@@ -12,6 +12,12 @@ on:
   push:
     tags:
       - "v*"
+  # Lets a release be rebuilt from the Actions tab without cutting a new tag.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build and publish, e.g. v0.1.0"
+        required: true
 
 permissions:
   contents: write
@@ -21,6 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
 
       - uses: actions/setup-node@v4
         with:
@@ -37,7 +45,9 @@ jobs:
 
       - name: Derive version from tag
         id: version
-        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+        env:
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       - name: Stamp version and download URL into the manifest
         env:
@@ -73,8 +83,17 @@ jobs:
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          name: Mantle ${{ github.ref_name }}
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          name: Mantle ${{ inputs.tag || github.ref_name }}
           files: |
             mantle.zip
             system.json
           generate_release_notes: true
+
+          # system.json's manifest URL points at releases/latest, and GitHub
+          # excludes pre-releases from "latest". This action infers pre-release
+          # from a tag like v0.1.0-alpha, which silently 404s the manifest and
+          # breaks Foundry's update check. Say it explicitly instead of letting
+          # the tag name decide.
+          prerelease: false
+          make_latest: true
