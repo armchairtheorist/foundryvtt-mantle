@@ -14,6 +14,8 @@ import MantleActor from "./module/documents/actor.mjs";
 import MantleItem from "./module/documents/item.mjs";
 import MantleCharacterSheet from "./module/apps/sheets/character-sheet.mjs";
 import MantleItemSheet from "./module/apps/sheets/item-sheet.mjs";
+import MantleRoll from "./module/dice/roll.mjs";
+import { registerChatHooks } from "./module/chat/cards.mjs";
 
 /* -------------------------------------------- */
 /*  Initialization                               */
@@ -41,7 +43,16 @@ Hooks.once("init", () => {
   // than a rolled formula, so there is deliberately no CONFIG.Combat.initiative
   // formula here. Turn order is driven by the combat tracker.
 
+  // Registering the Roll subclass is what lets a card survive a page reload:
+  // without it, message.rolls[0] comes back as a plain Roll and the card's
+  // controls stop working.
+  // @ts-expect-error — a Roll subclass with extra members does not satisfy
+  // fvtt-types' invariant typeof Roll, but this is exactly how Foundry
+  // expects custom roll classes to be registered.
+  CONFIG.Dice.rolls.push(MantleRoll);
+
   registerSheets();
+  registerChatHooks();
   registerConditions();
 
   globalThis.mantle = { config: MANTLE };

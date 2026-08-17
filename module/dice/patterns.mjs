@@ -162,6 +162,7 @@ export function findAllocations(faces) {
   const rank = { triple: 2, sequence: 1, double: 0 };
   results.sort((a, b) => {
     if (a.patterns.length !== b.patterns.length) return b.patterns.length - a.patterns.length;
+    /** @param {Allocation} allocation */
     const score = (allocation) =>
       allocation.patterns.reduce((sum, pattern) => sum + rank[pattern.type], 0);
     return score(b) - score(a);

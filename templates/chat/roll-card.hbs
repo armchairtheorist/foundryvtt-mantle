@@ -1,0 +1,125 @@
+{{!--
+  The Mantle roll card.
+
+  Reading order matches how a player actually resolves a roll: what was rolled,
+  how many successes, which band that lands in, and what the band does.
+--}}
+<div class="mantle mantle-roll-card">
+
+  <header class="card-header">
+    <span class="title">{{title}}</span>
+    {{#if subtitle}}<span class="subtitle">{{subtitle}}</span>{{/if}}
+  </header>
+
+  {{!-- The dice, with successes lit. A desperate pool shows its discarded die
+        greyed, so it's visible that the roll really happened. --}}
+  <div class="dice">
+    {{#each dice as |die|}}
+      <span class="die {{#if die.success}}die-success{{else}}die-failure{{/if}}
+                   {{#unless die.active}}dropped{{/unless}}">{{die.result}}</span>
+    {{/each}}
+  </div>
+
+  <div class="pool-line">
+    <span class="formula">{{pool.formula}}</span>
+    {{#each pool.modifiers as |modifier|}}
+      <span class="modifier {{#if (gt modifier.value 0)}}bonus{{else}}penalty{{/if}}">
+        {{localize modifier.label}} {{#if (gt modifier.value 0)}}+{{/if}}{{modifier.value}}d
+      </span>
+    {{/each}}
+    {{#if pool.desperate}}
+      <span class="desperate" data-tooltip="{{localize 'MANTLE.Card.desperateHint'}}">
+        {{localize "MANTLE.Card.desperate"}}
+      </span>
+    {{/if}}
+  </div>
+
+  {{!-- Successes, with the stepper. One control covers opposition rolls,
+        Heroic Feats, and GM adjudication alike. --}}
+  <div class="successes">
+    <button type="button" class="step" data-adjust="-1"
+            data-tooltip="{{localize 'MANTLE.Card.subtractHint'}}">&minus;</button>
+
+    <div class="count">
+      <span class="effective">{{resolved.effective}}</span>
+      <span class="label">{{localize "MANTLE.Card.successes"}}</span>
+      {{#if resolved.adjustment}}
+        <span class="adjustment">
+          ({{resolved.successes}} {{#if (gt resolved.adjustment 0)}}+{{/if}}{{resolved.adjustment}})
+        </span>
+      {{/if}}
+    </div>
+
+    <button type="button" class="step" data-adjust="1"
+            data-tooltip="{{localize 'MANTLE.Card.addHint'}}">+</button>
+  </div>
+
+  {{#if resolved.isGraze}}
+    <div class="graze">{{localize "MANTLE.Card.graze"}}</div>
+  {{/if}}
+
+  {{!-- Patterns. Chips appear only when the dice genuinely read more than one
+        way, since a single reading is not a choice. --}}
+  {{#if resolved.readsPatterns}}
+    <div class="patterns">
+      {{#each resolved.allocation.patterns as |pattern|}}
+        <span class="pattern pattern-{{pattern.type}}">
+          {{localize (lookup (lookup ../config.patterns pattern.type) "label")}} {{pattern.value}}
+        </span>
+      {{else}}
+        <span class="pattern none">{{localize "MANTLE.Card.noPatterns"}}</span>
+      {{/each}}
+    </div>
+
+    {{#if showAllocations}}
+      <div class="allocation-choice">
+        <span class="hint">{{localize "MANTLE.Card.readAs"}}</span>
+        {{#each resolved.allocations as |option index|}}
+          <button type="button" class="chip {{#if (eq index ../resolved.allocationIndex)}}active{{/if}}"
+                  data-allocation="{{index}}">
+            {{#each option.patterns as |pattern|}}{{pattern.type}}&nbsp;{{pattern.value}} {{/each}}
+            {{#unless option.patterns.length}}&mdash;{{/unless}}
+          </button>
+        {{/each}}
+      </div>
+    {{/if}}
+  {{/if}}
+
+  {{!-- The ladder, with the achieved band lit. Showing every band, not just the
+        one hit, keeps the stakes of a re-roll or a Heroic Feat visible. --}}
+  {{#if ladder}}
+    <div class="ladder">
+      {{#each config.bands as |band|}}
+        <div class="rung {{#if (eq band ../resolved.band)}}achieved{{/if}}">
+          <span class="band">{{#if (eq band "3")}}3+{{else}}{{band}}s{{/if}}</span>
+          <span class="effect">{{lookup ../ladder band}}</span>
+        </div>
+      {{/each}}
+    </div>
+
+    {{#if resolved.result.applied}}
+      <div class="result-total">
+        <span class="sum">
+          {{resolved.result.base}}
+          {{#if resolved.result.solidHitDamage}}
+            + {{resolved.result.solidHitDamage}} <em>{{localize "MANTLE.Card.solidHit"}}</em>
+          {{/if}}
+          {{#if resolved.result.bonusDamage}}
+            + {{resolved.result.bonusDamage}} <em>{{localize "MANTLE.Card.bonusDamage"}}</em>
+          {{/if}}
+          {{#if resolved.overflow}}
+            + <em>{{localize "MANTLE.Card.overflow"}} ×{{resolved.overflow}}</em>
+          {{/if}}
+        </span>
+        <span class="total">
+          {{resolved.result.total}}
+          {{#if (eq ladderKind "strain")}}
+            {{localize "MANTLE.Resource.strain"}}
+          {{else}}
+            {{localize "MANTLE.Card.damage"}}
+          {{/if}}
+        </span>
+      </div>
+    {{/if}}
+  {{/if}}
+</div>

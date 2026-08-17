@@ -25,7 +25,9 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
       toggleEquipped: MantleCharacterSheet.#onToggleEquipped,
       editItem: MantleCharacterSheet.#onEditItem,
       deleteItem: MantleCharacterSheet.#onDeleteItem,
-      refreshTurn: MantleCharacterSheet.#onRefreshTurn
+      refreshTurn: MantleCharacterSheet.#onRefreshTurn,
+      rollWeapon: MantleCharacterSheet.#onRollWeapon,
+      testLuck: MantleCharacterSheet.#onTestLuck
     }
   };
 
@@ -274,6 +276,23 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     });
 
     if (confirmed) await item.delete();
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onRollWeapon(_event, target) {
+    const weapon = this.#itemFor(target);
+    if (weapon) await this.document.rollWeapon(weapon);
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   */
+  static async #onTestLuck() {
+    await this.document.testLuck();
   }
 
   /**

@@ -667,3 +667,240 @@
 .mantle .die-failure {
   color: var(--mantle-graze);
 }
+
+/* -------------------------------------------- */
+/*  Roll chat card                               */
+/* -------------------------------------------- */
+
+.mantle-roll-card {
+  font-size: 0.95em;
+
+  .card-header {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    border-bottom: 1px solid var(--mantle-border);
+    padding-bottom: 3px;
+    margin-bottom: 5px;
+
+    .title {
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 0.8em;
+      text-transform: uppercase;
+      color: var(--mantle-muted);
+    }
+  }
+
+  .dice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 4px;
+
+    .die {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--mantle-border);
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    /* A success reads instantly; the desperate pool's discarded die is visibly
+       present but clearly out of play. */
+    .die-success {
+      border-color: var(--mantle-success);
+      background: color-mix(in srgb, var(--mantle-success) 15%, transparent);
+    }
+
+    .dropped {
+      opacity: 0.35;
+      text-decoration: line-through;
+    }
+  }
+
+  .pool-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    font-size: 0.8em;
+    color: var(--mantle-muted);
+    margin-bottom: 6px;
+
+    .bonus { color: var(--mantle-success); }
+    .penalty { color: var(--mantle-vitality); }
+
+    .desperate {
+      color: var(--mantle-warning);
+      font-weight: 600;
+    }
+  }
+
+  .successes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 4px;
+    background: var(--mantle-panel);
+    border-radius: 4px;
+
+    .step {
+      width: 26px;
+      height: 26px;
+      line-height: 1;
+      padding: 0;
+      flex: 0 0 auto;
+      font-weight: 700;
+    }
+
+    .count {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .effective {
+      font-size: 1.6em;
+      font-weight: 800;
+    }
+
+    .label {
+      font-size: 0.8em;
+      color: var(--mantle-muted);
+    }
+
+    /* Showing the raw roll alongside the adjusted total keeps an opposed
+       result auditable rather than mysterious. */
+    .adjustment {
+      font-size: 0.8em;
+      color: var(--mantle-muted);
+    }
+  }
+
+  /* A locked card belongs to someone else — visible, not editable. */
+  &.locked .step,
+  &.locked .chip {
+    display: none;
+  }
+
+  .graze {
+    text-align: center;
+    font-size: 0.85em;
+    font-style: italic;
+    color: var(--mantle-muted);
+    padding: 3px 0;
+  }
+
+  .patterns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    margin: 5px 0;
+
+    .pattern {
+      font-size: 0.75em;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border: 1px solid var(--mantle-valor);
+      color: var(--mantle-valor);
+      border-radius: 3px;
+      padding: 0 5px;
+    }
+
+    .pattern.none {
+      border-color: var(--mantle-border);
+      color: var(--mantle-muted);
+    }
+  }
+
+  .allocation-choice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    justify-content: center;
+    margin-bottom: 5px;
+
+    .hint {
+      font-size: 0.75em;
+      color: var(--mantle-muted);
+    }
+
+    .chip {
+      font-size: 0.75em;
+      padding: 1px 6px;
+      width: auto;
+      line-height: 1.5;
+      border-radius: 3px;
+    }
+
+    .chip.active {
+      border-color: var(--mantle-valor);
+      font-weight: 700;
+    }
+  }
+
+  /* Every band stays visible, not just the one hit — that's what makes the
+     cost of a re-roll or a Heroic Feat legible. */
+  .ladder {
+    border: 1px solid var(--mantle-border);
+    border-radius: 4px;
+    overflow: hidden;
+
+    .rung {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 6px;
+      padding: 2px 5px;
+      font-size: 0.85em;
+      opacity: 0.5;
+
+      .band {
+        font-weight: 700;
+        color: var(--mantle-muted);
+      }
+    }
+
+    .rung.achieved {
+      opacity: 1;
+      background: color-mix(in srgb, var(--mantle-valor) 18%, transparent);
+
+      .band {
+        color: var(--mantle-ink);
+      }
+    }
+  }
+
+  .result-total {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 5px;
+    padding-top: 4px;
+    border-top: 1px solid var(--mantle-border);
+
+    .sum {
+      font-size: 0.8em;
+      color: var(--mantle-muted);
+
+      em {
+        font-style: normal;
+        color: var(--mantle-valor);
+      }
+    }
+
+    .total {
+      font-size: 1.2em;
+      font-weight: 800;
+      color: var(--mantle-vitality);
+    }
+  }
+}

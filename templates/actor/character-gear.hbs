@@ -29,6 +29,8 @@
           <span class="weight">{{localize (lookup (lookup ../config.weightClasses weapon.system.weightClass) "label")}}</span>
           <span class="attribute">{{localize (lookup (lookup ../config.attributes weapon.system.attribute) "abbr")}}</span>
           <span class="cost">{{weapon.system.attackCost}} {{localize "MANTLE.Resource.vigorShort"}}</span>
+          <a class="control roll" data-action="rollWeapon"
+             data-tooltip="{{localize 'MANTLE.Sheet.rollAttack'}}"><i class="fa-solid fa-dice-d6"></i></a>
           <a class="control" data-action="deleteItem"><i class="fa-solid fa-trash"></i></a>
         </div>
 

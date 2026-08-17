@@ -239,13 +239,18 @@ describe("pattern rates match the published probability table", () => {
     test(`${size}d6`, () => {
       const rates = exactRates(Number(size));
       // Allow a point either way: the book's figures are themselves rounded.
+      /**
+       * @param {number} actual
+       * @param {number} expected
+       * @param {string} name
+       */
       const close = (actual, expected, name) =>
         assert.ok(
           Math.abs(actual - expected) <= 1,
           `${size}d6 ${name}: computed ${actual}%, book says ${expected}%`
         );
 
-      close(rates.double, double, "double");
+      if (double !== null) close(rates.double, double, "double");
       if (triple !== null) close(rates.triple, triple, "triple");
       if (sequence !== null) close(rates.sequence, sequence, "sequence");
     });
