@@ -30,6 +30,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # A broken template or a missing localization key would only show up
+      # mid-session, so a failing check must block the release rather than ship.
+      - name: Verify
+        run: npm run verify
+
       - name: Derive version from tag
         id: version
         run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
