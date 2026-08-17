@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "types": ["fvtt-types"],
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["esnext", "dom"],
+    "strict": true,
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+
+    // Dependencies ship plain .mjs, which checkJs would otherwise try to check.
+    // We care about our own code, not theirs.
+    "maxNodeModuleJsDepth": 0
+  },
+  "include": ["**/*.d.mts", "mantle.mjs", "module/**/*.mjs", "tools/**/*.mjs"],
+  "exclude": ["node_modules", "packs"]
+}

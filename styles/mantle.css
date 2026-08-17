@@ -1,0 +1,36 @@
+/*
+ * Mantle system styles.
+ *
+ * Plain CSS with native nesting — no build step. Everything is scoped under
+ * .mantle so the system never leaks styling into core Foundry UI or modules.
+ */
+
+.mantle {
+  /* Palette. Parchment and ink, with the three cores colour-coded so a player
+     can find the right block on the sheet without reading labels. */
+  --mantle-body: #a8432f;
+  --mantle-mind: #2f5fa8;
+  --mantle-soul: #7a4fa8;
+
+  --mantle-vitality: #a8432f;
+  --mantle-strain: #6b4fa8;
+  --mantle-guard: #4a6d8c;
+  --mantle-vigor: #b8860b;
+  --mantle-valor: #c8a02c;
+
+  --mantle-success: #2e7d32;
+  --mantle-graze: #8a8a8a;
+
+  --mantle-border: #7a7256;
+  --mantle-ink: #191813;
+}
+
+/* Dice results reuse the success colour so a 5 or 6 reads instantly. */
+.mantle .die-success {
+  color: var(--mantle-success);
+  font-weight: bold;
+}
+
+.mantle .die-failure {
+  color: var(--mantle-graze);
+}

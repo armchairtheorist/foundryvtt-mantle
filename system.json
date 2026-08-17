@@ -1,0 +1,60 @@
+{
+  "id": "mantle",
+  "title": "Mantle",
+  "description": "A tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. Roll pools of d6, read them twice — once for successes, once for patterns.",
+  "version": "0.1.0",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14.366"
+  },
+  "authors": [
+    {
+      "name": "Jonathan Wong",
+      "url": "https://armchairtheorist.com"
+    }
+  ],
+  "esmodules": ["mantle.mjs"],
+  "styles": ["styles/mantle.css"],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "packs": [],
+  "grid": {
+    "type": 1,
+    "distance": 1,
+    "units": "sq",
+    "diagonals": 0
+  },
+  "primaryTokenAttribute": "vitality",
+  "secondaryTokenAttribute": "guard",
+  "documentTypes": {
+    "Actor": {
+      "character": { "htmlFields": ["biography", "notes"] },
+      "adversary": { "htmlFields": ["description", "tactics"] },
+      "party": { "htmlFields": ["notes"] }
+    },
+    "Item": {
+      "archetype": { "htmlFields": ["description"] },
+      "mastery": { "htmlFields": ["description"] },
+      "weapon": { "htmlFields": ["description"] },
+      "armor": { "htmlFields": ["description"] },
+      "focus": { "htmlFields": ["description"] },
+      "wondrous": { "htmlFields": ["description"] },
+      "consumable": { "htmlFields": ["description"] },
+      "art": { "htmlFields": ["description"] },
+      "resonance": { "htmlFields": ["description"] },
+      "feature": { "htmlFields": ["description"] },
+      "limitbreak": { "htmlFields": ["description"] }
+    }
+  },
+  "url": "https://github.com/armchairtheorist/foundryvtt-mantle",
+  "manifest": "https://github.com/armchairtheorist/foundryvtt-mantle/releases/latest/download/system.json",
+  "download": "https://github.com/armchairtheorist/foundryvtt-mantle/releases/download/v0.1.0/mantle.zip",
+  "readme": "https://github.com/armchairtheorist/foundryvtt-mantle/blob/main/README.md",
+  "bugs": "https://github.com/armchairtheorist/foundryvtt-mantle/issues",
+  "socket": false
+}

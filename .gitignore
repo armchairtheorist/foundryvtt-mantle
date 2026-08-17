@@ -1,0 +1,12 @@
+node_modules/
+
+# Compendium build output. Source of truth is src/packs/; these are rebuilt
+# by `npm run build:packs` and by the release workflow.
+packs/
+
+# Packaged releases
+*.zip
+
+*.log
+.DS_Store
+Thumbs.db

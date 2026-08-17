@@ -1,0 +1,19 @@
+{
+  "name": "foundryvtt-mantle",
+  "version": "0.1.0",
+  "description": "The Mantle TTRPG as a game system for Foundry Virtual Tabletop",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "typecheck": "tsc -p jsconfig.json --noEmit",
+    "build:packs": "node tools/build-packs.mjs",
+    "extract:packs": "node tools/extract-packs.mjs",
+    "link": "node tools/link-system.mjs"
+  },
+  "devDependencies": {
+    "@foundryvtt/foundryvtt-cli": "^3.0.4",
+    "fvtt-types": "14.366.0-beta.20260817013338",
+    "typescript": "^5.9.3"
+  }
+}
