@@ -1,0 +1,200 @@
+{{!--
+  The type-specific middle of the item sheet. One template with a block per
+  subtype rather than eleven near-identical sheets; `is.<type>` flags are
+  precomputed so this stays free of long else-if chains.
+--}}
+<section class="item-details">
+
+  {{#if is.archetype}}
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.kind"}}</label>
+      {{formInput (lookup fields "kind") value=system.kind disabled=(not editable)}}
+    </div>
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.rank"}}</label>
+      {{formInput (lookup fields "rank") value=system.rank disabled=(not editable)}}
+      <label>{{localize "MANTLE.Field.maxRank"}}</label>
+      {{formInput (lookup fields "maxRank") value=system.maxRank disabled=(not editable)}}
+    </div>
+    {{#if (eq system.kind "ancestry")}}
+      {{!-- SPD, SEN, and SIZE come from the ancestry alone; they are ignored on
+            path archetypes. --}}
+      <div class="field-row">
+        <label>{{localize "MANTLE.Stat.spd"}}</label>
+        {{formInput (lookup fields "spd") value=system.spd disabled=(not editable)}}
+        <label>{{localize "MANTLE.Stat.sen"}}</label>
+        {{formInput (lookup fields "sen") value=system.sen disabled=(not editable)}}
+        <label>{{localize "MANTLE.Stat.size"}}</label>
+        {{formInput (lookup fields "size") value=system.size disabled=(not editable)}}
+      </div>
+    {{/if}}
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.prerequisites"}}</label>
+      {{formInput (lookup fields "prerequisites") value=system.prerequisites disabled=(not editable)}}
+    </div>
+  {{/if}}
+
+  {{#if is.mastery}}
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.domain"}}</label>
+      {{formInput (lookup fields "domain") value=system.domain disabled=(not editable)}}
+      <label>{{localize "MANTLE.Field.masteryType"}}</label>
+      {{formInput (lookup fields "masteryType") value=system.masteryType disabled=(not editable)}}
+    </div>
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.slotCost"}}</label>
+      {{formInput (lookup fields "slotCost") value=system.slotCost disabled=(not editable)}}
+      <label>{{localize "MANTLE.Field.setName"}}</label>
+      {{formInput (lookup fields "setName") value=system.setName disabled=(not editable)}}
+    </div>
+    <p class="hint">{{localize "MANTLE.Hint.multiSlot"}}</p>
+  {{/if}}
+
+  {{#if is.weapon}}
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.weightClass"}}</label>
+      {{formInput (lookup fields "weightClass") value=system.weightClass disabled=(not editable)}}
+      <label>{{localize "MANTLE.Field.attribute"}}</label>
+      {{formInput (lookup fields "attribute") value=system.attribute disabled=(not editable)}}
+    </div>
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.melee"}}</label>
+      {{formInput (lookup fields "melee") value=system.melee disabled=(not editable)}}
+      <label>{{localize "MANTLE.Field.range"}}</label>
+      {{formInput (lookup fields "range") value=system.range disabled=(not editable)}}
+    </div>
+    <p class="hint">{{localize "MANTLE.Hint.reach"}}</p>
+  {{/if}}
+
+  {{#if is.armor}}
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.armorClass"}}</label>
+      {{formInput (lookup fields "armorClass") value=system.armorClass disabled=(not editable)}}
+      <label>{{localize "MANTLE.Sheet.maxGuard"}}</label>
+      {{formInput (lookup fields "guard") value=system.guard disabled=(not editable)}}
+    </div>
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.penalty"}}</label>
+      {{formInput (lookup fields "penalty") value=system.penalty disabled=(not editable)}}
+      {{formInput (lookup fields "penaltyApplies") value=system.penaltyApplies disabled=(not editable)}}
+    </div>
+  {{/if}}
+
+  {{#if is.focus}}
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.exotic"}}</label>
+      {{formInput (lookup fields "exotic") value=system.exotic disabled=(not editable)}}
+    </div>
+    <div class="field-row full">
+      <label>{{localize "MANTLE.Field.effect"}}</label>
+      {{formInput (lookup fields "effect") value=system.effect disabled=(not editable)}}
+    </div>
+  {{/if}}
+
+  {{#if is.wondrous}}
+    <div class="field-row full">
+      <label>{{localize "MANTLE.Field.effect"}}</label>
+      {{formInput (lookup fields "effect") value=system.effect disabled=(not editable)}}
+    </div>
+  {{/if}}
+
+  {{#if is.consumable}}
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.category"}}</label>
+      {{formInput (lookup fields "category") value=system.category disabled=(not editable)}}
+      <label>{{localize "MANTLE.Field.target"}}</label>
+      {{formInput (lookup fields "target") value=system.target disabled=(not editable)}}
+    </div>
+    <div class="field-row full">
+      <label>{{localize "MANTLE.Field.effect"}}</label>
+      {{formInput (lookup fields "effect") value=system.effect disabled=(not editable)}}
+    </div>
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.isAttack"}}</label>
+      {{formInput (lookup fields "isAttack") value=system.isAttack disabled=(not editable)}}
+    </div>
+  {{/if}}
+
+  {{#if is.art}}
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.artType"}}</label>
+      {{formInput (lookup fields "artType") value=system.artType disabled=(not editable)}}
+      <label>{{localize "MANTLE.Field.baseCost"}}</label>
+      {{formInput (lookup fields "baseCost") value=system.baseCost disabled=(not editable)}}
+      <label>{{localize "MANTLE.Field.slotCost"}}</label>
+      {{formInput (lookup fields "slotCost") value=system.slotCost disabled=(not editable)}}
+    </div>
+    <p class="hint">{{localize "MANTLE.Hint.artLadders"}}</p>
+  {{/if}}
+
+  {{#if is.resonance}}
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.slotCost"}}</label>
+      {{formInput (lookup fields "slotCost") value=system.slotCost disabled=(not editable)}}
+    </div>
+    <div class="art-entries">
+      <h4>{{localize "MANTLE.Sheet.supportedArts"}}</h4>
+      {{#each system.arts as |entry|}}
+        <div class="art-entry">
+          <b>{{entry.art}}</b>
+          <span>{{entry.ladder}}</span>
+          {{#if entry.condition}}<span class="condition">{{entry.condition}}</span>{{/if}}
+          {{#if entry.opposedBy}}<span class="opposed">{{localize "MANTLE.Sheet.opposedBy"}} {{entry.opposedBy}}</span>{{/if}}
+        </div>
+      {{else}}
+        <p class="empty">{{localize "MANTLE.Sheet.noSupportedArts"}}</p>
+      {{/each}}
+    </div>
+  {{/if}}
+
+  {{#if is.feature}}
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.activation"}}</label>
+      {{formInput (lookup activationFields "type")
+                  value=system.activation.type disabled=(not editable)
+                  name="system.activation.type"}}
+      <label>{{localize "MANTLE.Resource.vigor"}}</label>
+      {{formInput (lookup activationFields "vigorCost")
+                  value=system.activation.vigorCost disabled=(not editable)
+                  name="system.activation.vigorCost"}}
+    </div>
+    <div class="field-row full">
+      <label>{{localize "MANTLE.Field.trigger"}}</label>
+      {{formInput (lookup fields "trigger") value=system.trigger disabled=(not editable)}}
+    </div>
+  {{/if}}
+
+  {{#if is.limitbreak}}
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.category"}}</label>
+      {{formInput (lookup fields "category") value=system.category disabled=(not editable)}}
+    </div>
+    {{#if (eq system.category "general")}}
+      <div class="field-row">
+        <label>{{localize "MANTLE.Field.requiredCore"}}</label>
+        {{formInput (lookup fields "requiredCore") value=system.requiredCore disabled=(not editable)}}
+        {{formInput (lookup fields "requiredCoreValue") value=system.requiredCoreValue disabled=(not editable)}}
+      </div>
+    {{else}}
+      <div class="field-row">
+        <label>{{localize "MANTLE.Field.requiredArchetype"}}</label>
+        {{formInput (lookup fields "requiredArchetype") value=system.requiredArchetype disabled=(not editable)}}
+      </div>
+      <p class="hint">{{localize "MANTLE.Hint.archetypeLimitBreak"}}</p>
+    {{/if}}
+  {{/if}}
+
+  {{!-- Effect ladders are shared by weapons and attack consumables. --}}
+  {{#if hasLadder}}
+    <div class="ladder-editor">
+      <h4>{{localize "MANTLE.Sheet.effectLadder"}}</h4>
+      {{#each ladderBands as |band|}}
+        <div class="ladder-row">
+          <label>{{band.label}}</label>
+          <input type="text" name="system.damage.{{band.key}}" value="{{band.value}}"
+                 {{#unless ../editable}}disabled{{/unless}}>
+        </div>
+      {{/each}}
+    </div>
+  {{/if}}
+</section>

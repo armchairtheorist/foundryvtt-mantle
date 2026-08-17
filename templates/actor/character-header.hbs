@@ -1,0 +1,97 @@
+{{!--
+  Character sheet header: identity on the left, the five live resources on the
+  right. These are the numbers a player touches every turn, so they stay visible
+  no matter which tab is open.
+--}}
+<header class="mantle-header">
+
+  <img class="portrait" src="{{document.img}}" data-edit="img" alt="{{document.name}}"
+       data-action="editImage" data-tooltip="{{localize 'MANTLE.Sheet.changePortrait'}}">
+
+  <div class="identity">
+    <input class="name" type="text" name="name" value="{{document.name}}"
+           placeholder="{{localize 'MANTLE.Sheet.namePlaceholder'}}" {{#unless editable}}disabled{{/unless}}>
+
+    <div class="archetype-line">
+      {{#each items.archetypes as |archetype|}}
+        <span class="archetype {{#if archetype.system.realized}}realized{{/if}}"
+              data-tooltip="{{#if archetype.system.realized}}{{localize 'MANTLE.Sheet.realized'}}{{/if}}">
+          {{archetype.name}} <b>R{{archetype.system.rank}}</b>
+        </span>
+      {{else}}
+        <span class="empty">{{localize "MANTLE.Sheet.noArchetypes"}}</span>
+      {{/each}}
+    </div>
+
+    <div class="rank-line">
+      <span class="rank">{{localize "MANTLE.Sheet.characterRank"}} <b>{{system.characterRank}}</b></span>
+      <span class="tier">{{localize system.tier.label}}</span>
+      {{#if system.states.crisis}}<span class="state crisis">{{localize "MANTLE.State.crisis"}}</span>{{/if}}
+      {{#if system.states.stressed}}<span class="state stressed">{{localize "MANTLE.State.stressed"}}</span>{{/if}}
+      {{#unless system.equilibrium.legal}}
+        <span class="state warning" data-tooltip="{{localize 'MANTLE.Warning.equilibriumHint'}}">
+          {{localize "MANTLE.Warning.equilibrium"}}
+        </span>
+      {{/unless}}
+    </div>
+  </div>
+
+  <div class="resources">
+    {{!-- Vitality and Strain are the two harm tracks; each fills a slot when it runs out. --}}
+    <div class="resource vitality">
+      <label>{{localize "MANTLE.Resource.vitality"}}</label>
+      <div class="pair">
+        <input type="number" name="system.vitality.value" value="{{system.vitality.value}}"
+               {{#unless editable}}disabled{{/unless}}>
+        <span class="max">/ {{system.vitality.max}}</span>
+      </div>
+    </div>
+
+    <div class="resource strain">
+      <label>{{localize "MANTLE.Resource.strain"}}</label>
+      <div class="pair">
+        <input type="number" name="system.strain.value" value="{{system.strain.value}}"
+               {{#unless editable}}disabled{{/unless}}>
+        <span class="max">/ {{system.strain.max}}</span>
+      </div>
+    </div>
+
+    {{!-- Guard can exceed its maximum. When it does, the start-of-turn refresh
+          is skipped rather than pulling it back down. --}}
+    <div class="resource guard {{#if system.overGuard}}over{{/if}}">
+      <label>{{localize "MANTLE.Resource.guard"}}</label>
+      <div class="pair">
+        <input type="number" name="system.guard.value" value="{{system.guard.value}}"
+               {{#unless editable}}disabled{{/unless}}>
+        <span class="max">/ {{system.guard.max}}</span>
+      </div>
+      {{#if system.overGuard}}<span class="badge">{{localize "MANTLE.Sheet.overGuard"}}</span>{{/if}}
+    </div>
+
+    <div class="resource vigor">
+      <label>{{localize "MANTLE.Resource.vigor"}}</label>
+      <div class="pair">
+        <input type="number" name="system.vigor.value" value="{{system.vigor.value}}"
+               {{#unless editable}}disabled{{/unless}}>
+        <span class="max">/ {{system.vigor.max}}</span>
+      </div>
+      <span class="refresh" data-tooltip="{{localize 'MANTLE.Sheet.vigorRefreshHint'}}">
+        +{{system.vigor.refresh}}/{{localize "MANTLE.Sheet.turn"}}
+      </span>
+    </div>
+
+    <div class="resource resolve">
+      <label>{{localize "MANTLE.Resource.resolve"}}</label>
+      <div class="pair">
+        <input type="number" name="system.resolve.value" value="{{system.resolve.value}}"
+               {{#unless editable}}disabled{{/unless}}>
+        <span class="max">/ {{system.resolve.max}}</span>
+      </div>
+    </div>
+
+    <button type="button" class="refresh-turn" data-action="refreshTurn"
+            data-tooltip="{{localize 'MANTLE.Sheet.refreshTurnHint'}}">
+      <i class="fa-solid fa-rotate"></i> {{localize "MANTLE.Sheet.refreshTurn"}}
+    </button>
+  </div>
+</header>

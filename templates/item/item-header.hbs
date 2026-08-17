@@ -1,0 +1,11 @@
+{{!-- Shared item header: portrait and name, whatever the subtype. --}}
+<header class="mantle-item-header">
+  <img class="item-image" src="{{document.img}}" data-edit="img" alt="{{document.name}}"
+       data-action="editImage" data-tooltip="{{localize 'MANTLE.Sheet.changeImage'}}">
+
+  <div class="identity">
+    <input class="name" type="text" name="name" value="{{document.name}}"
+           placeholder="{{localize 'MANTLE.Sheet.namePlaceholder'}}" {{#unless editable}}disabled{{/unless}}>
+    <span class="type">{{localize (concat "TYPES.Item." document.type)}}</span>
+  </div>
+</header>

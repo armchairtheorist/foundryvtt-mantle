@@ -1,0 +1,98 @@
+{{!--
+  Build tab: archetypes, the mastery boards, and equipped Limit Breaks.
+
+  Slot budgets are shown as used-of-total and flagged when overspent, but never
+  enforced. Mantle expects the GM to adjudicate unusual builds, so the sheet
+  reports rather than refuses.
+--}}
+<section class="tab build" data-tab="build" data-group="primary">
+
+  <div class="section archetypes">
+    <h3>{{localize "MANTLE.Sheet.archetypes"}}</h3>
+    {{#each items.archetypes as |archetype|}}
+      <div class="entry archetype" data-item-id="{{archetype.id}}">
+        <div class="entry-head">
+          <span class="name" data-action="editItem">{{archetype.name}}</span>
+          <span class="kind">{{localize (lookup (lookup ../config.archetypeKinds archetype.system.kind) "label")}}</span>
+          <span class="rank">R{{archetype.system.rank}} / {{archetype.system.maxRank}}</span>
+          {{#if archetype.system.realized}}
+            <span class="badge realized">{{localize "MANTLE.Sheet.realized"}}</span>
+          {{/if}}
+          <a class="control" data-action="deleteItem" data-tooltip="{{localize 'MANTLE.Sheet.delete'}}">
+            <i class="fa-solid fa-trash"></i>
+          </a>
+        </div>
+
+        {{!-- Only features from ranks actually reached are listed. --}}
+        {{#if archetype.system.activeFeatures.length}}
+          <ul class="rank-features">
+            {{#each archetype.system.activeFeatures as |feature|}}
+              <li><b>R{{feature.rank}} {{feature.name}}</b> {{feature.description}}</li>
+            {{/each}}
+          </ul>
+        {{/if}}
+      </div>
+    {{else}}
+      <p class="empty">{{localize "MANTLE.Sheet.dropArchetype"}}</p>
+    {{/each}}
+  </div>
+
+  <div class="section masteries">
+    <h3>{{localize "MANTLE.Sheet.masteries"}}</h3>
+
+    <div class="slot-summary">
+      {{#each slots.mastery as |board|}}
+        <div class="slot-meter {{#if board.over}}over{{/if}}">
+          <span class="label">{{localize board.label}}</span>
+          <span class="count">{{board.used}} / {{board.total}}</span>
+        </div>
+      {{/each}}
+    </div>
+
+    {{#each items.masteries as |mastery|}}
+      <div class="entry mastery {{#unless mastery.system.equipped}}unequipped{{/unless}}" data-item-id="{{mastery.id}}">
+        <a class="equip-toggle" data-action="toggleEquipped"
+           data-tooltip="{{localize 'MANTLE.Sheet.toggleEquipped'}}">
+          <i class="fa-solid {{#if mastery.system.equipped}}fa-square-check{{else}}fa-square{{/if}}"></i>
+        </a>
+        <span class="name" data-action="editItem">{{mastery.name}}</span>
+        <span class="type">{{localize (lookup ../config.masteryTypes mastery.system.masteryType)}}</span>
+        <span class="domain">{{localize (lookup ../config.masteryDomains mastery.system.domain)}}</span>
+        {{#if (gt mastery.system.slotCost 1)}}
+          <span class="cost" data-tooltip="{{localize 'MANTLE.Sheet.multiSlotHint'}}">
+            {{mastery.system.slotCost}} {{localize "MANTLE.Sheet.slots"}}
+          </span>
+        {{/if}}
+        {{#if mastery.system.setName}}<span class="set">{{mastery.system.setName}}</span>{{/if}}
+        <a class="control" data-action="deleteItem"><i class="fa-solid fa-trash"></i></a>
+      </div>
+    {{else}}
+      <p class="empty">{{localize "MANTLE.Sheet.dropMastery"}}</p>
+    {{/each}}
+  </div>
+
+  <div class="section limit-breaks">
+    <h3>
+      {{localize "MANTLE.Sheet.limitBreaks"}}
+      <span class="slots">{{localize "MANTLE.Sheet.slotsAvailable"}} {{system.tier.limitBreakSlots}}</span>
+    </h3>
+    {{#each items.limitBreaks as |lb|}}
+      <div class="entry limit-break {{#unless lb.system.equipped}}unequipped{{/unless}}" data-item-id="{{lb.id}}">
+        <a class="equip-toggle" data-action="toggleEquipped">
+          <i class="fa-solid {{#if lb.system.equipped}}fa-square-check{{else}}fa-square{{/if}}"></i>
+        </a>
+        <span class="name" data-action="editItem">{{lb.name}}</span>
+        <span class="prereq">
+          {{#if (eq lb.system.category "archetype")}}
+            {{lb.system.requiredArchetype}} {{localize "MANTLE.Sheet.realized"}}
+          {{else if lb.system.requiredCore}}
+            {{localize (lookup (lookup ../config.cores lb.system.requiredCore) "label")}} {{lb.system.requiredCoreValue}}
+          {{/if}}
+        </span>
+        <a class="control" data-action="deleteItem"><i class="fa-solid fa-trash"></i></a>
+      </div>
+    {{else}}
+      <p class="empty">{{localize "MANTLE.Sheet.noLimitBreaks"}}</p>
+    {{/each}}
+  </div>
+</section>

@@ -1,0 +1,10 @@
+{{!-- Rules text, plus where the item came from. --}}
+<section class="item-description">
+  <h4>{{localize "MANTLE.Sheet.description"}}</h4>
+  {{formInput (lookup fields "description") value=system.description enriched=enrichedDescription
+              toggled=true editable=editable}}
+
+  {{#if system.source}}
+    <p class="source">{{localize "MANTLE.Sheet.source"}}: {{system.source}}</p>
+  {{/if}}
+</section>

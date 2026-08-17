@@ -41,7 +41,7 @@ Neither is required — the system works without them, and degrades gracefully.
 ```bash
 npm install
 npm run link -- "/path/to/FoundryVTT"   # symlink into Foundry's Data/systems
-npm run typecheck                        # advisory; uses fvtt-types v14
+npm run verify                           # templates + typecheck + tests
 npm run build:packs                      # src/packs/*.json -> packs/ (LevelDB)
 ```
 

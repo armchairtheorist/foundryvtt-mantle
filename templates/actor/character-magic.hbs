@@ -1,0 +1,63 @@
+{{!--
+  Magic tab: the Arts and Resonances a caster knows.
+
+  A spell is one Art plus one Resonance, so what matters here is which
+  combinations are actually available — an Art the Resonance doesn't list is
+  refused by fiction, not by cost. The Cast dialog in a later phase reads from
+  exactly these two lists.
+--}}
+<section class="tab magic" data-tab="magic" data-group="primary">
+
+  {{#if (or items.arts.length items.resonances.length)}}
+
+    <div class="section arts">
+      <h3>{{localize "MANTLE.Sheet.arts"}}</h3>
+      {{#each items.arts as |art|}}
+        <div class="entry art" data-item-id="{{art.id}}">
+          <div class="entry-head">
+            <span class="name" data-action="editItem">{{art.name}}</span>
+            <span class="art-type">{{localize (lookup ../config.artTypes art.system.artType)}}</span>
+            <span class="cost">{{art.system.baseCost}} {{localize "MANTLE.Resource.vigorShort"}}</span>
+            <a class="control" data-action="deleteItem"><i class="fa-solid fa-trash"></i></a>
+          </div>
+          <div class="basic-shape">
+            <span>{{localize "MANTLE.Shaping.range"}}: {{art.system.basicShape.range.step}}{{#unless art.system.basicShape.range.shapeable}} ({{localize "MANTLE.Sheet.fixed"}}){{/unless}}</span>
+            <span>{{localize "MANTLE.Shaping.duration"}}: {{art.system.basicShape.duration.step}}{{#unless art.system.basicShape.duration.shapeable}} ({{localize "MANTLE.Sheet.fixed"}}){{/unless}}</span>
+            <span>{{localize "MANTLE.Shaping.area"}}: {{art.system.basicShape.area.step}}{{#unless art.system.basicShape.area.shapeable}} ({{localize "MANTLE.Sheet.fixed"}}){{/unless}}</span>
+          </div>
+        </div>
+      {{else}}
+        <p class="empty">{{localize "MANTLE.Sheet.noArts"}}</p>
+      {{/each}}
+    </div>
+
+    <div class="section resonances">
+      <h3>{{localize "MANTLE.Sheet.resonances"}}</h3>
+      {{#each items.resonances as |resonance|}}
+        <div class="entry resonance" data-item-id="{{resonance.id}}">
+          <div class="entry-head">
+            <span class="name" data-action="editItem">{{resonance.name}}</span>
+            {{#if (gt resonance.system.slotCost 1)}}
+              <span class="cost">{{resonance.system.slotCost}} {{localize "MANTLE.Sheet.slots"}}</span>
+            {{/if}}
+            <a class="control" data-action="deleteItem"><i class="fa-solid fa-trash"></i></a>
+          </div>
+          <div class="supported-arts">
+            {{#each resonance.system.arts as |entry|}}
+              <span class="combo" data-tooltip="{{entry.notes}}">
+                {{entry.art}}
+                {{#if entry.condition}}<em>{{entry.condition}}</em>{{/if}}
+                {{#if entry.opposedBy}}<span class="opposed">{{localize "MANTLE.Sheet.opposedBy"}} {{entry.opposedBy}}</span>{{/if}}
+              </span>
+            {{/each}}
+          </div>
+        </div>
+      {{else}}
+        <p class="empty">{{localize "MANTLE.Sheet.noResonances"}}</p>
+      {{/each}}
+    </div>
+
+  {{else}}
+    <p class="empty non-caster">{{localize "MANTLE.Sheet.notACaster"}}</p>
+  {{/if}}
+</section>

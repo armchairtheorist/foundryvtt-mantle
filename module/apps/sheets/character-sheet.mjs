@@ -54,6 +54,20 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     context.system = system;
     context.config = MANTLE;
     context.editable = this.isEditable;
+
+    // Schema fields drive the rich-text editors, which need the field
+    // definition rather than just the value.
+    context.fields = system.schema.fields;
+
+    const enrich = (html) =>
+      foundry.applications.ux.TextEditor.implementation.enrichHTML(html ?? "", {
+        relativeTo: this.document,
+        secrets: this.document.isOwner
+      });
+
+    context.enrichedBiography = await enrich(system.biography);
+    context.enrichedNotes = await enrich(system.notes);
+
     context.tabs = this.#getTabs();
     context.items = this.#organizeItems();
     context.attributes = this.#prepareAttributes();
@@ -80,7 +94,13 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     return Object.fromEntries(
       Object.entries(entries).map(([id, label]) => [
         id,
-        { id, group: "primary", label, cssClass: id === active ? "active" : "" }
+        {
+          id,
+          group: "primary",
+          label,
+          active: id === active,
+          cssClass: id === active ? "active" : ""
+        }
       ])
     );
   }

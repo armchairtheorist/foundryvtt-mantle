@@ -7,6 +7,8 @@
   "license": "MIT",
   "scripts": {
     "test": "node --test \"test/**/*.test.mjs\"",
+    "check": "node tools/check-templates.mjs",
+    "verify": "npm run check && npm run typecheck && npm test",
     "typecheck": "tsc -p jsconfig.json --noEmit",
     "build:packs": "node tools/build-packs.mjs",
     "extract:packs": "node tools/extract-packs.mjs",
@@ -15,6 +17,7 @@
   "devDependencies": {
     "@foundryvtt/foundryvtt-cli": "^3.0.4",
     "fvtt-types": "14.366.0-beta.20260817013338",
+    "handlebars": "^4.7.9",
     "typescript": "^5.9.3"
   }
 }

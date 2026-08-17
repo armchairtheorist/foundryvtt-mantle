@@ -16,16 +16,649 @@
   --mantle-strain: #6b4fa8;
   --mantle-guard: #4a6d8c;
   --mantle-vigor: #b8860b;
+  --mantle-resolve: #2e7d5b;
   --mantle-valor: #c8a02c;
 
   --mantle-success: #2e7d32;
   --mantle-graze: #8a8a8a;
+  --mantle-warning: #b3541e;
 
   --mantle-border: #7a7256;
   --mantle-ink: #191813;
+  --mantle-muted: #6a6558;
+  --mantle-panel: rgb(0 0 0 / 4%);
 }
 
-/* Dice results reuse the success colour so a 5 or 6 reads instantly. */
+/* -------------------------------------------- */
+/*  Shared                                       */
+/* -------------------------------------------- */
+
+.mantle {
+  .empty {
+    color: var(--mantle-muted);
+    font-style: italic;
+    padding: 4px 2px;
+    margin: 0;
+  }
+
+  .hint {
+    color: var(--mantle-muted);
+    font-size: 0.85em;
+    margin: 2px 0 8px;
+  }
+
+  h3 {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    border-bottom: 1px solid var(--mantle-border);
+    margin: 10px 0 6px;
+    padding-bottom: 2px;
+    font-size: 1.05em;
+
+    .slots {
+      font-size: 0.75em;
+      font-weight: normal;
+      color: var(--mantle-muted);
+    }
+  }
+
+  .section {
+    margin-bottom: 12px;
+  }
+
+  /* Anything not currently equipped is dimmed rather than hidden — you still
+     need to see what's in the pack. */
+  .unequipped {
+    opacity: 0.5;
+  }
+
+  .entry {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border-radius: 3px;
+
+    &:nth-child(even) {
+      background: var(--mantle-panel);
+    }
+
+    .name {
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1 1 auto;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .control,
+    .equip-toggle {
+      cursor: pointer;
+      color: var(--mantle-muted);
+      flex: 0 0 auto;
+
+      &:hover {
+        color: var(--mantle-ink);
+      }
+    }
+  }
+
+  .entry-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .badge,
+  .tag,
+  .cost,
+  .type,
+  .domain,
+  .weight,
+  .attribute,
+  .kind,
+  .rank,
+  .class,
+  .category,
+  .art-type {
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--mantle-muted);
+    border: 1px solid var(--mantle-border);
+    border-radius: 3px;
+    padding: 0 4px;
+    white-space: nowrap;
+  }
+
+  .badge.realized {
+    color: var(--mantle-valor);
+    border-color: var(--mantle-valor);
+    font-weight: 600;
+  }
+}
+
+/* -------------------------------------------- */
+/*  Character header                             */
+/* -------------------------------------------- */
+
+.mantle .mantle-header {
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  gap: 10px;
+  align-items: start;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--mantle-border);
+
+  .portrait {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border: 1px solid var(--mantle-border);
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  .identity {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+
+    .name {
+      font-size: 1.4em;
+      font-weight: 700;
+      border: none;
+      background: none;
+      padding: 0;
+    }
+  }
+
+  .archetype-line,
+  .rank-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    font-size: 0.85em;
+  }
+
+  .archetype.realized {
+    color: var(--mantle-valor);
+  }
+
+  .state {
+    text-transform: uppercase;
+    font-size: 0.75em;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0 5px;
+    border-radius: 3px;
+    color: #fff;
+
+    &.crisis {
+      background: var(--mantle-vitality);
+    }
+
+    &.stressed {
+      background: var(--mantle-strain);
+    }
+
+    &.warning {
+      background: var(--mantle-warning);
+    }
+  }
+
+  .resources {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(56px, auto));
+    gap: 6px;
+    align-items: end;
+
+    .resource {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+
+      label {
+        font-size: 0.7em;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--mantle-muted);
+      }
+
+      .pair {
+        display: flex;
+        align-items: baseline;
+        gap: 2px;
+      }
+
+      input {
+        width: 42px;
+        text-align: right;
+        font-weight: 700;
+        font-size: 1.1em;
+      }
+
+      .max {
+        font-size: 0.85em;
+        color: var(--mantle-muted);
+      }
+
+      .refresh {
+        font-size: 0.7em;
+        color: var(--mantle-vigor);
+      }
+    }
+
+    /* Over-Guard: Guard above its maximum, which also means the start-of-turn
+       refresh is skipped. Worth flagging clearly. */
+    .resource.guard.over input {
+      color: var(--mantle-guard);
+      font-weight: 800;
+    }
+
+    .badge {
+      font-size: 0.65em;
+      color: var(--mantle-guard);
+      border-color: var(--mantle-guard);
+    }
+
+    .vitality input { color: var(--mantle-vitality); }
+    .strain input { color: var(--mantle-strain); }
+    .guard input { color: var(--mantle-guard); }
+    .vigor input { color: var(--mantle-vigor); }
+    .resolve input { color: var(--mantle-resolve); }
+
+    .refresh-turn {
+      grid-column: 1 / -1;
+      font-size: 0.8em;
+      padding: 2px 6px;
+      line-height: 1.4;
+    }
+  }
+}
+
+/* -------------------------------------------- */
+/*  Cores and attributes                         */
+/* -------------------------------------------- */
+
+.mantle .cores {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 10px 0;
+
+  .core {
+    border: 1px solid var(--mantle-border);
+    border-radius: 4px;
+    padding: 6px;
+
+    &.core-body { border-top: 3px solid var(--mantle-body); }
+    &.core-mind { border-top: 3px solid var(--mantle-mind); }
+    &.core-soul { border-top: 3px solid var(--mantle-soul); }
+  }
+
+  .core-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+
+    .label {
+      text-transform: uppercase;
+      font-size: 0.75em;
+      letter-spacing: 0.06em;
+      color: var(--mantle-muted);
+    }
+
+    .value {
+      font-size: 1.5em;
+      font-weight: 700;
+    }
+  }
+
+  .core-attributes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+
+  .attribute {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    label {
+      font-size: 0.7em;
+      color: var(--mantle-muted);
+    }
+
+    input {
+      width: 100%;
+      text-align: center;
+      font-weight: 600;
+    }
+  }
+}
+
+.mantle .stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 6px;
+  margin: 8px 0;
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid var(--mantle-border);
+    border-radius: 3px;
+    padding: 3px;
+
+    label {
+      font-size: 0.7em;
+      text-transform: uppercase;
+      color: var(--mantle-muted);
+    }
+
+    span {
+      font-weight: 600;
+    }
+
+    input {
+      width: 36px;
+      text-align: right;
+    }
+  }
+}
+
+/* -------------------------------------------- */
+/*  Wounds and Burdens                           */
+/* -------------------------------------------- */
+
+.mantle .harm {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  .harm-entry {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: baseline;
+    padding: 3px 5px;
+    border-left: 3px solid var(--mantle-muted);
+    margin-bottom: 3px;
+    background: var(--mantle-panel);
+
+    /* Severity escalates from a flesh wound to something that can end you. */
+    &.severity-1 { border-left-color: #c9a227; }
+    &.severity-2 { border-left-color: var(--mantle-warning); }
+    &.severity-3 { border-left-color: var(--mantle-vitality); }
+
+    .severity {
+      font-weight: 700;
+      font-size: 0.85em;
+    }
+
+    .effect,
+    .affliction {
+      font-size: 0.85em;
+    }
+
+    .affliction {
+      font-style: italic;
+      color: var(--mantle-strain);
+    }
+  }
+}
+
+/* -------------------------------------------- */
+/*  Slot meters                                  */
+/* -------------------------------------------- */
+
+.mantle .slot-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+
+  .slot-meter {
+    display: flex;
+    gap: 5px;
+    align-items: baseline;
+    border: 1px solid var(--mantle-border);
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 0.85em;
+
+    .label {
+      text-transform: uppercase;
+      font-size: 0.85em;
+      color: var(--mantle-muted);
+    }
+
+    .count {
+      font-weight: 700;
+    }
+
+    /* Overspent boards are flagged, never blocked — the GM adjudicates. */
+    &.over {
+      border-color: var(--mantle-warning);
+      color: var(--mantle-warning);
+    }
+  }
+}
+
+/* -------------------------------------------- */
+/*  Ladders                                      */
+/* -------------------------------------------- */
+
+.mantle .ladder {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  font-size: 0.85em;
+  padding: 2px 0 2px 22px;
+
+  .band b {
+    color: var(--mantle-muted);
+    margin-right: 3px;
+  }
+}
+
+.mantle .entry-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 100%;
+  padding-left: 22px;
+
+  .tag.damage {
+    color: var(--mantle-vitality);
+    border-color: var(--mantle-vitality);
+  }
+}
+
+.mantle .rank-features {
+  margin: 2px 0 0;
+  padding-left: 22px;
+  font-size: 0.85em;
+  list-style: none;
+
+  li {
+    margin-bottom: 2px;
+  }
+}
+
+/* -------------------------------------------- */
+/*  Skills                                       */
+/* -------------------------------------------- */
+
+.mantle .skill-groups {
+  columns: 2;
+  column-gap: 14px;
+
+  .skill-group {
+    break-inside: avoid;
+    margin-bottom: 10px;
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  .skill {
+    cursor: pointer;
+    padding: 1px 3px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    color: var(--mantle-muted);
+
+    i {
+      width: 1em;
+      margin-right: 4px;
+    }
+
+    &:hover {
+      background: var(--mantle-panel);
+    }
+
+    /* Trained skills are the ones worth +2d, so they carry the weight. */
+    &.trained {
+      color: var(--mantle-ink);
+      font-weight: 600;
+    }
+  }
+}
+
+/* -------------------------------------------- */
+/*  Magic                                        */
+/* -------------------------------------------- */
+
+.mantle .basic-shape,
+.mantle .supported-arts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  padding-left: 4px;
+  font-size: 0.8em;
+  color: var(--mantle-muted);
+}
+
+.mantle .supported-arts .combo {
+  border: 1px solid var(--mantle-border);
+  border-radius: 3px;
+  padding: 1px 5px;
+
+  em {
+    color: var(--mantle-strain);
+    font-style: normal;
+    margin-left: 4px;
+  }
+
+  .opposed {
+    margin-left: 4px;
+    font-size: 0.9em;
+  }
+}
+
+.mantle .non-caster {
+  text-align: center;
+  padding: 30px 10px;
+}
+
+/* -------------------------------------------- */
+/*  Item sheet                                   */
+/* -------------------------------------------- */
+
+.mantle .mantle-item-header {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--mantle-border);
+
+  .item-image {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border: 1px solid var(--mantle-border);
+    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  .name {
+    font-size: 1.2em;
+    font-weight: 700;
+    border: none;
+    background: none;
+    width: 100%;
+  }
+}
+
+.mantle .item-details {
+  padding-top: 6px;
+
+  .field-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 5px;
+
+    label {
+      font-size: 0.8em;
+      text-transform: uppercase;
+      color: var(--mantle-muted);
+      flex: 0 0 auto;
+    }
+
+    &.full {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  .ladder-editor .ladder-row {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 3px;
+
+    label {
+      font-weight: 700;
+      color: var(--mantle-muted);
+    }
+  }
+
+  .art-entry {
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+    font-size: 0.85em;
+    padding: 2px 0;
+  }
+}
+
+/* -------------------------------------------- */
+/*  Dice results                                 */
+/* -------------------------------------------- */
+
+/* Reused by the chat cards in the next phase: a 5 or 6 reads instantly. */
 .mantle .die-success {
   color: var(--mantle-success);
   font-weight: bold;

@@ -1,0 +1,15 @@
+{{!-- Biography and free-form notes. --}}
+<section class="tab bio" data-tab="bio" data-group="primary">
+
+  <div class="section">
+    <h3>{{localize "MANTLE.Sheet.biography"}}</h3>
+    {{formInput (lookup fields "biography") value=system.biography enriched=enrichedBiography
+                toggled=true editable=editable}}
+  </div>
+
+  <div class="section">
+    <h3>{{localize "MANTLE.Sheet.notes"}}</h3>
+    {{formInput (lookup fields "notes") value=system.notes enriched=enrichedNotes
+                toggled=true editable=editable}}
+  </div>
+</section>

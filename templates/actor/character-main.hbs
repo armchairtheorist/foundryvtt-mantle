@@ -1,0 +1,91 @@
+{{!--
+  Main tab: attributes grouped under their cores, the derived stats those cores
+  produce, and the Wound and Burden tracks.
+--}}
+<section class="tab main" data-tab="main" data-group="primary">
+
+  <div class="cores">
+    {{#each attributes as |core|}}
+      <div class="core core-{{core.key}}">
+        <div class="core-total">
+          <span class="label">{{localize core.label}}</span>
+          <span class="value">{{core.value}}</span>
+        </div>
+        <div class="core-attributes">
+          {{#each core.attributes as |attr|}}
+            <div class="attribute">
+              <label data-tooltip="{{localize attr.label}}">{{localize attr.abbr}}</label>
+              <input type="number" name="system.attributes.{{attr.key}}" value="{{attr.value}}"
+                     min="0" {{#unless ../../editable}}disabled{{/unless}}>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    {{/each}}
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat"><label>{{localize "MANTLE.Stat.spd"}}</label><span>{{system.spd}}</span></div>
+    <div class="stat"><label>{{localize "MANTLE.Stat.sen"}}</label><span>{{system.sen}}</span></div>
+    <div class="stat"><label>{{localize "MANTLE.Stat.size"}}</label><span>{{system.size}}</span></div>
+    <div class="stat">
+      <label>{{localize "MANTLE.Stat.consumables"}}</label>
+      <span>
+        <input type="number" name="system.consumables.value" value="{{system.consumables.value}}"
+               {{#unless editable}}disabled{{/unless}}> / {{system.consumables.max}}
+      </span>
+    </div>
+    <div class="stat"><label>{{localize "MANTLE.Stat.languages"}}</label><span>{{system.languages}}</span></div>
+    <div class="stat"><label>{{localize "MANTLE.Stat.limitBreakSlots"}}</label><span>{{system.tier.limitBreakSlots}}</span></div>
+  </div>
+
+  {{!-- Wounds and Burdens persist past the end of a fight, so they read as a
+        record rather than a counter: each one keeps what it rolled. --}}
+  <div class="harm">
+    <div class="harm-track wounds">
+      <h3>
+        {{localize "MANTLE.Sheet.wounds"}}
+        <span class="slots">{{system.wounds.length}} / {{system.slots.wound}}</span>
+      </h3>
+      {{#each system.wounds as |wound index|}}
+        <div class="harm-entry severity-{{wound.severity}}">
+          <span class="severity">{{localize (lookup (lookup ../config.woundSeverities wound.severity) "label")}}</span>
+          <span class="effect">{{wound.effect}}</span>
+        </div>
+      {{else}}
+        <p class="empty">{{localize "MANTLE.Sheet.noWounds"}}</p>
+      {{/each}}
+    </div>
+
+    <div class="harm-track burdens">
+      <h3>
+        {{localize "MANTLE.Sheet.burdens"}}
+        <span class="slots">{{system.burdens.length}} / {{system.slots.burden}}</span>
+      </h3>
+      {{#each system.burdens as |burden index|}}
+        <div class="harm-entry severity-{{burden.severity}}">
+          <span class="severity">{{localize (lookup (lookup ../config.burdenSeverities burden.severity) "label")}}</span>
+          <span class="effect">{{burden.effect}}</span>
+          {{#if burden.affliction}}<span class="affliction">{{burden.affliction}}</span>{{/if}}
+        </div>
+      {{else}}
+        <p class="empty">{{localize "MANTLE.Sheet.noBurdens"}}</p>
+      {{/each}}
+    </div>
+  </div>
+
+  {{#if items.features.length}}
+    <div class="features">
+      <h3>{{localize "MANTLE.Sheet.features"}}</h3>
+      {{#each items.features as |feature|}}
+        <div class="feature" data-item-id="{{feature.id}}">
+          <span class="name" data-action="editItem">{{feature.name}}</span>
+          {{#if feature.system.activation.vigorCost}}
+            <span class="cost">{{feature.system.activation.vigorCost}} {{localize "MANTLE.Resource.vigorShort"}}</span>
+          {{/if}}
+          <span class="activation">{{localize (concat "MANTLE.Activation." feature.system.activation.type)}}</span>
+        </div>
+      {{/each}}
+    </div>
+  {{/if}}
+</section>

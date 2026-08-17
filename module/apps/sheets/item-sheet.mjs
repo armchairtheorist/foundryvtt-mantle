@@ -49,7 +49,28 @@ export default class MantleItemSheet extends HandlebarsApplicationMixin(ItemShee
       )
     );
 
-    context.hasLadder = ["weapon", "consumable"].includes(item.type);
+    // Schema fields drive the form inputs, which need the field definition
+    // rather than just the value.
+    context.fields = item.system.schema.fields;
+
+    // Handlebars cannot reach into a subexpression's properties, so nested
+    // schema groups have to be handed over ready to use.
+    if (item.type === "feature") context.activationFields = context.fields.activation.fields;
+
+    // Weapons always resolve on a ladder; consumables only when they are an
+    // attack, like Alchemist's Fire.
+    context.hasLadder = item.type === "weapon" || (item.type === "consumable" && item.system.isAttack);
+
+    if (context.hasLadder) {
+      const damage = item.system.damage;
+      context.ladderBands = [
+        { key: "0", label: "0s", value: damage[0] },
+        { key: "1", label: "1s", value: damage[1] },
+        { key: "2", label: "2s", value: damage[2] },
+        { key: "3", label: "3+", value: damage[3] },
+        { key: "overflow", label: game.i18n.localize("MANTLE.Sheet.overflow"), value: damage.overflow }
+      ];
+    }
 
     context.enrichedDescription = await foundry.applications.ux.TextEditor.implementation.enrichHTML(
       item.system.description ?? "",
