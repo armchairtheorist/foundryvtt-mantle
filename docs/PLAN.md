@@ -14,8 +14,8 @@ Archetypes, Masteries, Equipment, Spellcasting catalogs).
 | Decision | Choice |
 |---|---|
 | Automation level | **Assisted** — every roll produces a chat card with the ladder resolved and buttons a human clicks. No silent auto-application. |
-| Initiative | Delegate to the **Lancer Initiative** module (popcorn/activation tracker). Not reimplemented. |
-| Condition stacks | Delegate display to **Status Icon Counters**. The system owns the numbers. |
+| Initiative | Delegate to the **Lancer Initiative** module (popcorn/activation tracker). Not reimplemented. Confirmed working on v13; assumed fine on v14, with the stock combat tracker as fallback. |
+| Condition stacks | Delegate display to **Status Icon Counters**. The system owns the numbers. Confirmed working on v14, tested to 14.365. |
 | Spellcasting | **In scope for MVP.** The party will include casters. |
 | Build tooling | Minimal — no bundler. See §3. |
 
@@ -124,11 +124,30 @@ need the two modules from §1 if we keep those dependencies.
 
 **`character`** — player characters.
 
-**`adversary`** — enemies and NPCs. Schema shaped around the challenge classes
-the Quick Start names (Grunt / Regular / Elite / Champion / Nemesis), with
-support for multiple turns per round and for declaring which hit locations the
-creature actually has (some creatures are all Mass). Final shape pending the
-*Pre-Generated Enemies* document.
+**`adversary`** — enemies and NPCs. Deliberately *not* a stripped-down character:
+enemies don't track Vigor, have no reactions by default, and run a flat
+`1 Move + 1 extra maneuver` economy. The schema holds a **Regular-tier baseline**
+plus two independent overlays:
+
+- **Challenge class** (Grunt / Regular / Elite / Champion / Nemesis) — turns per
+  round, Vitality and Strain caps or bonuses, Wound/Burden slots, whether action
+  rolls are rolled at all (Grunts don't — always exactly 1 success), whether
+  patterns are read, and condition-clearing behaviour.
+- **Tier of play** (Novice → Paragon) — flat `+Nd` on action rolls, Vitality and
+  Strain adjustments, extra maneuvers.
+
+Both are Active Effect templates applied over the baseline, so one authored stat
+block scales to any class and tier without duplicating it.
+
+Hit locations are a **list**, not three fixed slots — Sorrowmaw has Wings and The
+Hollow Heart, the Razorwing has Wings and no Mark. Each entry carries its own
+targeting penalty, a hit effect (on 1+ success), and a Wound effect.
+
+Champion and Nemesis blocks also need **Wound-bar and Strain-breakdown triggers**
+(Sorrowmaw gains +2 SPD on its first bar lost, loses Flight on its third), and
+**telegraphed Signature attacks** that announce on one turn and resolve at the
+start of the next. Both are modelled as features with a state flag, surfaced on
+the sheet as a reminder rather than automated.
 
 ### Items
 
@@ -144,7 +163,7 @@ creature actually has (some creatures are all Mass). Final shape pending the
 | `art` | base Vigor cost, basic shape, which dimensions are shapeable, effect ladders |
 | `resonance` | one entry per supported Art: which ladder, tags, condition inflicted, opposed-by attribute, bonus damage |
 | `feature` | granted maneuvers, reactions, and passives (Enter Frenzy, Deflect, Overwatch, Analyze, …) with `activation: {type, vigorCost, uses}` |
-| `limitbreak` | prerequisite, effect. Pending the *Limit Breaks Catalog*. |
+| `limitbreak` | prerequisite (a core minimum for General, or an archetype realized for Archetype), effect |
 
 **Narrative skills are not items.** Fifty skills across six groups would bury the
 item directory for no benefit. They live as a static table in `CONFIG.MANTLE`
@@ -183,11 +202,22 @@ So the pipeline is:
    SPD / SEN / SIZE ← ancestry archetype
    ```
 
-**Acceptance test for this phase:** the Quick Start's worked example builds Mira
-(Half-Elf R1 / Warrior R2, POW 0 AGI 3 REA 0 INS 1 PRE 0 LUCK 0) and publishes
-her full stat block — Max Vitality 21, Max Strain 5, Resolve 6, Max Guard 4,
-Vigor refresh 4, SPD 5, SEN 10. If I build Mira on the sheet and every number
-matches without hand-editing, the pipeline is correct.
+**Acceptance test for this phase:** the *Pre-Generated Characters* catalog gives
+four fully pre-computed Rank 3 builds — Mira, Kira, Maya, and Vera — with dice
+pools and damage ladders printed *with all passive riders already applied*. Each
+one exercises a different part of the pipeline:
+
+| Pregen | What it proves |
+|---|---|
+| Mira (Half-Elf / Warrior) | Baseline derived stats: Vitality 21, Strain 5, Resolve 6, Guard 4, Vigor refresh 4, SPD 5, SEN 10 |
+| Kira (Dwarf / Barbarian) | Conditional bonuses — Greataxe at Frenzy 3 must show **5d6 for 9/15/23/31**, chaining Frenzy stacks through Relentless into the ladder |
+| Maya (Human / Scholar) | Bonus mastery slots (Versatile, Starting Repertoire), zero-BODY edge cases, the Dagger rolling **2d6 keep lowest** |
+| Vera (Elf / Channeler) | Multi-slot masteries (Lux Resonance costs 2), SOUL 0 meaning zero wondrous slots, deep Strain track |
+
+If all four build on the sheet and every printed number matches without
+hand-editing, the pipeline is correct. Kira is the sharpest test — her damage
+ladder only comes out right if archetype bonuses, mastery effects, and condition
+stacks all compose in the correct order.
 
 *v14 note:* custom Actor subclasses must call `super.prepareBaseData()`. v14
 splits Active Effect application into initial and final phases, and skipping the
@@ -284,14 +314,13 @@ exposes `game.modules.get("statuscounter")?.api` plus an `effect.statusCounter`
 getter, with `addCounterType()` for custom counter behaviour. The system will own
 the stack numbers and *mirror* them into that flag.
 
-> **Caveat worth checking before we commit.** Both modules are verified against
-> **v13**. I could not confirm v14 support from this container — Lancer
-> Initiative has an open v14 support request filed in April 2026, and I couldn't
-> reach its repository (see §9). Neither will be a hard dependency in
-> `system.json`: stack counts render on the character sheet regardless, and the
-> system works with Foundry's stock combat tracker if Lancer Initiative isn't
-> available. **Could you check both in your v14 install?** If either is dead on
-> v14, tell me and I'll fold that piece into the system.
+> **Status.** Status Icon Counters is confirmed working on v14 (tested to
+> 14.365). Lancer Initiative is confirmed on v13 and has an open v14 support
+> request from April 2026; we proceed on the assumption it works. Neither is a
+> hard dependency in `system.json` — stack counts render on the character sheet
+> regardless, and the system falls back to Foundry's stock combat tracker. If
+> Lancer Initiative turns out to be broken on v14, the fallback is the stock
+> tracker with manual ordering, not a blocked playtest.
 
 **Also relevant, no work needed from us:** Dice So Nice works automatically
 because we use standard `Roll` objects, so your d6 pools get physical dice.
@@ -312,23 +341,22 @@ and still have a system that runs.
 | Phase | Delivers | Done when |
 |---|---|---|
 | **0 — Skeleton** | Manifest, entry point, tooling, CI release workflow, install instructions | The system appears in Foundry's system list and a world launches on it |
-| **1 — Data & sheets** | Data models, derived-stat pipeline, character sheet, item sheets | Mira builds and every number matches the Quick Start's worked example |
+| **1 — Data & sheets** | Data models, derived-stat pipeline, character sheet, item sheets | All four pregens build and every printed number matches |
 | **2 — Dice & combat** | Pool builder, patterns, roll dialog, chat cards, weapon attacks, damage, Wounds/Burdens | A full attack resolves end to end from sheet to applied damage |
 | **3 — Spellcasting** | Cast dialog, shaping economy, Art × Resonance resolution | An Ignis Rend and a Lux Mend both resolve correctly, shaped and unshaped |
-| **4 — Content** | Compendium packs built from the four catalogs | You can drag a Warrior, a Rapier, and Bloodlust onto a sheet |
-| **5 — Table polish** | Valor tracker, conditions as status effects, adversary sheet, module integration | A GM can run *The Toll Road* encounter from the Quick Start |
+| **4 — Content** | Compendium packs built from all six catalogs, including the four pregen PCs as ready-to-play Actors | You can drag a Warrior, a Rapier, and Bloodlust onto a sheet, or import Mira whole |
+| **5 — Table polish** | Valor tracker, conditions as status effects, adversary sheet, challenge-class and tier templates, module integration | A GM can run *The Toll Road* encounter from the Quick Start |
 
 ---
 
 ## 9. Open items
 
-1. **Module v14 compatibility** — see the caveat in §7. Needs your check.
-2. **Missing documents.** Three files are still to come. Two are referenced
-   throughout and block content work: the *Limit Breaks Catalog* (Phase 4/5) and
-   *Pre-Generated Enemies* (needed to finalise the adversary schema, Phase 5).
-   Also: the Archetypes catalog ends at a bare `## Specialist Path Archetypes`
-   heading with nothing under it, and the Rogue basic path is named in the Quick
-   Start but has no stat block. Neither blocks Phases 0–3.
+1. ~~Module v14 compatibility~~ — resolved, see §7.
+2. ~~Missing documents~~ — all six catalogs received. Two known gaps, both
+   confirmed as *not yet written* rather than missing: the Archetypes catalog's
+   `## Specialist Path Archetypes` section is empty, and the Rogue basic path is
+   named in the Quick Start without a stat block. The schemas hold them; the
+   compendium ships the four ancestries and four basic paths that exist.
 3. **Network restriction in this container.** `foundryvtt.com` and `codeberg.org`
    are blocked by the environment's egress policy, so I can't read the official
    v14 API docs directly. Mitigation: the `fvtt-types` package publishes a v14
