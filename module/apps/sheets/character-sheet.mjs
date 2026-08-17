@@ -153,7 +153,13 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
    * the GM to adjudicate unusual builds.
    */
   #prepareSlots() {
-    const { slots, slotsUsed } = this.document.system;
+    // Safety net rather than a fix: if data preparation throws, Foundry keeps
+    // the actor but leaves the derived fields unset. Falling back to zeros lets
+    // the sheet still open so the console error can be read, instead of the
+    // sheet itself throwing and showing nothing at all.
+    const system = this.document.system;
+    const slots = system.slots ?? { gear: 0, wondrous: 0, mastery: {} };
+    const slotsUsed = system.slotsUsed ?? { gear: 0, wondrous: 0, mastery: {} };
 
     const entry = (label, used, total) => ({ label, used, total, over: used > total });
 

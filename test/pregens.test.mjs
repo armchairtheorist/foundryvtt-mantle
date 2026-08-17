@@ -49,10 +49,10 @@ describe("Mira — Half-Elf R1 / Warrior R2", () => {
   test("derived stats match the printed stat block", () => {
     expectStats(
       mira,
-      { maxVitality: 21, maxStrain: 5, resolve: 6, maxGuard: 4, spd: 5, sen: 10, languages: 1 },
+      { maxVitality: 21, maxStrain: 5, maxResolve: 6, maxGuard: 4, spd: 5, sen: 10, languagesKnown: 1 },
       "Mira"
     );
-    expectStats(mira.vigor, { max: 7, refresh: 4 }, "Mira vigor");
+    expectStats(mira, { maxVigor: 7, vigorRefresh: 4 }, "Mira vigor");
   });
 
   test("slots", () => {
@@ -81,10 +81,10 @@ describe("Kira — Dwarf R1 / Barbarian R2", () => {
   test("derived stats match the printed stat block", () => {
     expectStats(
       kira,
-      { maxVitality: 21, maxStrain: 5, resolve: 7, maxGuard: 3, spd: 4, sen: 12, languages: 1 },
+      { maxVitality: 21, maxStrain: 5, maxResolve: 7, maxGuard: 3, spd: 4, sen: 12, languagesKnown: 1 },
       "Kira"
     );
-    expectStats(kira.vigor, { max: 7, refresh: 3 }, "Kira vigor");
+    expectStats(kira, { maxVigor: 7, vigorRefresh: 3 }, "Kira vigor");
   });
 
   test("slots — SOUL 1 grants one wondrous item slot", () => {
@@ -113,7 +113,7 @@ describe("Maya — Human R1 / Scholar R2", () => {
   test("derived stats match the printed stat block", () => {
     expectStats(
       maya,
-      { maxVitality: 10, maxStrain: 10, resolve: 7, maxGuard: 2, languages: 4 },
+      { maxVitality: 10, maxStrain: 10, maxResolve: 7, maxGuard: 2, languagesKnown: 4 },
       "Maya"
     );
   });
@@ -121,7 +121,7 @@ describe("Maya — Human R1 / Scholar R2", () => {
   test("BODY 0 still refreshes at least 1 Vigor before bonuses", () => {
     // max(BODY 0, 1) = 1, then Vigorous adds 1. Applying the floor after the
     // bonus would give 1 and quietly rob her of a Vigor every turn.
-    expectStats(maya.vigor, { max: 7, refresh: 2 }, "Maya vigor");
+    expectStats(maya, { maxVigor: 7, vigorRefresh: 2 }, "Maya vigor");
   });
 
   test("Versatile grants a second wildcard mastery slot", () => {
@@ -149,10 +149,10 @@ describe("Vera — Elf R1 / Channeler R2", () => {
   test("derived stats match the printed stat block", () => {
     expectStats(
       vera,
-      { maxVitality: 12, maxStrain: 8, resolve: 8, maxGuard: 2, spd: 6, sen: 15, languages: 1 },
+      { maxVitality: 12, maxStrain: 8, maxResolve: 8, maxGuard: 2, spd: 6, sen: 15, languagesKnown: 1 },
       "Vera"
     );
-    expectStats(vera.vigor, { max: 7, refresh: 2 }, "Vera vigor");
+    expectStats(vera, { maxVigor: 7, vigorRefresh: 2 }, "Vera vigor");
   });
 
   test("SOUL 0 means no wondrous item slots", () => {
@@ -182,7 +182,7 @@ describe("advancement cadence", () => {
       deriveCharacter({
         attributes: { pow: 0, agi: 0, rea: 0, ins: 0, pre: 0, luck: 0 },
         characterRank: rank
-      }).vigor.max;
+      }).maxVigor;
 
     assert.equal(at(3), 7, "CR3");
     assert.equal(at(7), 8, "CR7");
@@ -234,5 +234,43 @@ describe("states", () => {
     // The book's example: Max Strain 7 means Stressed at 3 or more.
     assert.equal(isStressed(2, 7), false);
     assert.equal(isStressed(3, 7), true);
+  });
+});
+
+describe("derived output shape", () => {
+  // A live regression guard. prepareDerivedData used to do
+  // Object.assign(this, deriveCharacter(...)), which silently overwrote stored
+  // schema fields sharing a name — the `resolve` resource object became the
+  // number 6, and the next line threw "Cannot create property 'max' on number".
+  // The assign is now explicit, and these are the names that must never come
+  // back from the derivation.
+  const STORED_FIELDS = [
+    "vitality",
+    "strain",
+    "guard",
+    "vigor",
+    "resolve",
+    "consumables",
+    "wounds",
+    "burdens",
+    "skills",
+    "languages",
+    "bonuses",
+    "biography",
+    "notes"
+  ];
+
+  test("no derived key collides with a stored schema field", () => {
+    const derived = deriveCharacter({
+      attributes: { pow: 1, agi: 1, rea: 1, ins: 1, pre: 1, luck: 1 },
+      characterRank: 3
+    });
+
+    const collisions = Object.keys(derived).filter((key) => STORED_FIELDS.includes(key));
+    assert.deepEqual(
+      collisions,
+      [],
+      `derived keys shadow stored fields: ${collisions.join(", ")}`
+    );
   });
 });

@@ -98,7 +98,18 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
         : {}
     });
 
-    Object.assign(this, derived);
+    // Assign explicitly rather than Object.assign(this, derived). A blanket
+    // merge overwrites stored schema fields that happen to share a name — it
+    // replaced the `resolve` resource object with a bare number, which then
+    // threw on the very next line.
+    this.cores = derived.cores;
+    this.equilibrium = derived.equilibrium;
+    this.tier = derived.tier;
+    this.slots = derived.slots;
+    this.spd = derived.spd;
+    this.sen = derived.sen;
+    this.size = derived.size;
+    this.languagesKnown = derived.languagesKnown;
     this.characterRank = characterRank;
 
     // Attach maxima to the resources so token bars and the sheet can read
@@ -106,8 +117,9 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
     this.vitality.max = derived.maxVitality;
     this.strain.max = derived.maxStrain;
     this.guard.max = derived.maxGuard;
-    this.vigor.max = derived.vigor.max;
-    this.resolve.max = derived.resolve;
+    this.vigor.max = derived.maxVigor;
+    this.vigor.refresh = derived.vigorRefresh;
+    this.resolve.max = derived.maxResolve;
     this.consumables.max = derived.slots.consumable;
 
     // Guard may be pushed above its maximum — Over-Guard — and when it is, the

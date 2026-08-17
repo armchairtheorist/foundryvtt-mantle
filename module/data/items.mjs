@@ -12,9 +12,50 @@
  */
 
 import { MANTLE } from "../config.mjs";
-import { fields, count, modifier, text, choice, ladder } from "./_fields.mjs";
+import { fields, count, modifier, text, choice, options, ladder } from "./_fields.mjs";
 
 const TypeDataModel = foundry.abstract.TypeDataModel;
+
+/**
+ * Small shared vocabularies. Each is a value-to-localization-key map, never an
+ * array — an array makes Foundry's select emit the option *index* as its value,
+ * which then fails schema validation.
+ */
+const ATTRIBUTE_CHOICES = {
+  pow: "MANTLE.Attribute.powAbbr",
+  agi: "MANTLE.Attribute.agiAbbr",
+  either: "MANTLE.Field.either"
+};
+const BOARD_CHOICES = {
+  "": "MANTLE.Field.none",
+  body: "MANTLE.Slot.body",
+  mind: "MANTLE.Slot.mind",
+  soul: "MANTLE.Slot.soul",
+  wildcard: "MANTLE.Slot.wildcard"
+};
+const CORE_CHOICES = {
+  "": "MANTLE.Field.none",
+  body: "MANTLE.Core.body",
+  mind: "MANTLE.Core.mind",
+  soul: "MANTLE.Core.soul"
+};
+const CONSUMABLE_CATEGORIES = { common: "MANTLE.Category.common", exotic: "MANTLE.Category.exotic" };
+const LADDER_CHOICES = {
+  vitality: "MANTLE.Ladder.vitality",
+  strain: "MANTLE.Ladder.strain",
+  both: "MANTLE.Ladder.both"
+};
+const ACTIVATION_CHOICES = {
+  passive: "MANTLE.Activation.passive",
+  maneuver: "MANTLE.Activation.maneuver",
+  reaction: "MANTLE.Activation.reaction",
+  fullTurn: "MANTLE.Activation.fullTurn",
+  free: "MANTLE.Activation.free"
+};
+const LIMIT_BREAK_CATEGORIES = {
+  general: "MANTLE.LimitBreak.general",
+  archetype: "MANTLE.LimitBreak.archetype"
+};
 
 /** Fields shared by every item: a description, and where it came from. */
 function common() {
@@ -93,12 +134,7 @@ export class MasteryData extends TypeDataModel {
       slotCost: count(1, { min: 1 }),
 
       /** Which board actually paid for it: its own type, or wildcard. */
-      slotBoard: new fields.StringField({
-        required: true,
-        blank: true,
-        initial: "",
-        choices: ["", "body", "mind", "soul", "wildcard"]
-      }),
+      slotBoard: options(BOARD_CHOICES, "", { blank: true }),
 
       prerequisite: text(),
 
@@ -123,11 +159,7 @@ export class WeaponData extends TypeDataModel {
        * Which attribute builds the pool. "either" means the wielder picks, as
        * with POW/AGI weapons.
        */
-      attribute: new fields.StringField({
-        required: true,
-        initial: "pow",
-        choices: ["pow", "agi", "either"]
-      }),
+      attribute: options(ATTRIBUTE_CHOICES, "pow"),
 
       damageTypes: new fields.SetField(new fields.StringField({ blank: false })),
       tags: new fields.SetField(new fields.StringField({ blank: false })),
@@ -200,17 +232,13 @@ export class ConsumableData extends TypeDataModel {
     return {
       ...common(),
       /** Common consumables are always available; exotic ones must be found. */
-      category: new fields.StringField({
-        required: true,
-        initial: "common",
-        choices: ["common", "exotic"]
-      }),
+      category: options(CONSUMABLE_CATEGORIES, "common"),
       target: text(),
       effect: text(),
 
       // Some consumables are thrown weapons and resolve on a ladder.
       isAttack: new fields.BooleanField({ initial: false }),
-      attribute: new fields.StringField({ required: true, initial: "agi", choices: ["pow", "agi", "either"] }),
+      attribute: options(ATTRIBUTE_CHOICES, "agi"),
       damageTypes: new fields.SetField(new fields.StringField({ blank: false })),
       tags: new fields.SetField(new fields.StringField({ blank: false })),
       range: new fields.NumberField({ required: false, nullable: true, integer: true, min: 0, initial: null }),
@@ -269,7 +297,7 @@ export class ResonanceData extends TypeDataModel {
       arts: new fields.ArrayField(
         new fields.SchemaField({
           art: text(),
-          ladder: new fields.StringField({ required: true, initial: "vitality", choices: ["vitality", "strain", "both"] }),
+          ladder: options(LADDER_CHOICES, "vitality"),
           tags: new fields.SetField(new fields.StringField({ blank: false })),
           condition: text(),
           opposedBy: text(),
@@ -299,11 +327,7 @@ export class FeatureData extends TypeDataModel {
       ...common(),
       /** Granted maneuvers, reactions, and always-on passives. */
       activation: new fields.SchemaField({
-        type: new fields.StringField({
-          required: true,
-          initial: "passive",
-          choices: ["passive", "maneuver", "reaction", "fullTurn", "free"]
-        }),
+        type: options(ACTIVATION_CHOICES, "passive"),
         vigorCost: count(0),
         /** Free text because limits vary: "1/turn", "once per combat", "1/Interlude". */
         uses: text()
@@ -324,12 +348,8 @@ export class LimitBreakData extends TypeDataModel {
        * General Limit Breaks gate on a core minimum; Archetype Limit Breaks
        * unlock when their archetype is realized and carry no attribute gate.
        */
-      category: new fields.StringField({
-        required: true,
-        initial: "general",
-        choices: ["general", "archetype"]
-      }),
-      requiredCore: new fields.StringField({ required: true, blank: true, initial: "", choices: ["", "body", "mind", "soul"] }),
+      category: options(LIMIT_BREAK_CATEGORIES, "general"),
+      requiredCore: options(CORE_CHOICES, "", { blank: true }),
       requiredCoreValue: count(0),
       requiredArchetype: text()
     };

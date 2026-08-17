@@ -223,6 +223,10 @@ export function deriveCharacter({ attributes, characterRank, bonuses = {}, ances
   const cores = deriveCores(attributes);
   const baseline = MANTLE.baseline;
 
+  // Every key here is deliberately named so it cannot collide with a stored
+  // schema field. `resolve`, `vigor`, and `languages` are all resources or sets
+  // on the character, and returning those names invites a caller to overwrite
+  // real data with a derived number. See the collision guard in the tests.
   return {
     cores,
     equilibrium: checkEquilibrium(cores),
@@ -230,13 +234,10 @@ export function deriveCharacter({ attributes, characterRank, bonuses = {}, ances
 
     maxVitality: deriveMaxVitality(cores, bonuses),
     maxStrain: deriveMaxStrain(cores, bonuses),
-    resolve: deriveResolve(cores, bonuses),
+    maxResolve: deriveResolve(cores, bonuses),
     maxGuard: baseline.maxGuard + (bonuses.guard ?? 0),
-
-    vigor: {
-      max: deriveMaxVigor(characterRank, bonuses),
-      refresh: deriveVigorRefresh(cores, bonuses)
-    },
+    maxVigor: deriveMaxVigor(characterRank, bonuses),
+    vigorRefresh: deriveVigorRefresh(cores, bonuses),
 
     slots: {
       wound: baseline.woundSlots + (bonuses.woundSlots ?? 0),
@@ -251,6 +252,6 @@ export function deriveCharacter({ attributes, characterRank, bonuses = {}, ances
     sen: (ancestry.sen ?? 0) + (bonuses.sen ?? 0),
     size: ancestry.size ?? "1M",
 
-    languages: deriveLanguages(attributes, bonuses)
+    languagesKnown: deriveLanguages(attributes, bonuses)
   };
 }

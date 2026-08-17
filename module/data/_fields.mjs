@@ -54,7 +54,17 @@ export function text(initial = "", options = {}) {
 /**
  * A choice from a config table, keyed by the table's own keys.
  *
- * @param {Record<string, unknown>} table
+ * Choices must be an **object** of value-to-label, never an array. Given an
+ * array, Foundry's select input emits the array *index* as the option value, so
+ * picking "Basic Path Archetype" submits `1` and validation rejects it. The
+ * object form also gets us localized labels in the dropdown for free.
+ *
+ * Localization runs inside the function so it happens at render time, once
+ * `game.i18n` exists — the schema is built during `init`, before it does.
+ *
+ * @param {Record<string, string | {label: string}>} table
+ *   A CONFIG.MANTLE table. Values are either a localization key or an object
+ *   carrying one as `label`.
  * @param {string} initial
  */
 export function choice(table, initial) {
@@ -62,8 +72,41 @@ export function choice(table, initial) {
     required: true,
     blank: false,
     initial,
-    choices: Object.keys(table)
+    choices: () => localizeChoices(table)
   });
+}
+
+/**
+ * A choice from an inline map of value to localization key, for the small
+ * vocabularies that don't warrant a CONFIG table.
+ *
+ * @param {Record<string, string>} map
+ * @param {string} initial
+ * @param {{blank?: boolean}} [options] - `blank` permits an empty selection.
+ */
+export function options(map, initial, { blank = false } = {}) {
+  return new fields.StringField({
+    required: true,
+    blank,
+    initial,
+    choices: () => localizeChoices(map)
+  });
+}
+
+/**
+ * Turn a config table into the `{value: label}` object a select expects,
+ * localizing as we go.
+ *
+ * @param {Record<string, string | {label: string}>} table
+ * @returns {Record<string, string>}
+ */
+function localizeChoices(table) {
+  return Object.fromEntries(
+    Object.entries(table).map(([key, entry]) => {
+      const label = typeof entry === "string" ? entry : entry.label;
+      return [key, game.i18n?.localize(label) ?? label];
+    })
+  );
 }
 
 /**
