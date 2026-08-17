@@ -6,6 +6,14 @@
  */
 
 import { MANTLE } from "./module/config.mjs";
+import CharacterData from "./module/data/actor-character.mjs";
+import AdversaryData from "./module/data/actor-adversary.mjs";
+import PartyData from "./module/data/actor-party.mjs";
+import { itemDataModels } from "./module/data/items.mjs";
+import MantleActor from "./module/documents/actor.mjs";
+import MantleItem from "./module/documents/item.mjs";
+import MantleCharacterSheet from "./module/apps/sheets/character-sheet.mjs";
+import MantleItemSheet from "./module/apps/sheets/item-sheet.mjs";
 
 /* -------------------------------------------- */
 /*  Initialization                               */
@@ -17,12 +25,72 @@ Hooks.once("init", () => {
   // Publish the reference tables so macros, modules, and the console can reach them.
   CONFIG.MANTLE = MANTLE;
 
+  // Document classes.
+  CONFIG.Actor.documentClass = MantleActor;
+  CONFIG.Item.documentClass = MantleItem;
+
+  // Data models, keyed by the subtypes declared in system.json.
+  CONFIG.Actor.dataModels = {
+    character: CharacterData,
+    adversary: AdversaryData,
+    party: PartyData
+  };
+  CONFIG.Item.dataModels = itemDataModels;
+
   // Mantle resolves initiative through side-alternating zipper turn order rather
   // than a rolled formula, so there is deliberately no CONFIG.Combat.initiative
   // formula here. Turn order is driven by the combat tracker.
 
+  registerSheets();
+  registerConditions();
+
   globalThis.mantle = { config: MANTLE };
 });
+
+/* -------------------------------------------- */
+
+/** Replace the core sheets with Mantle's own. */
+function registerSheets() {
+  const { Actors, Items } = foundry.documents.collections;
+  const { sheets } = foundry.applications;
+
+  Actors.unregisterSheet("core", sheets.ActorSheetV2);
+  Actors.registerSheet("mantle", MantleCharacterSheet, {
+    types: ["character"],
+    makeDefault: true,
+    label: "MANTLE.Sheet.character"
+  });
+
+  Items.unregisterSheet("core", sheets.ItemSheetV2);
+  Items.registerSheet("mantle", MantleItemSheet, {
+    makeDefault: true,
+    label: "MANTLE.Sheet.item"
+  });
+}
+
+/* -------------------------------------------- */
+
+/**
+ * Register Mantle's conditions as token status effects.
+ *
+ * Stack counts are mirrored into `flags.statuscounter.value` so the Status Icon
+ * Counters module renders them on the token. Without that module the counts are
+ * still tracked and shown on the character sheet — the icons just don't carry a
+ * number.
+ */
+function registerConditions() {
+  CONFIG.statusEffects = Object.entries(MANTLE.conditions).map(([id, condition]) => ({
+    id,
+    name: condition.label,
+    img: `systems/mantle/assets/conditions/${id}.svg`
+  }));
+
+  // Stacking rules and caps stay in CONFIG.MANTLE.conditions rather than being
+  // copied onto the status effects. One source of truth, and the sheet and the
+  // effect code read the same table.
+}
+
+/* -------------------------------------------- */
 
 Hooks.once("ready", () => {
   console.log(`Mantle | Ready — system version ${game.system?.version} on Foundry ${game.version}`);

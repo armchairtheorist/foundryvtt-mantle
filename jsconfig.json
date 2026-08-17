@@ -15,6 +15,24 @@
     // We care about our own code, not theirs.
     "maxNodeModuleJsDepth": 0
   },
-  "include": ["**/*.d.mts", "mantle.mjs", "module/**/*.mjs", "tools/**/*.mjs"],
-  "exclude": ["node_modules", "packs"]
+
+  // Sheets under module/apps are deliberately excluded. ApplicationV2's generic
+  // signatures are heavy enough that fvtt-types reports "excessive stack depth"
+  // on any subclass written in plain JS, and the render context is typed as a
+  // closed interface that JSDoc can't widen. Checking them produces pages of
+  // unfixable noise, which is worse than not checking at all.
+  //
+  // What is checked is where it pays: the rules maths in module/data, the
+  // document classes, the dice engine, and the build tooling.
+  "include": [
+    "**/*.d.mts",
+    "mantle.mjs",
+    "module/config.mjs",
+    "module/data/**/*.mjs",
+    "module/documents/**/*.mjs",
+    "module/dice/**/*.mjs",
+    "tools/**/*.mjs",
+    "test/**/*.mjs"
+  ],
+  "exclude": ["node_modules", "packs", "module/apps"]
 }

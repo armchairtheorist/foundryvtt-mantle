@@ -59,7 +59,7 @@ jobs:
           # zip itself errors, so a broken archive never reaches a release.
           set -euo pipefail
           included=()
-          for p in system.json mantle.mjs module templates styles lang packs README.md LICENSE; do
+          for p in system.json mantle.mjs module templates styles lang assets packs README.md LICENSE; do
             if [ -e "$p" ]; then included+=("$p"); fi
           done
           printf 'Packaging: %s\n' "${included[*]}"
