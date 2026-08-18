@@ -146,7 +146,7 @@ const CONSUMABLES = [
   }
 ];
 
-/** @returns {object[]} */
+/** @returns {import("./_build.mjs").PackDocument[]} */
 export function build() {
   const documents = [];
 

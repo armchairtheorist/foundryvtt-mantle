@@ -89,6 +89,18 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
     // character has at most one; if somehow more, the first wins.
     const ancestry = archetypes.find((a) => a.system.kind === "ancestry");
 
+    // Archetype bonuses are per rank, so only ranks actually reached count.
+    // These are summed here rather than applied as Active Effects: effects
+    // cannot easily be made rank-aware without one effect per rank, toggled as
+    // the rank changes.
+    for (const archetype of archetypes) {
+      for (const feature of archetype.system.activeFeatures ?? []) {
+        for (const [key, value] of Object.entries(feature.bonuses ?? {})) {
+          if (value) this.bonuses[key] += value;
+        }
+      }
+    }
+
     const derived = deriveCharacter({
       attributes: this.attributes,
       characterRank,

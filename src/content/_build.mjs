@@ -10,6 +10,30 @@
 import { createHash } from "node:crypto";
 
 /**
+ * A compendium document, as authored here: enough shape for the content modules
+ * and their tests to work with, without restating Foundry's full document type.
+ *
+ * @typedef {object} PackDocument
+ * @property {string} _id
+ * @property {string} _key
+ * @property {string} name
+ * @property {string} type
+ * @property {string} img
+ * @property {Record<string, any>} system
+ *
+ * Foundry requires further fields on a stored document — effects, ownership,
+ * sort, and so on — which the builders fill in with defaults.
+ * @property {any} [effects]
+ * @property {any} [items]
+ * @property {any} [folder]
+ * @property {any} [sort]
+ * @property {any} [ownership]
+ * @property {any} [prototypeToken]
+ * @property {any} [flags]
+ * @property {any} [_stats]
+ */
+
+/**
  * A stable Foundry id derived from the document's identity.
  *
  * Foundry ids must be exactly 16 alphanumeric characters. Deriving them from a
@@ -33,7 +57,7 @@ export function stableId(key) {
  * @param {string} options.type - Item subtype
  * @param {object} options.system
  * @param {string} [options.img]
- * @returns {object}
+ * @returns {PackDocument}
  */
 export function item({ pack, name, type, system, img }) {
   const _id = stableId(`${pack}/${type}/${name}`);
@@ -64,7 +88,7 @@ export function item({ pack, name, type, system, img }) {
  * @param {string} options.type
  * @param {object} options.system
  * @param {string} [options.img]
- * @returns {object}
+ * @returns {PackDocument}
  */
 export function actor({ pack, name, type, system, img }) {
   const _id = stableId(`${pack}/${type}/${name}`);
@@ -94,6 +118,7 @@ export function actor({ pack, name, type, system, img }) {
  * @param {string} [suffix] - Appended to numeric entries, e.g. "damage"
  */
 export function ladder(bands, overflow = "", suffix = "damage") {
+  /** @param {number|string} value */
   const format = (value) => (typeof value === "number" ? `${value} ${suffix}` : String(value));
   return {
     0: format(bands[0]),

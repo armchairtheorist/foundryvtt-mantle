@@ -101,7 +101,26 @@ export class ArchetypeData extends TypeDataModel {
         new fields.SchemaField({
           rank: count(1, { min: 1 }),
           name: text(),
-          description: text()
+          description: text(),
+
+          /**
+           * Numeric bonuses this rank grants, summed into the character's
+           * accumulators for every rank actually reached.
+           *
+           * Deliberately data rather than Active Effects. An archetype's bonuses
+           * are per rank, and a rank-1 Warrior must not receive rank-2's Guard;
+           * expressing that with effects would mean one effect per rank, each
+           * enabled and disabled as the rank changes. Summing the ranks a
+           * character has actually reached is simpler, deterministic, and
+           * testable without a running Foundry.
+           */
+          bonuses: new fields.SchemaField({
+            vitality: modifier(),
+            strain: modifier(),
+            resolve: modifier(),
+            guard: modifier(),
+            masteryWildcard: modifier()
+          })
         })
       )
     };
@@ -138,8 +157,12 @@ export class MasteryData extends TypeDataModel {
 
       prerequisite: text(),
 
-      /** Mastery set this belongs to, if any. Completing a set grants a bonus. */
-      setName: text()
+      /**
+       * Mastery sets this belongs to. A set, not a single name: the catalog puts
+       * Aggression in both Peak Human Condition and Human Excellence, and
+       * equipping every member of any one set grants that set's bonus.
+       */
+      sets: new fields.SetField(new fields.StringField({ blank: false }))
     };
   }
 }

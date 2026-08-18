@@ -44,8 +44,8 @@
     <div class="field-row">
       <label>{{localize "MANTLE.Field.slotCost"}}</label>
       {{formInput (lookup fields "slotCost") value=system.slotCost disabled=(not editable)}}
-      <label>{{localize "MANTLE.Field.setName"}}</label>
-      {{formInput (lookup fields "setName") value=system.setName disabled=(not editable)}}
+      <label>{{localize "MANTLE.Field.sets"}}</label>
+      <span class="sets">{{#each system.sets as |set|}}{{set}} {{else}}&mdash;{{/each}}</span>
     </div>
     <p class="hint">{{localize "MANTLE.Hint.multiSlot"}}</p>
   {{/if}}

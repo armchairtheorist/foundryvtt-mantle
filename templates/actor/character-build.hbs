@@ -63,7 +63,7 @@
             {{mastery.system.slotCost}} {{localize "MANTLE.Sheet.slots"}}
           </span>
         {{/if}}
-        {{#if mastery.system.setName}}<span class="set">{{mastery.system.setName}}</span>{{/if}}
+        {{#each mastery.system.sets as |set|}}<span class="set">{{set}}</span>{{/each}}
         <a class="control" data-action="deleteItem"><i class="fa-solid fa-trash"></i></a>
       </div>
     {{else}}

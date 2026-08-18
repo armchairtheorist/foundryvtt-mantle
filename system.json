@@ -28,6 +28,28 @@
   ],
   "packs": [
     {
+      "name": "archetypes",
+      "label": "Mantle: Archetypes",
+      "type": "Item",
+      "path": "packs/archetypes",
+      "system": "mantle",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "masteries",
+      "label": "Mantle: Masteries",
+      "type": "Item",
+      "path": "packs/masteries",
+      "system": "mantle",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
       "name": "equipment",
       "label": "Mantle: Equipment",
       "type": "Item",
@@ -137,6 +159,8 @@
       "sorting": "m",
       "color": "#7a7256",
       "packs": [
+        "archetypes",
+        "masteries",
         "equipment"
       ]
     }
