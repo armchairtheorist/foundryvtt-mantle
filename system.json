@@ -26,7 +26,19 @@
       "path": "lang/en.json"
     }
   ],
-  "packs": [],
+  "packs": [
+    {
+      "name": "equipment",
+      "label": "Mantle: Equipment",
+      "type": "Item",
+      "path": "packs/equipment",
+      "system": "mantle",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    }
+  ],
   "grid": {
     "type": 1,
     "distance": 1,
@@ -118,5 +130,15 @@
   "download": "https://github.com/armchairtheorist/foundryvtt-mantle/releases/download/v0.1.1/mantle.zip",
   "readme": "https://github.com/armchairtheorist/foundryvtt-mantle/blob/main/README.md",
   "bugs": "https://github.com/armchairtheorist/foundryvtt-mantle/issues",
-  "socket": false
+  "socket": false,
+  "packFolders": [
+    {
+      "name": "Mantle",
+      "sorting": "m",
+      "color": "#7a7256",
+      "packs": [
+        "equipment"
+      ]
+    }
+  ]
 }

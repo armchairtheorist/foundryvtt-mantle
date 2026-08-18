@@ -8,11 +8,12 @@
   "scripts": {
     "test": "node --test \"test/**/*.test.mjs\"",
     "check": "node tools/check-templates.mjs",
-    "verify": "npm run check && npm run typecheck && npm test",
+    "verify": "npm run check && npm run check:packs && npm run typecheck && npm test",
     "typecheck": "tsc -p jsconfig.json --noEmit",
     "build:packs": "node tools/build-packs.mjs",
     "extract:packs": "node tools/extract-packs.mjs",
-    "link": "node tools/link-system.mjs"
+    "link": "node tools/link-system.mjs",
+    "check:packs": "node tools/check-packs.mjs"
   },
   "devDependencies": {
     "@foundryvtt/foundryvtt-cli": "^3.0.4",

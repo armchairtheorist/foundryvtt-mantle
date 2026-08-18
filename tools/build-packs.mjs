@@ -1,46 +1,82 @@
 /**
- * Compile compendium source JSON into the LevelDB packs Foundry actually loads.
+ * Compile compendium content into the LevelDB packs Foundry loads.
  *
- * Source of truth is `src/packs/<pack-name>/*.json` — one JSON file per document,
- * version-controlled and diffable. Output goes to `packs/<pack-name>`, which is
- * git-ignored and rebuilt on demand.
+ * Content is authored in `src/content/*.mjs`, one module per pack, each
+ * exporting `build()` and returning an array of documents. Authoring in JS
+ * rather than raw JSON keeps the source close to the catalog tables it mirrors —
+ * a weapon is one readable line — instead of hundreds of files of id and
+ * ownership boilerplate.
+ *
+ * Ids are derived from a hash of each document's identity, so rebuilding a pack
+ * preserves every id and existing worlds keep their links.
  *
  * Usage: npm run build:packs
  */
 
 import { compilePack } from "@foundryvtt/foundryvtt-cli";
-import { readdir, mkdir, rm } from "node:fs/promises";
+import { readdir, mkdir, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
+import os from "node:os";
 
-const SRC = "src/packs";
+const CONTENT = "src/content";
 const OUT = "packs";
 
-if (!existsSync(SRC)) {
-  console.log(`No ${SRC} directory yet — nothing to build.`);
+if (!existsSync(CONTENT)) {
+  console.log(`No ${CONTENT} directory yet — nothing to build.`);
   process.exit(0);
 }
 
-const entries = await readdir(SRC, { withFileTypes: true });
-const packs = entries.filter((e) => e.isDirectory()).map((e) => e.name);
+const modules = (await readdir(CONTENT))
+  .filter((file) => file.endsWith(".mjs") && !file.startsWith("_"))
+  .sort();
 
-if (packs.length === 0) {
-  console.log(`No pack directories found in ${SRC}.`);
+if (modules.length === 0) {
+  console.log(`No content modules found in ${CONTENT}.`);
   process.exit(0);
 }
 
 await mkdir(OUT, { recursive: true });
 
-for (const pack of packs) {
-  const src = path.join(SRC, pack);
-  const dest = path.join(OUT, pack);
+let total = 0;
 
-  // A stale LevelDB directory will happily merge with new documents and keep
-  // deleted ones around, so always start from empty.
-  await rm(dest, { recursive: true, force: true });
+for (const file of modules) {
+  const pack = path.basename(file, ".mjs");
+  const module = await import(path.resolve(CONTENT, file));
 
-  await compilePack(src, dest, { log: true });
-  console.log(`Built ${pack}`);
+  if (typeof module.build !== "function") {
+    console.error(`${file} does not export build() — skipping.`);
+    continue;
+  }
+
+  const documents = module.build();
+
+  // The CLI compiles from a directory of files, so stage the documents in a
+  // temporary directory rather than committing generated JSON alongside the
+  // source it was generated from.
+  const staging = await mkdir(path.join(os.tmpdir(), `mantle-pack-${pack}`), { recursive: true })
+    .then(() => path.join(os.tmpdir(), `mantle-pack-${pack}`));
+  await rm(staging, { recursive: true, force: true });
+  await mkdir(staging, { recursive: true });
+
+  for (const document of documents) {
+    await writeFile(
+      path.join(staging, `${document._id}.json`),
+      `${JSON.stringify(document, null, 2)}\n`,
+      "utf8"
+    );
+  }
+
+  const destination = path.join(OUT, pack);
+
+  // A stale LevelDB directory merges rather than replaces, keeping documents
+  // that have since been deleted, so always start from empty.
+  await rm(destination, { recursive: true, force: true });
+  await compilePack(staging, destination);
+  await rm(staging, { recursive: true, force: true });
+
+  console.log(`  ${pack.padEnd(14)} ${String(documents.length).padStart(4)} documents`);
+  total += documents.length;
 }
 
-console.log(`\nCompiled ${packs.length} pack(s) into ${OUT}/`);
+console.log(`\nCompiled ${modules.length} pack(s), ${total} documents, into ${OUT}/`);
