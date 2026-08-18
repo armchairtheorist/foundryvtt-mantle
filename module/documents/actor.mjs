@@ -14,6 +14,14 @@
 import MantleRoll from "../dice/roll.mjs";
 import { buildPool, standardModifiers } from "../dice/pool.mjs";
 import { postRollCard } from "../chat/cards.mjs";
+import {
+  applyDamage,
+  applyStrain,
+  damageAffinity,
+  harmSeverity,
+  woundEffect,
+  burdenEffect
+} from "../rules/harm.mjs";
 
 export default class MantleActor extends Actor {
   /**
@@ -50,6 +58,8 @@ export default class MantleActor extends Actor {
    * @param {Record<string, string>} [options.ladder] - Effect ladder to resolve against
    * @param {"vitality"|"strain"} [options.ladderKind]
    * @param {number} [options.bonusDamage]
+   * @param {string[]} [options.damageTypes] - Carried to the card so Apply can resolve affinity
+   * @param {boolean} [options.penetrating]
    * @returns {Promise<ChatMessage>}
    */
   async rollAction({
@@ -59,12 +69,16 @@ export default class MantleActor extends Actor {
     modifiers = [],
     ladder = null,
     ladderKind = "vitality",
-    bonusDamage = 0
+    bonusDamage = 0,
+    damageTypes = [],
+    penetrating = false
   }) {
     const base = this.system.attributes?.[attribute] ?? 0;
     const pool = buildPool(base, modifiers);
 
-    const roll = MantleRoll.fromPool(pool, { ladder, ladderKind, bonusDamage });
+    const roll = MantleRoll.fromPool(pool, {
+      ladder, ladderKind, bonusDamage, damageTypes, penetrating
+    });
     await roll.evaluate();
 
     return postRollCard(roll, { actor: this, title, subtitle });
@@ -102,7 +116,9 @@ export default class MantleActor extends Actor {
       subtitle: game.i18n.localize(CONFIG.MANTLE.attributes[attribute].abbr),
       modifiers,
       ladder: weapon.system.damage,
-      ladderKind: "vitality"
+      ladderKind: "vitality",
+      damageTypes: Array.from(weapon.system.damageTypes ?? []),
+      penetrating: weapon.system.tags?.has?.("penetrating") ?? false
     });
   }
 
@@ -122,6 +138,148 @@ export default class MantleActor extends Actor {
       title: game.i18n.localize("MANTLE.Card.luckRoll"),
       subtitle: reason
     });
+  }
+
+  /* -------------------------------------------- */
+
+  /** Damage types this actor resists, from its own data. */
+  get resistances() {
+    return this.system.resistances ?? [];
+  }
+
+  /** Damage types this actor is vulnerable to. */
+  get weaknesses() {
+    return this.system.weaknesses ?? [];
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Apply an incoming hit, updating Guard and Vitality — or Strain — and
+   * reporting what happened so the caller can narrate it.
+   *
+   * Wounds and Burdens are counted here but not *created*: their severity needs
+   * a luck roll, which is a decision point rather than something to resolve
+   * silently. `takeWound` and `takeBurden` finish the job.
+   *
+   * @param {object} options
+   * @param {number} options.amount
+   * @param {string[]} [options.damageTypes]
+   * @param {boolean} [options.penetrating]
+   * @param {boolean} [options.strain] - Resolve on the Strain track instead
+   * @returns {Promise<object>}
+   */
+  async applyHarm({ amount, damageTypes = [], penetrating = false, strain = false }) {
+    const system = this.system;
+    const untyped = damageTypes.includes("untyped");
+    const affinity = untyped
+      ? "normal"
+      : damageAffinity(damageTypes, this.resistances, this.weaknesses);
+
+    if (strain) {
+      const result = applyStrain({
+        amount,
+        strain: system.strain.value,
+        maxStrain: system.strain.max,
+        burdenSlots: system.slots?.burden ?? system.burdenSlots ?? 0,
+        burdensTaken: system.burdens.length,
+        affinity
+      });
+
+      await this.update({ "system.strain.value": result.strainAfter });
+      return { ...result, strain: true, affinity };
+    }
+
+    const result = applyDamage({
+      amount,
+      guard: system.guard.value,
+      vitality: system.vitality.value,
+      maxVitality: system.vitality.max,
+      woundSlots: system.slots?.wound ?? system.woundSlots ?? 0,
+      woundsTaken: system.wounds.length,
+      penetrating,
+      untyped,
+      affinity
+    });
+
+    await this.update({
+      "system.guard.value": result.guardAfter,
+      "system.vitality.value": result.vitalityAfter
+    });
+
+    return { ...result, strain: false, affinity };
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Take a Wound: test your luck, work out the severity, and record it.
+   *
+   * @param {object} [options]
+   * @param {"mass"|"edge"|"mark"} [options.hitLocation] - A called shot floors the severity
+   * @returns {Promise<object|null>}
+   */
+  async takeWound({ hitLocation = "mass" } = {}) {
+    const system = this.system;
+    const slotsFilled = system.wounds.length + 1;
+    if (slotsFilled > (system.slots?.wound ?? 0)) return null;
+
+    const luck = await this.rollAction({
+      attribute: "luck",
+      title: game.i18n.localize("MANTLE.Card.woundSeverity"),
+      subtitle: this.name
+    });
+
+    const successes = luck?.rolls?.[0]?.resolve()?.successes ?? 0;
+    const severity = harmSeverity({ slotsFilled, luckSuccesses: successes, hitLocation });
+
+    // A Trauma Wound reads a 1d6 sub-table for what it actually does.
+    const sub = await new Roll("1d6").evaluate();
+    const effect = woundEffect(severity, slotsFilled, sub.total);
+
+    const wounds = [...system.wounds.map((w) => ({ ...w })), {
+      severity: effect.severity,
+      effect: effect.effect,
+      disabledGear: ""
+    }];
+
+    await this.update({ "system.wounds": wounds });
+    return { ...effect, luckSuccesses: successes, subRoll: sub.total };
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Take a Burden: as Wounds, but on the Strain track, and severity 2 or 3 also
+   * rolls an affliction that persists until the Burden is healed.
+   *
+   * @returns {Promise<object|null>}
+   */
+  async takeBurden() {
+    const system = this.system;
+    const slotsFilled = system.burdens.length + 1;
+    if (slotsFilled > (system.slots?.burden ?? 0)) return null;
+
+    const luck = await this.rollAction({
+      attribute: "luck",
+      title: game.i18n.localize("MANTLE.Card.burdenSeverity"),
+      subtitle: this.name
+    });
+
+    const successes = luck?.rolls?.[0]?.resolve()?.successes ?? 0;
+    const severity = harmSeverity({ slotsFilled, luckSuccesses: successes });
+
+    const sub = await new Roll("1d6").evaluate();
+    const effect = burdenEffect(severity, slotsFilled, sub.total);
+
+    const burdens = [...system.burdens.map((b) => ({ ...b })), {
+      severity: effect.severity,
+      effect: effect.effect,
+      affliction: effect.affliction ? game.i18n.localize(effect.affliction) : ""
+    }];
+
+    await this.update({ "system.burdens": burdens });
+    return { ...effect, luckSuccesses: successes, subRoll: sub.total };
   }
 
   /* -------------------------------------------- */

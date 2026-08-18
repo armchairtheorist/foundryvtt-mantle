@@ -97,6 +97,14 @@
       {{/each}}
     </div>
 
+    {{#if resolved.result.total}}
+      <div class="card-actions">
+        <button type="button" data-apply data-tooltip="{{localize 'MANTLE.Card.applyHint'}}">
+          <i class="fa-solid fa-crosshairs"></i> {{localize "MANTLE.Card.apply"}}
+        </button>
+      </div>
+    {{/if}}
+
     {{#if resolved.result.applied}}
       <div class="result-total">
         <span class="sum">

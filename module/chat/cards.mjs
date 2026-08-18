@@ -66,6 +66,8 @@ async function renderCard(roll, state) {
     pool: context.pool,
     ladder: context.ladder,
     ladderKind: context.ladderKind ?? "vitality",
+    damageTypes: context.damageTypes ?? [],
+    penetrating: context.penetrating ?? false,
     dice: roll.diceResults,
     resolved,
     // Chips are only worth showing when the dice genuinely read more than one
@@ -101,6 +103,12 @@ async function updateCard(message, changes) {
  * @param {HTMLElement} html
  */
 export function activateCardListeners(message, html) {
+  // Harm cards are posted separately from roll cards and carry only the
+  // Wound/Burden button, so they are bound first and independently.
+  for (const button of html.querySelectorAll(".mantle-harm-card [data-harm]")) {
+    button.addEventListener("click", () => takeHarm(button));
+  }
+
   const card = html.querySelector(".mantle-roll-card");
   if (!card) return;
 
@@ -124,6 +132,129 @@ export function activateCardListeners(message, html) {
       await updateCard(message, { allocationIndex: Number(chip.dataset.allocation) });
     });
   }
+
+  const apply = card.querySelector("[data-apply]");
+  if (apply) apply.addEventListener("click", () => applyToTargets(message));
+}
+
+/* -------------------------------------------- */
+
+/**
+ * Apply this card's result to whatever the user currently has targeted.
+ *
+ * Targets rather than selection: you target what you are shooting at, and
+ * select what you control. Applying to selection would routinely damage the
+ * attacker.
+ *
+ * @param {ChatMessage} message
+ */
+async function applyToTargets(message) {
+  const roll = message.rolls[0];
+  if (!(roll instanceof MantleRoll)) return;
+
+  const state = message.getFlag("mantle", "card") ?? {};
+  const resolved = roll.resolve(state);
+  const amount = resolved.result?.total;
+
+  if (!amount) {
+    ui.notifications.warn(game.i18n.localize("MANTLE.Card.nothingToApply"));
+    return;
+  }
+
+  const targets = Array.from(game.user.targets).map((token) => token.actor).filter(Boolean);
+  if (targets.length === 0) {
+    ui.notifications.warn(game.i18n.localize("MANTLE.Card.noTargets"));
+    return;
+  }
+
+  const context = roll.mantle;
+  const isStrain = (context.ladderKind ?? "vitality") === "strain";
+
+  for (const actor of targets) {
+    const result = await actor.applyHarm({
+      amount,
+      damageTypes: context.damageTypes ?? [],
+      penetrating: context.penetrating ?? false,
+      strain: isStrain
+    });
+
+    await reportHarm(actor, amount, result);
+  }
+}
+
+/* -------------------------------------------- */
+
+/**
+ * Announce what an applied hit did, including whether a Wound or Burden is now
+ * owed. The Wound itself is a separate button: its severity needs a luck roll,
+ * which is a decision point rather than something to resolve behind the scenes.
+ *
+ * @param {Actor} actor
+ * @param {number} amount
+ * @param {object} result
+ */
+async function reportHarm(actor, amount, result) {
+  const owed = result.strain ? result.burdensInflicted : result.woundsInflicted;
+  const lines = [];
+
+  if (result.affinity === "resistant") lines.push(game.i18n.localize("MANTLE.Card.resisted"));
+  if (result.affinity === "weak") lines.push(game.i18n.localize("MANTLE.Card.vulnerable"));
+  if (!result.strain && result.guardAbsorbed) {
+    lines.push(game.i18n.format("MANTLE.Card.guardAbsorbed", { amount: result.guardAbsorbed }));
+  }
+  if (result.defeated) lines.push(game.i18n.localize("MANTLE.Condition.defeated"));
+  if (result.lost) lines.push(game.i18n.localize("MANTLE.Condition.lost"));
+
+  const harm = result.strain ? "burden" : "wound";
+  const button =
+    owed > 0 && !result.defeated && !result.lost
+      ? `<button type="button" data-harm="${harm}" data-actor="${actor.id}">
+           ${game.i18n.format(`MANTLE.Card.take${harm === "wound" ? "Wound" : "Burden"}`, { count: owed })}
+         </button>`
+      : "";
+
+  await ChatMessage.create({
+    content: `<div class="mantle mantle-harm-card">
+        <p><strong>${actor.name}</strong> ${game.i18n.format(
+          result.strain ? "MANTLE.Card.tookStrain" : "MANTLE.Card.tookDamage",
+          { amount }
+        )}</p>
+        ${lines.length ? `<p class="notes">${lines.join(" · ")}</p>` : ""}
+        ${button}
+      </div>`,
+    speaker: ChatMessage.getSpeaker({ actor })
+  });
+}
+
+/* -------------------------------------------- */
+
+/**
+ * Resolve an owed Wound or Burden.
+ *
+ * The actor is read from the button that was actually clicked. Looking it up by
+ * selector would find the first matching button anywhere in the chat log, and
+ * wound the wrong character as soon as two harm cards are on screen.
+ *
+ * @param {HTMLElement} button
+ */
+async function takeHarm(button) {
+  const kind = button.dataset.harm;
+  const actor = game.actors.get(button.dataset.actor ?? "");
+  if (!actor) return;
+
+  // A Wound is taken once; disable immediately so a double-click cannot take two.
+  button.disabled = true;
+
+  const result = kind === "wound" ? await actor.takeWound() : await actor.takeBurden();
+  if (!result) return;
+
+  await ChatMessage.create({
+    content: `<div class="mantle mantle-harm-card">
+        <p><strong>${actor.name}</strong> — ${game.i18n.localize(result.label)}</p>
+        <p class="notes">${result.effect}${result.affliction ? ` · ${result.affliction}` : ""}</p>
+      </div>`,
+    speaker: ChatMessage.getSpeaker({ actor })
+  });
 }
 
 /* -------------------------------------------- */

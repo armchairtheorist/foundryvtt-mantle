@@ -904,3 +904,43 @@
     }
   }
 }
+
+/* -------------------------------------------- */
+/*  Harm cards                                   */
+/* -------------------------------------------- */
+
+.mantle-roll-card .card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+
+  button {
+    font-size: 0.85em;
+    padding: 2px 6px;
+    line-height: 1.5;
+  }
+}
+
+.mantle-harm-card {
+  p {
+    margin: 2px 0;
+  }
+
+  .notes {
+    font-size: 0.85em;
+    color: var(--mantle-muted);
+  }
+
+  /* Taking a Wound is a decision, not a consequence: the button is deliberate,
+     and disables itself once used so a stray double-click cannot take two. */
+  button {
+    margin-top: 4px;
+    font-size: 0.85em;
+    padding: 2px 6px;
+    line-height: 1.5;
+
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+}
