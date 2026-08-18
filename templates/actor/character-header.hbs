@@ -45,6 +45,7 @@
                {{#unless editable}}disabled{{/unless}}>
         <span class="max">/ {{system.vitality.max}}</span>
       </div>
+      <span class="note"></span>
     </div>
 
     <div class="resource strain">
@@ -54,6 +55,7 @@
                {{#unless editable}}disabled{{/unless}}>
         <span class="max">/ {{system.strain.max}}</span>
       </div>
+      <span class="note"></span>
     </div>
 
     {{!-- Guard can exceed its maximum. When it does, the start-of-turn refresh
@@ -65,7 +67,9 @@
                {{#unless editable}}disabled{{/unless}}>
         <span class="max">/ {{system.guard.max}}</span>
       </div>
-      {{#if system.overGuard}}<span class="badge">{{localize "MANTLE.Sheet.overGuard"}}</span>{{/if}}
+      <span class="note">
+        {{#if system.overGuard}}{{localize "MANTLE.Sheet.overGuard"}}{{/if}}
+      </span>
     </div>
 
     <div class="resource vigor">
@@ -75,7 +79,7 @@
                {{#unless editable}}disabled{{/unless}}>
         <span class="max">/ {{system.vigor.max}}</span>
       </div>
-      <span class="refresh" data-tooltip="{{localize 'MANTLE.Sheet.vigorRefreshHint'}}">
+      <span class="note refresh" data-tooltip="{{localize 'MANTLE.Sheet.vigorRefreshHint'}}">
         +{{system.vigor.refresh}}/{{localize "MANTLE.Sheet.turn"}}
       </span>
     </div>
@@ -87,8 +91,13 @@
                {{#unless editable}}disabled{{/unless}}>
         <span class="max">/ {{system.resolve.max}}</span>
       </div>
+      <span class="note"></span>
     </div>
+  </div>
 
+  {{!-- Actions sit on their own row rather than inside the resource grid, where
+        a button would otherwise occupy a resource-sized cell. --}}
+  <div class="header-actions">
     <button type="button" class="test-luck" data-action="testLuck"
             data-tooltip="{{localize 'MANTLE.Sheet.testLuckHint'}}">
       <i class="fa-solid fa-clover"></i> {{localize "MANTLE.Sheet.testLuck"}}

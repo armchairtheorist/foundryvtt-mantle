@@ -81,6 +81,23 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
 
   /* -------------------------------------------- */
 
+  /**
+   * Hand each tab part its own tab descriptor.
+   *
+   * Without this the section never receives the `active` class, and Foundry's
+   * own stylesheet hides every inactive tab — which renders the whole sheet
+   * body blank rather than just the unselected tabs.
+   *
+   * @override
+   */
+  async _preparePartContext(partId, context, options) {
+    const part = await super._preparePartContext(partId, context, options);
+    if (partId in part.tabs) part.tab = part.tabs[partId];
+    return part;
+  }
+
+  /* -------------------------------------------- */
+
   /** @returns {Record<string, {id: string, group: string, label: string, cssClass: string}>} */
   #getTabs() {
     const active = this.tabGroups.primary;

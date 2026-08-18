@@ -2,7 +2,7 @@
   Main tab: attributes grouped under their cores, the derived stats those cores
   produce, and the Wound and Burden tracks.
 --}}
-<section class="tab main" data-tab="main" data-group="primary">
+<section class="tab main {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
 
   <div class="cores">
     {{#each attributes as |core|}}
