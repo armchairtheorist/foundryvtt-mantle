@@ -1,0 +1,85 @@
+{{!--
+  The Cast dialog.
+
+  Cost and penalty stay visible while the caster shapes the spell, because in
+  Mantle those two numbers are the decision — reaching further costs Vigor, and
+  covering more ground costs accuracy too.
+--}}
+<form class="mantle cast-dialog">
+
+  <div class="pairing">
+    <label>
+      {{localize "MANTLE.Sheet.resonances"}}
+      <select name="resonance">
+        {{#each resonances as |resonance|}}
+          <option value="{{resonance.id}}">{{resonance.name}}</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <label>
+      {{localize "MANTLE.Sheet.arts"}}
+      <select name="art">
+        {{#each arts as |art|}}
+          <option value="{{art.id}}">{{art.name}}</option>
+        {{/each}}
+      </select>
+    </label>
+  </div>
+
+  <p class="hint">{{localize "MANTLE.Cast.pairingHint"}}</p>
+
+  <div class="shaping">
+    <div class="shape-row">
+      <label>{{localize "MANTLE.Shaping.range"}}</label>
+      <input type="number" name="range" value="1" min="1" max="8">
+      <span class="readout"><span data-range>0</span> {{localize "MANTLE.Cast.squares"}}</span>
+    </div>
+
+    <div class="shape-row">
+      <label>{{localize "MANTLE.Shaping.duration"}}</label>
+      <input type="number" name="duration" value="1" min="1" max="10">
+      <span class="readout"><span data-duration>1</span> {{localize "MANTLE.Cast.rounds"}}</span>
+    </div>
+
+    <div class="shape-row">
+      <label>{{localize "MANTLE.Shaping.area"}}</label>
+      <input type="number" name="area" value="1" min="1" max="4">
+      <span class="readout">
+        {{#each config.shaping.area.steps as |step|}}{{/each}}
+        {{localize "MANTLE.Cast.areaHint"}}
+      </span>
+    </div>
+
+    {{#if specials.length}}
+      {{!-- Special shapes replace area shaping, and each is gated behind its
+            own mastery, so only unlocked ones appear. --}}
+      <div class="shape-row">
+        <label>{{localize "MANTLE.Cast.specialShape"}}</label>
+        <select name="special">
+          <option value="">{{localize "MANTLE.Field.none"}}</option>
+          {{#each specials as |special|}}
+            <option value="{{special.key}}">{{localize special.label}}</option>
+          {{/each}}
+        </select>
+        <input type="number" name="specialSize" value="1" min="1" max="10"
+               data-tooltip="{{localize 'MANTLE.Cast.specialSizeHint'}}">
+      </div>
+    {{/if}}
+  </div>
+
+  <div class="cast-summary">
+    <div class="figure cost">
+      <span class="label">{{localize "MANTLE.Resource.vigor"}}</span>
+      <span class="value" data-cost>2</span>
+    </div>
+    <div class="figure penalty">
+      <span class="label">{{localize "MANTLE.Cast.penalty"}}</span>
+      <span class="value" data-penalty>—</span>
+    </div>
+    <div class="figure graze">
+      <span class="label">{{localize "MANTLE.Cast.grazeStrain"}}</span>
+      <span class="value" data-graze>1</span>
+    </div>
+  </div>
+</form>

@@ -958,3 +958,115 @@
     }
   }
 }
+
+/* -------------------------------------------- */
+/*  Cast dialog                                  */
+/* -------------------------------------------- */
+
+.mantle .cast-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+
+  button { flex: 0 0 auto; }
+
+  .casting-attribute {
+    font-size: 0.85em;
+    color: var(--mantle-muted);
+  }
+
+  .warn {
+    font-size: 0.8em;
+    color: var(--mantle-warning);
+  }
+}
+
+.mantle.cast-dialog,
+.cast-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 380px;
+
+  .pairing {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 0.8em;
+      text-transform: uppercase;
+      color: var(--mantle-muted);
+    }
+  }
+
+  .shaping {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .shape-row {
+    display: grid;
+    grid-template-columns: 90px 60px 1fr;
+    gap: 8px;
+    align-items: center;
+
+    label {
+      font-size: 0.85em;
+    }
+
+    .readout {
+      font-size: 0.8em;
+      color: var(--mantle-muted);
+    }
+
+    /* A dimension the Art fixes is disabled rather than hidden, so it is clear
+       the choice exists and simply is not available here. */
+    &.fixed {
+      opacity: 0.45;
+    }
+  }
+
+  /* The two numbers that drive every shaping decision stay large and adjacent. */
+  .cast-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 6px;
+    border: 1px solid var(--mantle-border);
+    border-radius: 4px;
+
+    .figure {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .label {
+      font-size: 0.7em;
+      text-transform: uppercase;
+      color: var(--mantle-muted);
+    }
+
+    .value {
+      font-size: 1.4em;
+      font-weight: 800;
+    }
+
+    .cost .value { color: var(--mantle-vigor); }
+    .penalty .value { color: var(--mantle-vitality); }
+    .graze .value { color: var(--mantle-strain); }
+
+    /* Casting costs Vigor you may not have — worth knowing before the roll. */
+    &.unaffordable {
+      border-color: var(--mantle-warning);
+
+      .cost .value { color: var(--mantle-warning); }
+    }
+  }
+}

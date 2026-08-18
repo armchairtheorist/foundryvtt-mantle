@@ -149,6 +149,20 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
     };
 
     this.slotsUsed = this.#countSlotUsage();
+
+    // Which attribute this character casts on, granted by an archetype at a
+    // rank they have actually reached. Blank means they are not a caster.
+    const caster = archetypes.find(
+      (a) => a.system.casting?.attribute && a.system.rank >= (a.system.casting.rank ?? 1)
+    );
+    this.castingAttribute = caster?.system.casting.attribute ?? "";
+    this.isCaster = Boolean(this.castingAttribute);
+
+    // Casting without a focus costs a die, unless Inner Focus covers it.
+    this.hasFocus = this.parent.items.some((i) => i.type === "focus" && i.system.equipped);
+    this.innerFocus = this.parent.items.some(
+      (i) => i.type === "mastery" && i.system.equipped && i.name === "Inner Focus"
+    );
   }
 
   /* -------------------------------------------- */

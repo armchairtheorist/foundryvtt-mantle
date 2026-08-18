@@ -10,6 +10,23 @@
 
   {{#if (or items.arts.length items.resonances.length)}}
 
+    {{#if system.isCaster}}
+      <div class="cast-bar">
+        <button type="button" data-action="castSpell">
+          <i class="fa-solid fa-wand-sparkles"></i> {{localize "MANTLE.Cast.title"}}
+        </button>
+        <span class="casting-attribute">
+          {{localize "MANTLE.Cast.castsOn"}}
+          {{localize (lookup (lookup config.attributes system.castingAttribute) "abbr")}}
+        </span>
+        {{#unless system.hasFocus}}
+          {{#unless system.innerFocus}}
+            <span class="warn">{{localize "MANTLE.Cast.noFocus"}}</span>
+          {{/unless}}
+        {{/unless}}
+      </div>
+    {{/if}}
+
     <div class="section arts">
       <h3>{{localize "MANTLE.Sheet.arts"}}</h3>
       {{#each items.arts as |art|}}

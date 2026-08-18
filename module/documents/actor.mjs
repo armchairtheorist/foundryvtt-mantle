@@ -14,6 +14,7 @@
 import MantleRoll from "../dice/roll.mjs";
 import { buildPool, standardModifiers } from "../dice/pool.mjs";
 import { postRollCard } from "../chat/cards.mjs";
+import { promptCast } from "../apps/cast-dialog.mjs";
 import {
   applyDamage,
   applyStrain,
@@ -138,6 +139,69 @@ export default class MantleActor extends Actor {
       title: game.i18n.localize("MANTLE.Card.luckRoll"),
       subtitle: reason
     });
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Cast a spell: shape it, pay for it, and resolve it on the Resonance's ladder.
+   *
+   * The Vigor cost is spent whether or not the roll lands — the effort is made
+   * either way — and a graze additionally costs Strain, more if the caster
+   * reached beyond the Art's basic shape.
+   *
+   * @returns {Promise<ChatMessage|null>}
+   */
+  async castSpell() {
+    if (!this.system.isCaster) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Cast.notACaster"));
+      return null;
+    }
+
+    const choice = await promptCast(this);
+    if (!choice) return null;
+
+    const { art, resonance, cast } = choice;
+    const entry = (resonance.system.arts ?? []).find((e) => e.art === art.name);
+    if (!entry) return null;
+
+    if (cast.vigorCost > this.system.vigor.value) {
+      ui.notifications.warn(
+        game.i18n.format("MANTLE.Cast.notEnoughVigor", { cost: cast.vigorCost })
+      );
+      return null;
+    }
+
+    await this.update({ "system.vigor.value": this.system.vigor.value - cast.vigorCost });
+
+    // The Resonance decides which of the Art's two ladders this pairing uses.
+    // "both" means the caster chooses; default to Vitality, which the card's
+    // ladder display makes obvious enough to correct by hand.
+    const ladderKind = entry.ladder === "strain" ? "strain" : "vitality";
+    const ladder = ladderKind === "strain" ? art.system.strainLadder : art.system.vitalityLadder;
+
+    const modifiers = [];
+    if (cast.penalty) modifiers.push({ label: "MANTLE.Cast.shapingPenalty", value: cast.penalty });
+
+    const message = await this.rollAction({
+      attribute: this.system.castingAttribute,
+      title: `${resonance.name} ${art.name}`,
+      subtitle: game.i18n.format("MANTLE.Cast.subtitle", { cost: cast.vigorCost }),
+      modifiers,
+      ladder,
+      ladderKind,
+      bonusDamage: entry.bonusDamage ?? 0,
+      damageTypes: Array.from(entry.tags ?? []).filter((tag) => tag in CONFIG.MANTLE.damageTypes),
+      penetrating: (entry.tags ?? []).includes("penetrating")
+    });
+
+    // Grazing costs the caster Strain, and more if the spell was shaped.
+    const resolved = message?.rolls?.[0]?.resolve();
+    if (resolved?.isGraze) {
+      await this.applyHarm({ amount: cast.grazeStrain, strain: true });
+    }
+
+    return message;
   }
 
   /* -------------------------------------------- */

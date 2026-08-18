@@ -53,6 +53,7 @@ const ANCESTRIES = [
   {
     name: "Elf",
     spd: 6, sen: 15, size: "1M",
+    casting: { attribute: "pre", rank: 3 },
     domains: ["general", "elf"],
     ranks: [
       rank(1, "Low-Light Vision", "Treat Dim Light as Bright Light, and Darkness as Dim Light.", { strain: 2 }),
@@ -108,6 +109,7 @@ const PATHS = [
   {
     name: "Scholar",
     prerequisites: "REA 2",
+    casting: { attribute: "rea", rank: 1 },
     domains: ["magic", "scholar"],
     ranks: [
       rank(1, "Spellcasting", "You may perform the Cast a Spell maneuver, using REA as the spellcasting attribute.", { strain: 1 }),
@@ -123,6 +125,7 @@ const PATHS = [
   {
     name: "Channeler",
     prerequisites: "INS 2",
+    casting: { attribute: "ins", rank: 1 },
     domains: ["magic", "channeler"],
     ranks: [
       rank(1, "Spellcasting", "You may perform the Cast a Spell maneuver, using INS as the spellcasting attribute.", { resolve: 1 }),
@@ -159,6 +162,7 @@ export function build() {
         maxRank: 3,
         domains: row.domains,
         prerequisites: row.prerequisites ?? "",
+        casting: row.casting ?? { attribute: "", rank: 1 },
         spd: row.spd ?? 5,
         sen: row.sen ?? 10,
         size: row.size ?? "1M",

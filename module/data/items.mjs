@@ -87,6 +87,16 @@ export class ArchetypeData extends TypeDataModel {
 
       prerequisites: text(),
 
+      /**
+       * Spellcasting granted by this archetype, if any. Scholars cast on REA,
+       * Channelers on INS, and an Elf gains innate casting on PRE — but only at
+       * rank 3, so the grant carries the rank it unlocks at.
+       */
+      casting: new fields.SchemaField({
+        attribute: new fields.StringField({ required: true, blank: true, initial: "" }),
+        rank: count(1, { min: 1 })
+      }),
+
       // Ancestry archetypes alone set these; they are ignored on path archetypes.
       spd: count(5),
       sen: count(10),
