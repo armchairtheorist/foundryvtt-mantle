@@ -379,9 +379,15 @@
     flex-direction: column;
     align-items: center;
 
+    /* The abbreviation is the roll button, so it has to be big enough to hit
+       comfortably. At 0.7em it was a three-character target barely taller than
+       the cursor. */
     label {
-      font-size: 0.7em;
-      color: var(--mantle-muted);
+      font-size: 0.95em;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 2px 8px;
+      color: inherit;
     }
 
     input {
@@ -1112,18 +1118,75 @@
 /*  Rollable attributes                          */
 /* -------------------------------------------- */
 
-/* The attribute abbreviation is the roll button. It has to read as clickable
-   without becoming louder than the number beside it, which is the thing the
-   player actually reads. */
+/* The attribute abbreviation is the roll button, so it gets a real hit target
+   and a border that says so — a bare text label reads as a caption, and players
+   were not finding it. */
 .mantle .attribute label.rollable {
   cursor: pointer;
-  border-radius: 3px;
-  padding: 0 3px;
-  transition: background-color 120ms ease;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  transition: background-color 120ms ease, border-color 120ms ease;
 
   &:hover {
     background: var(--mantle-panel);
-    text-decoration: underline;
+    border-color: var(--mantle-border);
+  }
+}
+
+/* -------------------------------------------- */
+/*  Mastery boards                               */
+/* -------------------------------------------- */
+
+/* Which board pays for a mastery is a live decision, not a label: click to move
+   it between its own board and a wildcard slot. */
+.mantle .entry.mastery .board {
+  cursor: pointer;
+  border: 1px solid var(--mantle-border);
+  border-radius: 3px;
+  padding: 0 5px;
+  font-size: 0.7em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--mantle-panel);
+  }
+
+  /* A mastery parked on wildcard is the interesting case — it is the one that
+     took a slot the player could have spent elsewhere. */
+  &.wildcard {
+    border-color: var(--mantle-valor);
+    color: var(--mantle-valor);
+    font-weight: 700;
+  }
+}
+
+/* -------------------------------------------- */
+/*  Harm track controls                          */
+/* -------------------------------------------- */
+
+.mantle .harm-track {
+  /* The h3 is space-between, so pushing the count right keeps it next to the
+     add control rather than stranded in the middle of the rule. */
+  h3 .slots {
+    margin-left: auto;
+  }
+
+  h3 .control.add {
+    cursor: pointer;
+    color: var(--mantle-muted);
+
+    &:hover { color: var(--mantle-vitality); }
+  }
+
+  .harm-entry .control {
+    margin-left: auto;
+    cursor: pointer;
+    color: var(--mantle-muted);
+    font-size: 0.85em;
+
+    &:hover { color: var(--mantle-vitality); }
   }
 }
 
@@ -1215,5 +1278,151 @@
         color: var(--mantle-warning);
       }
     }
+  }
+}
+
+/* -------------------------------------------- */
+/*  Adversary sheet                              */
+/* -------------------------------------------- */
+
+/* One scrolling stat block rather than tabs: a GM reads an enemy the way the
+   catalog prints it, and hiding the maneuvers behind a tab means clicking
+   mid-turn to find the thing you are about to roll. */
+.mantle-header.adversary {
+  display: grid;
+  grid-template-areas:
+    "portrait identity resources"
+    "portrait actions  actions";
+  grid-template-columns: 64px 1fr auto;
+  gap: 6px 10px;
+  align-items: start;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--mantle-border);
+
+  .portrait { grid-area: portrait; }
+  .identity { grid-area: identity; }
+  .resources { grid-area: resources; }
+  .header-actions { grid-area: actions; }
+
+  .class-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    margin: 3px 0;
+  }
+
+  /* Challenge class is the first thing a GM checks, so it is colour-coded by
+     how much of the evening the creature is going to take up. */
+  .badge {
+    border: 1px solid var(--mantle-border);
+    border-radius: 3px;
+    padding: 0 5px;
+    font-size: 0.7em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+
+    &.class-grunt { border-color: var(--mantle-muted); color: var(--mantle-muted); }
+    &.class-regular { border-color: var(--mantle-guard); color: var(--mantle-guard); }
+    &.class-elite { border-color: var(--mantle-vigor); color: var(--mantle-vigor); }
+    &.class-champion { border-color: var(--mantle-warning); color: var(--mantle-warning); }
+    &.class-nemesis { border-color: var(--mantle-vitality); color: var(--mantle-vitality); }
+
+    &.patterns { border-color: var(--mantle-valor); color: var(--mantle-valor); }
+    &.no-roll { border-style: dashed; color: var(--mantle-muted); }
+  }
+
+  .scaling {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8em;
+      color: var(--mantle-muted);
+    }
+  }
+
+  .warn {
+    margin: 4px 0 0;
+    font-size: 0.8em;
+    color: var(--mantle-warning);
+  }
+
+  .resources {
+    display: flex;
+    gap: 8px;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    .economy {
+      font-size: 0.8em;
+      color: var(--mantle-muted);
+    }
+
+    .tier-bonus { color: var(--mantle-valor); }
+  }
+}
+
+.mantle .adversary-block {
+  /* Signature maneuvers are the ones that end fights; they should be findable
+     without reading. */
+  .entry.maneuver.signature {
+    border-left: 3px solid var(--mantle-valor);
+    padding-left: 5px;
+  }
+
+  .entry.maneuver .pool {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tag.telegraphed {
+    border-color: var(--mantle-valor);
+    color: var(--mantle-valor);
+  }
+
+  .tag.opposed {
+    border-style: dashed;
+  }
+
+  .entry.location,
+  .entry.ability {
+    display: grid;
+    gap: 6px;
+    align-items: baseline;
+    padding: 3px 5px;
+    font-size: 0.85em;
+    border-bottom: 1px solid rgb(from var(--mantle-border) r g b / 30%);
+  }
+
+  .entry.location {
+    grid-template-columns: 8em 3em 1fr 1fr auto;
+
+    .name { font-weight: 600; }
+    .penalty { color: var(--mantle-muted); font-variant-numeric: tabular-nums; }
+    .wound-effect { color: var(--mantle-vitality); }
+
+    .control {
+      cursor: pointer;
+      color: var(--mantle-muted);
+
+      &:hover { color: var(--mantle-vitality); }
+    }
+  }
+
+  .entry.ability {
+    grid-template-columns: 12em 1fr;
+
+    .name { font-weight: 600; }
   }
 }

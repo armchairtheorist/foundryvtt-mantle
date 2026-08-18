@@ -23,6 +23,10 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     actions: {
       toggleSkill: MantleCharacterSheet.#onToggleSkill,
       toggleEquipped: MantleCharacterSheet.#onToggleEquipped,
+      cycleBoard: MantleCharacterSheet.#onCycleBoard,
+      takeWound: MantleCharacterSheet.#onTakeWound,
+      takeBurden: MantleCharacterSheet.#onTakeBurden,
+      clearHarm: MantleCharacterSheet.#onClearHarm,
       editItem: MantleCharacterSheet.#onEditItem,
       deleteItem: MantleCharacterSheet.#onDeleteItem,
       refreshTurn: MantleCharacterSheet.#onRefreshTurn,
@@ -284,6 +288,52 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
   }
 
   /**
+   * Move a mastery between its own board and a wildcard slot.
+   *
+   * A mastery may only sit on its own core's board or on wildcard — a BODY
+   * mastery cannot go into MIND — so there are exactly two destinations, and a
+   * click that cycles between them beats a dropdown of mostly-illegal options.
+   *
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onCycleBoard(_event, target) {
+    const item = this.#itemFor(target);
+    if (item?.type !== "mastery") return;
+
+    const own = item.system.masteryType;
+    const next = item.system.board === "wildcard" ? own : "wildcard";
+    await item.update({ "system.slotBoard": next });
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   */
+  static async #onTakeWound() {
+    await this.document.takeWound();
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   */
+  static async #onTakeBurden() {
+    await this.document.takeBurden();
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onClearHarm(_event, target) {
+    const track = target.dataset.track;
+    const index = Number(target.dataset.index);
+    if (track !== "wounds" && track !== "burdens") return;
+    await this.document.clearHarm(track, index);
+  }
+
+  /**
    * @this {MantleCharacterSheet}
    * @param {PointerEvent} _event
    * @param {HTMLElement} target
@@ -333,7 +383,17 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
    */
   static async #onRollAttribute(_event, target) {
     const attribute = target.dataset.attribute;
-    if (attribute) await this.document.rollAttributeAction(attribute);
+    if (!attribute) return;
+
+    // Testing your luck takes no modifiers of any kind — no skills, no
+    // Impaired, no Heroic Feats — so offering the modifier dialog for LUCK
+    // would invite exactly the roll the rules forbid. Send it straight through.
+    if (attribute === "luck") {
+      await this.document.testLuck();
+      return;
+    }
+
+    await this.document.rollAttributeAction(attribute);
   }
 
   /**

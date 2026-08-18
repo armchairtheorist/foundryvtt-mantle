@@ -50,11 +50,21 @@
       <h3>
         {{localize "MANTLE.Sheet.wounds"}}
         <span class="slots">{{system.wounds.length}} / {{system.slots.wound}}</span>
+        {{!-- Harm arrives from a chat card most of the time, but not always:
+              a trap, a fall, or a GM ruling has no card behind it. --}}
+        <a class="control add" data-action="takeWound"
+           data-tooltip="{{localize 'MANTLE.Harm.takeWoundHint'}}">
+          <i class="fa-solid fa-plus"></i>
+        </a>
       </h3>
       {{#each system.wounds as |wound index|}}
         <div class="harm-entry severity-{{wound.severity}}">
           <span class="severity">{{localize (lookup (lookup ../config.woundSeverities wound.severity) "label")}}</span>
           <span class="effect">{{wound.effect}}</span>
+          <a class="control" data-action="clearHarm" data-track="wounds" data-index="{{index}}"
+             data-tooltip="{{localize 'MANTLE.Harm.clearWound'}}">
+            <i class="fa-solid fa-xmark"></i>
+          </a>
         </div>
       {{else}}
         <p class="empty">{{localize "MANTLE.Sheet.noWounds"}}</p>
@@ -65,12 +75,20 @@
       <h3>
         {{localize "MANTLE.Sheet.burdens"}}
         <span class="slots">{{system.burdens.length}} / {{system.slots.burden}}</span>
+        <a class="control add" data-action="takeBurden"
+           data-tooltip="{{localize 'MANTLE.Harm.takeBurdenHint'}}">
+          <i class="fa-solid fa-plus"></i>
+        </a>
       </h3>
       {{#each system.burdens as |burden index|}}
         <div class="harm-entry severity-{{burden.severity}}">
           <span class="severity">{{localize (lookup (lookup ../config.burdenSeverities burden.severity) "label")}}</span>
           <span class="effect">{{burden.effect}}</span>
           {{#if burden.affliction}}<span class="affliction">{{burden.affliction}}</span>{{/if}}
+          <a class="control" data-action="clearHarm" data-track="burdens" data-index="{{index}}"
+             data-tooltip="{{localize 'MANTLE.Harm.clearBurden'}}">
+            <i class="fa-solid fa-xmark"></i>
+          </a>
         </div>
       {{else}}
         <p class="empty">{{localize "MANTLE.Sheet.noBurdens"}}</p>

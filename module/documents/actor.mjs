@@ -168,6 +168,61 @@ export default class MantleActor extends Actor {
   /* -------------------------------------------- */
 
   /**
+   * Roll one of an adversary's maneuvers.
+   *
+   * The pool is authored on the stat block rather than built from attributes,
+   * and the tier of play adds to it — that is the whole of enemy scaling on the
+   * roll side. A Grunt does not roll at all: every action roll it makes counts
+   * as exactly one success, so the card is posted with that result rather than
+   * with dice nobody needed to throw.
+   *
+   * @param {number} index - Which maneuver, by position on the stat block
+   * @param {object} [options]
+   * @param {number} [options.situational]
+   * @returns {Promise<ChatMessage|null>}
+   */
+  async rollManeuver(index, { situational = 0 } = {}) {
+    const maneuver = this.system.maneuvers?.[index];
+    if (!maneuver) return null;
+
+    const tags = toArray(maneuver.tags);
+    const strain = tags.includes("strain") || /strain/i.test(maneuver.ladder?.[1] ?? "");
+
+    const modifiers = [];
+    if (this.system.diceBonus) {
+      modifiers.push({ label: "MANTLE.Adversary.tierBonus", value: this.system.diceBonus });
+    }
+    if (situational) modifiers.push({ label: "MANTLE.Modifier.situational", value: situational });
+
+    const subtitle = [
+      maneuver.opposedBy
+        ? game.i18n.format("MANTLE.Adversary.opposedBy", { by: maneuver.opposedBy })
+        : "",
+      maneuver.telegraphed ? game.i18n.localize("MANTLE.Adversary.telegraphed") : ""
+    ]
+      .filter(Boolean)
+      .join(" · ");
+
+    // The authored pool already includes the creature's attribute, so the roll
+    // is built from a zero base plus the pool as a modifier rather than being
+    // routed through `system.attributes` like a character's.
+    const pool = buildPool(maneuver.pool, modifiers);
+    const roll = MantleRoll.fromPool(pool, {
+      ladder: maneuver.ladder,
+      ladderKind: strain ? "strain" : "vitality",
+      damageTypes: tags.filter((tag) => tag in MANTLE.damageTypes),
+      penetrating: tags.includes("penetrating"),
+      fixedSuccesses: this.system.rollsDice ? null : 1,
+      noPatterns: !this.system.readsPatterns
+    });
+    await roll.evaluate();
+
+    return postRollCard(roll, { actor: this, title: maneuver.name, subtitle });
+  }
+
+  /* -------------------------------------------- */
+
+  /**
    * Open the action roll dialog for an attribute, then roll what it returns.
    *
    * @param {string} attribute
@@ -426,9 +481,17 @@ export default class MantleActor extends Actor {
    * @returns {Promise<object|null>}
    */
   async takeWound({ hitLocation = "mass" } = {}) {
+    if (this.type === "adversary") return this.#takeAdversaryHarm("wounds", hitLocation);
+
     const system = this.system;
     const slotsFilled = system.wounds.length + 1;
-    if (slotsFilled > (system.slots?.wound ?? 0)) return null;
+
+    // No slot left is not a no-op: the rules say the character is Defeated.
+    // Saying so is the point — silently doing nothing reads as a broken button.
+    if (slotsFilled > (system.slots?.wound ?? 0)) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Harm.noWoundSlots"));
+      return null;
+    }
 
     const luck = await this.rollAction({
       attribute: "luck",
@@ -462,9 +525,15 @@ export default class MantleActor extends Actor {
    * @returns {Promise<object|null>}
    */
   async takeBurden() {
+    if (this.type === "adversary") return this.#takeAdversaryHarm("burdens");
+
     const system = this.system;
     const slotsFilled = system.burdens.length + 1;
-    if (slotsFilled > (system.slots?.burden ?? 0)) return null;
+
+    if (slotsFilled > (system.slots?.burden ?? 0)) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Harm.noBurdenSlots"));
+      return null;
+    }
 
     const luck = await this.rollAction({
       attribute: "luck",
@@ -486,6 +555,71 @@ export default class MantleActor extends Actor {
 
     await this.update({ "system.burdens": burdens });
     return { ...effect, luckSuccesses: successes, subRoll: sub.total };
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Wounds and Burdens for adversaries, which work quite differently.
+   *
+   * No luck roll and no severity: a creature that takes one gains Impaired N,
+   * where N is the number of slots now filled — unless its stat block names a
+   * Wound Effect for the location that was struck, in which case that effect
+   * replaces the condition entirely. Afflictions do not apply at all, since an
+   * adversary's behaviour is the GM's to play either way.
+   *
+   * @param {"wounds"|"burdens"} track
+   * @param {string} [hitLocation] - Which location was struck, by name
+   * @returns {Promise<object|null>}
+   */
+  async #takeAdversaryHarm(track, hitLocation = "") {
+    const system = this.system;
+    const slots = track === "wounds" ? system.slots.wound : system.slots.burden;
+    const filled = system[track].length + 1;
+
+    if (filled > slots) {
+      ui.notifications.warn(
+        game.i18n.localize(
+          track === "wounds" ? "MANTLE.Harm.noWoundSlots" : "MANTLE.Harm.noBurdenSlots"
+        )
+      );
+      return null;
+    }
+
+    const location = (system.hitLocations ?? []).find(
+      (entry) => entry.name.toLowerCase() === hitLocation.toLowerCase()
+    );
+    const effect =
+      track === "wounds" && location?.woundEffect
+        ? location.woundEffect
+        : game.i18n.format("MANTLE.Condition.impairedN", { count: filled });
+
+    const entries = [...system[track].map((e) => ({ ...e })), { effect }];
+    await this.update({ [`system.${track}`]: entries });
+
+    return { effect, label: `MANTLE.Sheet.${track}` };
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Remove one Wound or Burden by index.
+   *
+   * Healing in Mantle costs Resolve equal to the severity, and happens during
+   * an interlude rather than mid-fight — but downtime, story events, and plain
+   * GM fiat all clear harm too, so this takes no payment. What it costs is a
+   * table decision, not a rule the sheet can enforce.
+   *
+   * @param {"wounds"|"burdens"} track
+   * @param {number} index
+   * @returns {Promise<this|null>}
+   */
+  async clearHarm(track, index) {
+    const entries = this.system[track] ?? [];
+    if (index < 0 || index >= entries.length) return null;
+
+    const kept = entries.filter((_entry, position) => position !== index).map((e) => ({ ...e }));
+    return this.update({ [`system.${track}`]: kept });
   }
 
   /* -------------------------------------------- */

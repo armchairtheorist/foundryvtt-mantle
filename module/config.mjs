@@ -111,6 +111,18 @@ MANTLE.archetypeKinds = {
   specialist: { label: "MANTLE.ArchetypeKind.specialist", defaultMaxRank: 3 }
 };
 
+/**
+ * The mastery boards a mastery can be slotted into. Three mirror the cores; the
+ * wildcard board takes a mastery of any type, which is what makes it worth
+ * spending deliberately rather than leaving idle.
+ */
+MANTLE.slotBoards = {
+  body: "MANTLE.Slot.body",
+  mind: "MANTLE.Slot.mind",
+  soul: "MANTLE.Slot.soul",
+  wildcard: "MANTLE.Slot.wildcard"
+};
+
 /** Mastery types map one-to-one onto the cores; wildcard slots accept any type. */
 MANTLE.masteryTypes = {
   body: "MANTLE.Core.body",

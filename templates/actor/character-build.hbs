@@ -56,7 +56,16 @@
           <i class="fa-solid {{#if mastery.system.equipped}}fa-square-check{{else}}fa-square{{/if}}"></i>
         </a>
         <span class="name" data-action="editItem">{{mastery.name}}</span>
-        <span class="type">{{localize (lookup ../config.masteryTypes mastery.system.masteryType)}}</span>
+
+        {{!-- The board chip is a toggle. A mastery may sit on its own core's
+              board or on a wildcard slot and nowhere else, so clicking cycles
+              between exactly those two — which is how a player moves a mastery
+              off an overspent board and onto a spare wildcard. --}}
+        <a class="board {{#if mastery.system.onWildcard}}wildcard{{/if}}" data-action="cycleBoard"
+           data-tooltip="{{localize 'MANTLE.Sheet.cycleBoardHint'}}">
+          {{localize (lookup ../config.slotBoards mastery.system.board)}}
+        </a>
+
         <span class="domain">{{localize (lookup ../config.masteryDomains mastery.system.domain)}}</span>
         {{#if (gt mastery.system.slotCost 1)}}
           <span class="cost" data-tooltip="{{localize 'MANTLE.Sheet.multiSlotHint'}}">

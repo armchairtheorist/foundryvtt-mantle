@@ -1,0 +1,94 @@
+{{!--
+  Adversary header: identity, the two scaling dials, and the live tracks.
+
+  Challenge class and tier sit next to the name because they are the two things
+  a GM changes at the table — the same Bandit Thug runs at every tier of play.
+--}}
+<header class="mantle-header adversary">
+
+  <img class="portrait" src="{{document.img}}" data-edit="img" alt="{{document.name}}"
+       data-action="editImage" data-tooltip="{{localize 'MANTLE.Sheet.changePortrait'}}">
+
+  <div class="identity">
+    <input class="name" type="text" name="name" value="{{document.name}}"
+           {{#unless editable}}disabled{{/unless}}>
+
+    <div class="class-line">
+      <span class="badge class-{{system.effectiveClass}}">
+        {{localize (lookup (lookup config.challengeClasses system.effectiveClass) "label")}}
+      </span>
+      {{#each system.tags as |tag|}}
+        <span class="tag">{{localize (lookup ../config.enemyTags tag)}}</span>
+      {{/each}}
+      {{#if system.readsPatterns}}
+        <span class="badge patterns" data-tooltip="{{localize 'MANTLE.Adversary.readsPatternsHint'}}">
+          {{localize "MANTLE.Adversary.readsPatterns"}}
+        </span>
+      {{/if}}
+      {{#unless system.rollsDice}}
+        <span class="badge no-roll" data-tooltip="{{localize 'MANTLE.Adversary.autoSuccessHint'}}">
+          {{localize "MANTLE.Adversary.autoSuccess"}}
+        </span>
+      {{/unless}}
+    </div>
+
+    {{!-- The two scaling dials. Nothing here is written into the stat block:
+          drop the template and the printed creature comes back. --}}
+    <div class="scaling">
+      <label>
+        {{localize "MANTLE.Adversary.template"}}
+        {{formInput (lookup fields "template") value=system.template disabled=(not editable)}}
+      </label>
+      <label>
+        {{localize "MANTLE.Adversary.tier"}}
+        {{formInput (lookup fields "tier") value=system.tier disabled=(not editable)}}
+      </label>
+    </div>
+
+    {{#if templateIgnored}}
+      <p class="warn">{{localize "MANTLE.Adversary.templateIgnored"}}</p>
+    {{/if}}
+  </div>
+
+  <div class="resources">
+    <div class="resource vitality">
+      <label>{{localize "MANTLE.Resource.vitality"}}</label>
+      <div class="pair">
+        <input type="number" name="system.vitality.value" value="{{system.vitality.value}}"
+               {{#unless editable}}disabled{{/unless}}>
+        <span class="max">/ {{system.vitality.max}}</span>
+      </div>
+    </div>
+
+    <div class="resource strain">
+      <label>{{localize "MANTLE.Resource.strain"}}</label>
+      <div class="pair">
+        <input type="number" name="system.strain.value" value="{{system.strain.value}}"
+               {{#unless editable}}disabled{{/unless}}>
+        <span class="max">/ {{system.strain.max}}</span>
+      </div>
+    </div>
+
+    <div class="resource guard {{#if system.overGuard}}over{{/if}}">
+      <label>{{localize "MANTLE.Resource.guard"}}</label>
+      <div class="pair">
+        <input type="number" name="system.guard.value" value="{{system.guard.value}}"
+               {{#unless editable}}disabled{{/unless}}>
+        <span class="max">/ {{system.guard.max}}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="header-actions">
+    <span class="economy" data-tooltip="{{localize 'MANTLE.Adversary.economyHint'}}">
+      {{localize "MANTLE.Adversary.turnsPerRound"}} <b>{{system.turnsPerRound}}</b>
+      · {{localize "MANTLE.Adversary.extraManeuvers"}} <b>{{system.extraManeuvers}}</b>
+      {{#if system.diceBonus}}· <b class="tier-bonus">+{{system.diceBonus}}d</b>{{/if}}
+    </span>
+
+    <button type="button" data-action="resetHarm"
+            data-tooltip="{{localize 'MANTLE.Adversary.resetHint'}}">
+      <i class="fa-solid fa-rotate"></i> {{localize "MANTLE.Adversary.reset"}}
+    </button>
+  </div>
+</header>

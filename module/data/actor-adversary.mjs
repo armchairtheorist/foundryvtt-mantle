@@ -13,17 +13,44 @@
  *
  * Stat blocks are written at the Regular challenge class; Grunt, Elite,
  * Champion, and Nemesis are overlays applied on top, as is the tier of play.
- * Both overlays are stored as choices here and applied through Active Effects,
- * so one authored creature scales across the whole campaign.
+ * Both overlays are applied in derived data from the authored numbers rather
+ * than written into them, so one authored creature scales across the whole
+ * campaign and can always be scaled back — see module/rules/adversary.mjs.
  */
 
 import { MANTLE } from "../config.mjs";
-import { fields, count, text, choice, resource, ladder } from "./_fields.mjs";
+import { scaleAdversary } from "../rules/adversary.mjs";
+import { fields, count, text, choice, options, ladder } from "./_fields.mjs";
+
+/**
+ * Templates a GM may layer onto a Regular baseline. Blank means "run the stat
+ * block as authored", which is the usual case.
+ */
+const TEMPLATE_CHOICES = {
+  "": "MANTLE.Adversary.asAuthored",
+  grunt: "MANTLE.Class.grunt",
+  elite: "MANTLE.Class.elite",
+  champion: "MANTLE.Class.champion",
+  nemesis: "MANTLE.Class.nemesis"
+};
 
 export default class AdversaryData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
+      /** What the stat block was authored at. Most of the catalog is Regular. */
       challengeClass: choice(MANTLE.challengeClasses, "regular"),
+
+      /**
+       * A challenge class template the GM wants layered on top.
+       *
+       * Kept separate from `challengeClass` because the two are different
+       * things: the authored class is a property of the creature, the template
+       * is a property of tonight's encounter. Sharing one field would mean
+       * re-scaling a Bandit Captain up to Nemesis and having no way back to
+       * what the catalog actually printed.
+       */
+      template: options(TEMPLATE_CHOICES, "", { blank: true }),
+
       tier: choice(MANTLE.tiers, "novice"),
       tags: new fields.SetField(new fields.StringField({ blank: false })),
 
@@ -36,6 +63,8 @@ export default class AdversaryData extends foundry.abstract.TypeDataModel {
       strain: new fields.SchemaField({ value: count(), max: count(5) }),
       guard: new fields.SchemaField({ value: count(), max: count(0) }),
 
+      // Authored figures. The effective slots come from the challenge class,
+      // which is what the sheet and the harm rules actually read.
       woundSlots: count(0),
       burdenSlots: count(0),
       wounds: new fields.ArrayField(new fields.SchemaField({ effect: text() })),
@@ -98,26 +127,50 @@ export default class AdversaryData extends foundry.abstract.TypeDataModel {
   /* -------------------------------------------- */
 
   prepareDerivedData() {
-    const cc = MANTLE.challengeClasses[this.challengeClass];
+    // Both overlays are applied here rather than stored, so the printed stat
+    // block stays intact and a GM can drop the template to get it back.
+    const scaled = scaleAdversary({
+      challengeClass: this.challengeClass,
+      template: this.template,
+      tier: this.tier,
+      vitality: this._source.vitality.max,
+      strain: this._source.strain.max,
+      extraManeuvers: this._source.extraManeuvers
+    });
 
-    /**
-     * Grunts never roll: any action roll they make is treated as exactly one
-     * success. That single rule removes most of the dice-rolling from a squad
-     * of four, which is the point of fielding them.
-     */
-    this.rollsDice = this.challengeClass !== "grunt";
+    this.scaled = scaled;
+    this.effectiveClass = scaled.effectiveClass;
 
-    /** Only Champions and Nemeses read patterns on their rolls. */
-    this.readsPatterns = ["champion", "nemesis"].includes(this.challengeClass);
+    this.vitality.max = scaled.maxVitality;
+    this.strain.max = scaled.maxStrain;
+
+    // Slot counts follow the class rather than the printed figure. The catalog
+    // prints them too, and they always agree — but a templated creature has to
+    // pick up the slots its new class grants.
+    this.effectiveWoundSlots = scaled.woundSlots;
+    this.effectiveBurdenSlots = scaled.burdenSlots;
+
+    this.turnsPerRound = scaled.turnsPerRound;
+    this.extraManeuvers = scaled.extraManeuvers;
+
+    /** Every maneuver's pool grows with the tier of play. */
+    this.diceBonus = scaled.diceBonus;
+
+    this.rollsDice = scaled.rollsDice;
+    this.readsPatterns = scaled.readsPatterns;
 
     /** Defeating an adversary grants Valor only at Elite and above. */
-    this.valorValue = cc?.valor ?? 0;
+    this.valorValue = MANTLE.challengeClasses[scaled.effectiveClass]?.valor ?? 0;
 
     this.overGuard = this.guard.value > this.guard.max;
 
     // A creature with no Wound slots is removed the moment its Vitality runs
     // out, which is the normal case for Regulars and Grunts.
-    this.hasWoundSlots = this.woundSlots > 0;
-    this.hasBurdenSlots = this.burdenSlots > 0;
+    this.hasWoundSlots = scaled.woundSlots > 0;
+    this.hasBurdenSlots = scaled.burdenSlots > 0;
+
+    // The harm rules read `slots` on both actor types, so adversaries expose
+    // the same shape rather than making every caller branch on actor type.
+    this.slots = { wound: scaled.woundSlots, burden: scaled.burdenSlots };
   }
 }

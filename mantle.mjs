@@ -13,6 +13,7 @@ import { itemDataModels } from "./module/data/items.mjs";
 import MantleActor from "./module/documents/actor.mjs";
 import MantleItem from "./module/documents/item.mjs";
 import MantleCharacterSheet from "./module/apps/sheets/character-sheet.mjs";
+import MantleAdversarySheet from "./module/apps/sheets/adversary-sheet.mjs";
 import MantleItemSheet from "./module/apps/sheets/item-sheet.mjs";
 import MantleRoll from "./module/dice/roll.mjs";
 import { registerChatHooks } from "./module/chat/cards.mjs";
@@ -70,6 +71,12 @@ function registerSheets() {
     types: ["character"],
     makeDefault: true,
     label: "MANTLE.Sheet.character"
+  });
+
+  Actors.registerSheet("mantle", MantleAdversarySheet, {
+    types: ["adversary"],
+    makeDefault: true,
+    label: "MANTLE.Sheet.adversary"
   });
 
   Items.unregisterSheet("core", sheets.ItemSheetV2);

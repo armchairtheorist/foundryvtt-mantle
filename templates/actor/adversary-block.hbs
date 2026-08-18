@@ -1,0 +1,153 @@
+{{!--
+  The stat block body, in the order the catalog prints it: attributes, then
+  maneuvers, then hit locations, then abilities and behaviour.
+--}}
+<section class="adversary-block">
+
+  <div class="stat-grid">
+    {{#each attributes as |attr|}}
+      <div class="stat">
+        <label data-tooltip="{{localize attr.label}}">{{localize attr.abbr}}</label>
+        <span>
+          <input type="number" name="system.attributes.{{attr.key}}" value="{{attr.value}}"
+                 min="0" {{#unless ../editable}}disabled{{/unless}}>
+        </span>
+      </div>
+    {{/each}}
+    <div class="stat"><label>{{localize "MANTLE.Stat.spd"}}</label><span>{{system.spd}}</span></div>
+    <div class="stat"><label>{{localize "MANTLE.Stat.sen"}}</label><span>{{system.sen}}</span></div>
+    <div class="stat"><label>{{localize "MANTLE.Stat.size"}}</label><span>{{system.size}}</span></div>
+  </div>
+
+  {{!-- Maneuvers carry their own pools rather than being built from attributes,
+        so the pool shown is the printed one plus whatever the tier adds. --}}
+  <div class="section maneuvers">
+    <h3>{{localize "MANTLE.Adversary.maneuvers"}}</h3>
+    {{#each maneuvers as |maneuver|}}
+      <div class="entry maneuver {{#if maneuver.signature}}signature{{/if}}">
+        <div class="entry-head">
+          <span class="name">
+            {{#if maneuver.signature}}<i class="fa-solid fa-star"></i>{{/if}}
+            {{maneuver.name}}
+          </span>
+          <span class="pool">{{maneuver.effectivePool}}d6</span>
+          <a class="control roll" data-action="rollManeuver" data-index="{{maneuver.index}}"
+             data-tooltip="{{localize 'MANTLE.Sheet.rollAttack'}}">
+            <i class="fa-solid fa-dice-d6"></i>
+          </a>
+        </div>
+
+        <div class="entry-tags">
+          {{#each maneuver.tags as |tag|}}<span class="tag">{{tag}}</span>{{/each}}
+          {{#if maneuver.opposedBy}}
+            <span class="tag opposed">{{localize "MANTLE.Adversary.opposedShort"}} {{maneuver.opposedBy}}</span>
+          {{/if}}
+          {{#if maneuver.telegraphed}}
+            <span class="tag telegraphed" data-tooltip="{{localize 'MANTLE.Adversary.telegraphedHint'}}">
+              {{localize "MANTLE.Adversary.telegraphed"}}
+            </span>
+          {{/if}}
+        </div>
+
+        <div class="ladder">
+          <span class="band"><b>0s</b> {{maneuver.ladder.[0]}}</span>
+          <span class="band"><b>1s</b> {{maneuver.ladder.[1]}}</span>
+          <span class="band"><b>2s</b> {{maneuver.ladder.[2]}}</span>
+          <span class="band"><b>3+</b> {{maneuver.ladder.[3]}}</span>
+        </div>
+
+        {{#if maneuver.notes}}<p class="special">{{maneuver.notes}}</p>{{/if}}
+      </div>
+    {{else}}
+      <p class="empty">{{localize "MANTLE.Adversary.noManeuvers"}}</p>
+    {{/each}}
+  </div>
+
+  {{!-- Not every creature has Mass/Edge/Mark. A Razorwing has Wings and no
+        Mark at all, so the locations are read from the stat block. --}}
+  <div class="section hit-locations">
+    <h3>{{localize "MANTLE.Adversary.hitLocations"}}</h3>
+    {{#each system.hitLocations as |location|}}
+      <div class="entry location">
+        <span class="name">{{location.name}}</span>
+        <span class="penalty">{{#if location.penalty}}{{location.penalty}}d{{else}}—{{/if}}</span>
+        <span class="effect">{{#if location.hitEffect}}{{location.hitEffect}}{{else}}—{{/if}}</span>
+        <span class="wound-effect">{{#if location.woundEffect}}{{location.woundEffect}}{{else}}—{{/if}}</span>
+        {{#if ../system.hasWoundSlots}}
+          <a class="control" data-action="takeWound" data-location="{{location.name}}"
+             data-tooltip="{{localize 'MANTLE.Adversary.woundHere'}}">
+            <i class="fa-solid fa-droplet"></i>
+          </a>
+        {{/if}}
+      </div>
+    {{/each}}
+  </div>
+
+  {{!-- Regulars and Grunts have no slots at all: they are removed the moment
+        their Vitality runs out, so the tracks are hidden rather than empty. --}}
+  {{#if system.hasWoundSlots}}
+    <div class="harm">
+      <div class="harm-track wounds">
+        <h3>
+          {{localize "MANTLE.Sheet.wounds"}}
+          <span class="slots">{{system.wounds.length}} / {{system.slots.wound}}</span>
+          <a class="control add" data-action="takeWound"
+             data-tooltip="{{localize 'MANTLE.Harm.takeWoundHint'}}"><i class="fa-solid fa-plus"></i></a>
+        </h3>
+        {{#each system.wounds as |wound index|}}
+          <div class="harm-entry">
+            <span class="effect">{{wound.effect}}</span>
+            <a class="control" data-action="clearHarm" data-track="wounds" data-index="{{index}}">
+              <i class="fa-solid fa-xmark"></i>
+            </a>
+          </div>
+        {{else}}
+          <p class="empty">{{localize "MANTLE.Sheet.noWounds"}}</p>
+        {{/each}}
+      </div>
+
+      <div class="harm-track burdens">
+        <h3>
+          {{localize "MANTLE.Sheet.burdens"}}
+          <span class="slots">{{system.burdens.length}} / {{system.slots.burden}}</span>
+          <a class="control add" data-action="takeBurden"
+             data-tooltip="{{localize 'MANTLE.Harm.takeBurdenHint'}}"><i class="fa-solid fa-plus"></i></a>
+        </h3>
+        {{#each system.burdens as |burden index|}}
+          <div class="harm-entry">
+            <span class="effect">{{burden.effect}}</span>
+            <a class="control" data-action="clearHarm" data-track="burdens" data-index="{{index}}">
+              <i class="fa-solid fa-xmark"></i>
+            </a>
+          </div>
+        {{else}}
+          <p class="empty">{{localize "MANTLE.Sheet.noBurdens"}}</p>
+        {{/each}}
+      </div>
+    </div>
+  {{/if}}
+
+  {{#if system.abilities.length}}
+    <div class="section abilities">
+      <h3>{{localize "MANTLE.Adversary.abilities"}}</h3>
+      {{#each system.abilities as |ability|}}
+        <div class="entry ability">
+          <span class="name">{{ability.name}}</span>
+          <span class="effect">{{ability.description}}</span>
+        </div>
+      {{/each}}
+    </div>
+  {{/if}}
+
+  <div class="section tactics">
+    <h3>{{localize "MANTLE.Adversary.tactics"}}</h3>
+    {{formField (lookup fields "tactics") value=system.tactics enriched=enrichedTactics
+      toggled=true disabled=(not editable)}}
+  </div>
+
+  <div class="section description">
+    <h3>{{localize "MANTLE.Sheet.description"}}</h3>
+    {{formField (lookup fields "description") value=system.description enriched=enrichedDescription
+      toggled=true disabled=(not editable)}}
+  </div>
+</section>

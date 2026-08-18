@@ -67,12 +67,20 @@ export default class MantleRoll extends Roll {
     const pool = context.pool ?? {};
     const faces = this.faces;
 
-    const successes = countSuccesses(faces);
+    // A Grunt does not roll: every action roll it makes is treated as exactly
+    // one success. The dice are still thrown and shown, so the card looks like
+    // every other card, but the result does not come from them.
+    const successes = context.fixedSuccesses ?? countSuccesses(faces);
     const effective = effectiveSuccesses(successes, adjustment);
     const { band, overflow, isGraze } = resolveBand(effective);
 
     // A graze triggers nothing, and a desperate pool never reads patterns.
-    const readsPatterns = patternsApply({ effective, desperate: pool.desperate ?? false });
+    // Neither does a creature whose challenge class does not read them, nor a
+    // roll whose successes were never counted from the faces in the first place.
+    const readsPatterns =
+      context.noPatterns !== true &&
+      context.fixedSuccesses == null &&
+      patternsApply({ effective, desperate: pool.desperate ?? false });
     const allocations = readsPatterns ? findAllocations(faces) : [];
     const index = Math.min(allocationIndex, Math.max(0, allocations.length - 1));
     const allocation = allocations[index] ?? { patterns: [], unused: faces };

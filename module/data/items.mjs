@@ -175,6 +175,15 @@ export class MasteryData extends TypeDataModel {
       sets: new fields.SetField(new fields.StringField({ blank: false }))
     };
   }
+
+  prepareDerivedData() {
+    // Which board is actually paying for this mastery. A mastery may sit on its
+    // own core's board or on a wildcard slot, and nowhere else — a BODY mastery
+    // cannot be slotted into MIND — so the choice is genuinely binary and the
+    // sheet cycles between the two.
+    this.board = this.slotBoard || this.masteryType;
+    this.onWildcard = this.board === "wildcard";
+  }
 }
 
 /* -------------------------------------------- */
