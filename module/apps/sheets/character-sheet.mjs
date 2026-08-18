@@ -27,6 +27,10 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
       deleteItem: MantleCharacterSheet.#onDeleteItem,
       refreshTurn: MantleCharacterSheet.#onRefreshTurn,
       rollWeapon: MantleCharacterSheet.#onRollWeapon,
+      rollUnarmed: MantleCharacterSheet.#onRollUnarmed,
+      rollAttribute: MantleCharacterSheet.#onRollAttribute,
+      rollDodge: MantleCharacterSheet.#onRollDodge,
+      rollDeflect: MantleCharacterSheet.#onRollDeflect,
       testLuck: MantleCharacterSheet.#onTestLuck,
       castSpell: MantleCharacterSheet.#onCastSpell
     }
@@ -76,6 +80,15 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     context.attributes = this.#prepareAttributes();
     context.skills = this.#prepareSkills();
     context.slots = this.#prepareSlots();
+
+    // The Unarmed Attack is always available and never costs a gear slot, so
+    // the gear tab shows it whether or not the player owns the item.
+    const unarmed = this.document.unarmedAttack;
+    context.unarmed = { name: unarmed.name, system: unarmed.system, owned: Boolean(unarmed.id) };
+
+    // Deflect needs a weapon that permits it; without one the button would only
+    // ever produce a warning, so it is not offered at all.
+    context.canDeflect = this.document.deflectWeapons.length > 0;
 
     return context;
   }
@@ -304,6 +317,74 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
   static async #onRollWeapon(_event, target) {
     const weapon = this.#itemFor(target);
     if (weapon) await this.document.rollWeapon(weapon);
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   */
+  static async #onRollUnarmed() {
+    await this.document.rollUnarmed();
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onRollAttribute(_event, target) {
+    const attribute = target.dataset.attribute;
+    if (attribute) await this.document.rollAttributeAction(attribute);
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   */
+  static async #onRollDodge() {
+    await this.document.rollDodge();
+  }
+
+  /**
+   * Deflect with an equipped Deflect or Shield weapon.
+   *
+   * Which weapon matters — it sets the attribute rolled, and a weapon that has
+   * already deflected this round cannot do so again — so with more than one
+   * available the player is asked rather than guessed for.
+   *
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onRollDeflect(_event, target) {
+    const available = this.document.deflectWeapons;
+    if (available.length === 0) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Reaction.noDeflectWeapon"));
+      return;
+    }
+
+    const chosen = this.#itemFor(target) ?? (available.length === 1 ? available[0] : null);
+    if (chosen) {
+      await this.document.rollDeflect(chosen);
+      return;
+    }
+
+    const options = available
+      .map((weapon) => `<option value="${weapon.id}">${weapon.name}</option>`)
+      .join("");
+
+    const weaponId = await foundry.applications.api.DialogV2.prompt({
+      window: { title: game.i18n.localize("MANTLE.Reaction.deflect") },
+      classes: ["mantle"],
+      content: `<form><label class="row">${game.i18n.localize("MANTLE.Reaction.deflectWith")}
+          <select name="weapon">${options}</select></label></form>`,
+      ok: {
+        label: game.i18n.localize("MANTLE.Action.roll"),
+        callback: (_dialogEvent, button) => new FormData(button.form).get("weapon")
+      },
+      rejectClose: false
+    });
+
+    const weapon = available.find((entry) => entry.id === weaponId);
+    if (weapon) await this.document.rollDeflect(weapon);
   }
 
   /**

@@ -12,9 +12,11 @@
  */
 
 import MantleRoll from "../dice/roll.mjs";
+import { MANTLE } from "../config.mjs";
 import { buildPool, standardModifiers } from "../dice/pool.mjs";
 import { postRollCard } from "../chat/cards.mjs";
 import { promptCast } from "../apps/cast-dialog.mjs";
+import { promptAction } from "../apps/action-dialog.mjs";
 import {
   applyDamage,
   applyStrain,
@@ -44,6 +46,29 @@ export default class MantleActor extends Actor {
   /** Equipped weapons, in sheet order. */
   get weapons() {
     return this.items.filter((i) => i.type === "weapon" && i.system.equipped);
+  }
+
+  /**
+   * The Unarmed Attack, as a weapon profile.
+   *
+   * Every character always has it, so it comes from CONFIG rather than from an
+   * item — a character created a moment ago can already punch. If the player
+   * has dragged the compendium copy onto their sheet, that one wins, so a house
+   * rule or an archetype that improves unarmed damage takes effect.
+   *
+   * @returns {{name: string, system: object}}
+   */
+  get unarmedAttack() {
+    const owned = this.items.find((i) => i.type === "weapon" && i.system.intrinsic);
+    if (owned) return owned;
+
+    const profile = MANTLE.unarmedAttack;
+    return { name: game.i18n.localize(profile.name), system: profile };
+  }
+
+  /** Equipped weapons that can be used for the Deflect reaction. */
+  get deflectWeapons() {
+    return this.weapons.filter((weapon) => weapon.system.canDeflect);
   }
 
   /* -------------------------------------------- */
@@ -100,27 +125,144 @@ export default class MantleActor extends Actor {
    */
   async rollWeapon(weapon, options = {}) {
     if (weapon?.type !== "weapon") return;
+    return this.attackWith(weapon, options);
+  }
 
-    const choice = weapon.system.attribute;
-    const attribute =
-      choice === "either"
-        ? this.system.attributes.pow >= this.system.attributes.agi
-          ? "pow"
-          : "agi"
-        : choice;
+  /**
+   * Attack with the Unarmed Attack, which needs no item and no gear slot.
+   *
+   * @param {object} [options] - Passed through to `standardModifiers`
+   * @returns {Promise<ChatMessage|void>}
+   */
+  async rollUnarmed(options = {}) {
+    return this.attackWith(this.unarmedAttack, options);
+  }
+
+  /**
+   * Roll an attack from a weapon profile — either an owned Item or the
+   * intrinsic Unarmed Attack from CONFIG. Both carry the same `system` shape,
+   * so nothing below needs to know which it got.
+   *
+   * @param {{name: string, system: object}} weapon
+   * @param {object} [options] - Passed through to `standardModifiers`
+   * @returns {Promise<ChatMessage|void>}
+   */
+  async attackWith(weapon, options = {}) {
+    const attribute = this.#chooseAttribute(weapon.system.attribute);
+    const tags = toArray(weapon.system.tags);
 
     const modifiers = standardModifiers({ ...options, trained: false });
 
     return this.rollAction({
       attribute,
       title: weapon.name,
-      subtitle: game.i18n.localize(CONFIG.MANTLE.attributes[attribute].abbr),
+      subtitle: game.i18n.localize(MANTLE.attributes[attribute].abbr),
       modifiers,
       ladder: weapon.system.damage,
       ladderKind: "vitality",
-      damageTypes: Array.from(weapon.system.damageTypes ?? []),
-      penetrating: weapon.system.tags?.has?.("penetrating") ?? false
+      damageTypes: toArray(weapon.system.damageTypes),
+      penetrating: tags.includes("penetrating")
     });
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Open the action roll dialog for an attribute, then roll what it returns.
+   *
+   * @param {string} attribute
+   * @returns {Promise<ChatMessage|null>}
+   */
+  async rollAttributeAction(attribute) {
+    const choice = await promptAction(this, { attribute });
+    if (!choice) return null;
+
+    return this.rollAction({
+      attribute: choice.attribute,
+      title: game.i18n.localize(MANTLE.attributes[choice.attribute].label),
+      subtitle: choice.subtitle,
+      modifiers: choice.modifiers
+    });
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Dodge: oppose an attack with AGI for 2 Vigor.
+   *
+   * The successes rolled here are what the attacker's card is stepped down by,
+   * which is why nothing is applied automatically — the defender rolls, and
+   * someone clicks minus on the attack.
+   *
+   * @returns {Promise<ChatMessage|null>}
+   */
+  async rollDodge() {
+    const reaction = MANTLE.reactions.dodge;
+    if (!(await this.#spendVigor(reaction.vigorCost))) return null;
+
+    return this.rollAction({
+      attribute: reaction.attribute,
+      title: game.i18n.localize(reaction.label),
+      subtitle: game.i18n.format("MANTLE.Reaction.cost", { cost: reaction.vigorCost })
+    });
+  }
+
+  /**
+   * Deflect: oppose a melee attack with a Deflect or Shield weapon for 1 Vigor.
+   *
+   * The attribute follows the deflecting weapon rather than the defender's
+   * choice — you parry with what you are holding.
+   *
+   * @param {Item} weapon - A weapon with the Deflect or Shield tag
+   * @returns {Promise<ChatMessage|null>}
+   */
+  async rollDeflect(weapon) {
+    if (!weapon?.system?.canDeflect) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Reaction.noDeflectWeapon"));
+      return null;
+    }
+
+    const reaction = MANTLE.reactions.deflect;
+    if (!(await this.#spendVigor(reaction.vigorCost))) return null;
+
+    return this.rollAction({
+      attribute: this.#chooseAttribute(weapon.system.attribute),
+      title: game.i18n.localize(reaction.label),
+      subtitle: weapon.name
+    });
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Resolve a weapon's attribute. "either" means the wielder picks, and the
+   * higher of POW and AGI is what a player would pick anyway.
+   *
+   * @param {string} choice
+   * @returns {string}
+   */
+  #chooseAttribute(choice) {
+    if (choice !== "either") return choice;
+    return this.system.attributes.pow >= this.system.attributes.agi ? "pow" : "agi";
+  }
+
+  /**
+   * Pay a Vigor cost, refusing rather than going negative.
+   *
+   * @param {number} cost
+   * @returns {Promise<boolean>} Whether the cost was paid
+   */
+  async #spendVigor(cost) {
+    if (!cost) return true;
+
+    const available = this.system.vigor?.value ?? 0;
+    if (cost > available) {
+      ui.notifications.warn(game.i18n.format("MANTLE.Cast.notEnoughVigor", { cost }));
+      return false;
+    }
+
+    await this.update({ "system.vigor.value": available - cost });
+    return true;
   }
 
   /* -------------------------------------------- */
@@ -369,4 +511,20 @@ export default class MantleActor extends Actor {
 
     return this.update(updates);
   }
+}
+
+/* -------------------------------------------- */
+
+/**
+ * Normalize a tag or damage-type collection to a plain array.
+ *
+ * Owned items carry these as Foundry Sets; the intrinsic profiles in CONFIG
+ * carry them as arrays. Callers should not have to care which they were handed.
+ *
+ * @param {Set<string>|string[]|undefined} value
+ * @returns {string[]}
+ */
+function toArray(value) {
+  if (!value) return [];
+  return Array.from(value);
 }

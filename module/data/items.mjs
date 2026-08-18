@@ -186,6 +186,14 @@ export class WeaponData extends TypeDataModel {
     return {
       ...common(),
       ...equippable(),
+
+      /**
+       * An intrinsic weapon is part of the body rather than part of the
+       * loadout: always available, never unequipped, and free of gear slots.
+       * Unarmed Attack is the only one in the catalog.
+       */
+      intrinsic: new fields.BooleanField({ initial: false }),
+
       weightClass: choice(MANTLE.weightClasses, "light"),
 
       /**
@@ -208,7 +216,14 @@ export class WeaponData extends TypeDataModel {
   }
 
   prepareDerivedData() {
-    this.gearSlots = MANTLE.weightClasses[this.weightClass]?.gearSlots ?? 1;
+    this.gearSlots = this.intrinsic
+      ? 0
+      : MANTLE.weightClasses[this.weightClass]?.gearSlots ?? 1;
+
+    // An intrinsic weapon cannot be put down, so it reads as equipped whatever
+    // the stored flag says.
+    if (this.intrinsic) this.equipped = true;
+
     this.isMelee = this.melee !== null;
     this.isRanged = this.range !== null;
 

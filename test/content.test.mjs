@@ -13,6 +13,8 @@ import assert from "node:assert/strict";
 import { build as buildArchetypes } from "../src/content/archetypes.mjs";
 import { build as buildMasteries } from "../src/content/masteries.mjs";
 import { build as buildEquipment } from "../src/content/equipment.mjs";
+import { build as buildLimitBreaks } from "../src/content/limitbreaks.mjs";
+import { MANTLE } from "../module/config.mjs";
 import { deriveCharacter } from "../module/data/derive.mjs";
 
 const archetypes = buildArchetypes();
@@ -166,5 +168,60 @@ describe("catalog coverage", () => {
         assert.ok(weapon.system.damage[band], `${weapon.name} band ${band}`);
       }
     }
+  });
+
+  test("the Unarmed Attack is intrinsic, so it costs no gear slot", () => {
+    const unarmed = buildEquipment().find((i) => i.name === "Unarmed Attack");
+    assert.ok(unarmed);
+    assert.equal(unarmed.system.intrinsic, true);
+    assert.equal(unarmed.system.equipped, true, "an intrinsic weapon cannot be put down");
+  });
+
+  test("the intrinsic profile in CONFIG matches the catalog entry", () => {
+    // Characters who do not own the item roll from CONFIG instead, so the two
+    // have to agree or the same punch does different damage depending on
+    // whether the player happened to drag the item across.
+    const unarmed = buildEquipment().find((i) => i.name === "Unarmed Attack");
+    assert.ok(unarmed);
+    const profile = MANTLE.unarmedAttack;
+
+    assert.equal(profile.weightClass, unarmed.system.weightClass);
+    assert.equal(profile.attribute, unarmed.system.attribute);
+    assert.deepEqual(profile.damageTypes, unarmed.system.damageTypes);
+    assert.equal(profile.melee, unarmed.system.melee);
+    const catalog = /** @type {Record<string, string>} */ (unarmed.system.damage);
+    const intrinsic = /** @type {Record<string, string>} */ (profile.damage);
+    for (const band of ["0", "1", "2", "3"]) {
+      assert.equal(intrinsic[band], catalog[band], `band ${band}`);
+    }
+  });
+});
+
+/* -------------------------------------------- */
+
+describe("limit breaks", () => {
+  test("General Limit Breaks gate on a core, Archetype ones on realization", () => {
+    for (const lb of buildLimitBreaks()) {
+      if (lb.system.category === "general") {
+        assert.ok(lb.system.requiredCore, `${lb.name}: needs a core gate`);
+        assert.ok(lb.system.requiredCoreValue > 0, `${lb.name}: needs a core minimum`);
+        assert.equal(lb.system.requiredArchetype, "", `${lb.name}: is not archetype-gated`);
+      } else {
+        assert.ok(lb.system.requiredArchetype, `${lb.name}: needs an archetype`);
+        assert.equal(lb.system.requiredCore, "", `${lb.name}: carries no attribute gate`);
+      }
+    }
+  });
+
+  test("every gated core is one the system knows about", () => {
+    for (const lb of buildLimitBreaks()) {
+      if (!lb.system.requiredCore) continue;
+      assert.ok(lb.system.requiredCore in MANTLE.cores, `${lb.name}: ${lb.system.requiredCore}`);
+    }
+  });
+
+  test("the catalog's two Limit Break kinds are both represented", () => {
+    const categories = new Set(buildLimitBreaks().map((lb) => lb.system.category));
+    assert.deepEqual([...categories].sort(), ["archetype", "general"]);
   });
 });

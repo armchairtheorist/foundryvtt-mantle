@@ -29,6 +29,30 @@
   --mantle-panel: rgb(0 0 0 / 4%);
 }
 
+/* The palette above is parchment-and-ink, which is unreadable on Foundry's
+   dark theme — near-black text on a near-black sheet. Foundry marks themed
+   applications, so follow it rather than picking one look and hoping. */
+.mantle.theme-dark,
+.theme-dark .mantle,
+[data-theme="dark"] .mantle {
+  --mantle-border: #9b937a;
+  --mantle-ink: #f2eee2;
+  --mantle-muted: #b4ad9a;
+  --mantle-panel: rgb(255 255 255 / 6%);
+
+  --mantle-body: #e0745c;
+  --mantle-mind: #6f9de4;
+  --mantle-soul: #b088e0;
+
+  --mantle-vitality: #e0745c;
+  --mantle-strain: #a98ce0;
+  --mantle-guard: #7fb0d8;
+  --mantle-vigor: #e0b53c;
+  --mantle-resolve: #5fbd90;
+  --mantle-success: #6cc46f;
+  --mantle-warning: #e08a4a;
+}
+
 /* -------------------------------------------- */
 /*  Shared                                       */
 /* -------------------------------------------- */
@@ -289,13 +313,18 @@
   .header-actions {
     grid-area: actions;
     display: flex;
+    flex-wrap: wrap;
     gap: 6px;
 
+    /* Four buttons rather than two now that the reactive defenses live here,
+       so they share the row and wrap onto a second one on a narrow sheet. */
     button {
-      flex: 1 1 0;
+      flex: 1 1 90px;
+      min-width: 0;
       font-size: 0.85em;
       padding: 2px 6px;
       line-height: 1.6;
+      white-space: nowrap;
     }
   }
 }
@@ -533,12 +562,17 @@
     }
   }
 
+  /* Contrast here comes from opacity against the sheet's own text colour
+     rather than from a fixed ink value. A trained skill has to be legible on
+     whichever theme the player runs, and inheriting is the only way to be sure
+     of that; a hard-coded ink read as near-black on the dark theme. */
   .skill {
     cursor: pointer;
     padding: 1px 3px;
     border-radius: 3px;
     font-size: 0.9em;
-    color: var(--mantle-muted);
+    color: inherit;
+    opacity: 0.55;
 
     i {
       width: 1em;
@@ -547,12 +581,15 @@
 
     &:hover {
       background: var(--mantle-panel);
+      opacity: 0.85;
     }
 
     /* Trained skills are the ones worth +2d, so they carry the weight. */
     &.trained {
-      color: var(--mantle-ink);
+      opacity: 1;
       font-weight: 600;
+      background: var(--mantle-panel);
+      box-shadow: inset 3px 0 0 var(--mantle-success);
     }
   }
 }
@@ -1067,6 +1104,116 @@
       border-color: var(--mantle-warning);
 
       .cost .value { color: var(--mantle-warning); }
+    }
+  }
+}
+
+/* -------------------------------------------- */
+/*  Rollable attributes                          */
+/* -------------------------------------------- */
+
+/* The attribute abbreviation is the roll button. It has to read as clickable
+   without becoming louder than the number beside it, which is the thing the
+   player actually reads. */
+.mantle .attribute label.rollable {
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 0 3px;
+  transition: background-color 120ms ease;
+
+  &:hover {
+    background: var(--mantle-panel);
+    text-decoration: underline;
+  }
+}
+
+/* -------------------------------------------- */
+/*  Intrinsic weapons                            */
+/* -------------------------------------------- */
+
+/* Unarmed Attack is always there and costs no slot, so it gets no equip
+   checkbox — the fist icon stands in for one, and the row is dimmed slightly
+   so it does not compete with gear the player actually chose. */
+.mantle .entry.weapon.intrinsic {
+  .intrinsic-icon {
+    width: 1em;
+    color: var(--mantle-muted);
+  }
+
+  .tag.free {
+    border-style: dashed;
+    color: var(--mantle-muted);
+  }
+}
+
+/* -------------------------------------------- */
+/*  Reactions                                    */
+/* -------------------------------------------- */
+
+.mantle .header-actions .reaction {
+  border-color: var(--mantle-guard);
+  color: var(--mantle-guard);
+}
+
+.mantle .entry .control.deflect {
+  color: var(--mantle-guard);
+}
+
+/* -------------------------------------------- */
+/*  Action dialog                                */
+/* -------------------------------------------- */
+
+.mantle.action-dialog,
+.mantle .action-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    select,
+    input {
+      flex: 0 1 60%;
+    }
+  }
+
+  /* The pool is the whole point of the dialog: it is exactly what will hit the
+     table once every modifier has been summed. */
+  .action-summary {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: 6px;
+    padding: 6px 8px;
+    border: 1px solid var(--mantle-border);
+    border-radius: 4px;
+    background: var(--mantle-panel);
+
+    .label {
+      text-transform: uppercase;
+      font-size: 0.75em;
+      letter-spacing: 0.06em;
+      color: var(--mantle-muted);
+    }
+
+    .value {
+      font-size: 1.4em;
+      font-weight: 700;
+    }
+
+    /* A pool driven to zero is not a failure — it is 2d6 keeping the lowest,
+       which still succeeds about one time in nine. */
+    &.desperate {
+      border-color: var(--mantle-warning);
+
+      .value {
+        font-size: 1em;
+        color: var(--mantle-warning);
+      }
     }
   }
 }

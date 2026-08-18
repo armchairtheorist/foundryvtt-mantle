@@ -20,12 +20,15 @@ const PACK = "equipment";
  * @property {string[]} [tags]
  * @property {number[]} damage - The 0s, 1s, 2s, and 3+ bands
  * @property {string} [special]
+ * @property {boolean} [intrinsic] - Part of the body: always equipped, no gear slot
  */
 
 /** @type {WeaponRow[]} */
 const WEAPONS = [
-  // Always available, and it costs no gear slot.
-  { name: "Unarmed Attack", weight: "light", attr: "either", types: ["crushing"], melee: 1, damage: [1, 3, 6, 9] },
+  // Always available, and it costs no gear slot. Every character has this
+  // without owning the item at all; the copy here is for anyone who wants to
+  // modify their own.
+  { name: "Unarmed Attack", weight: "light", attr: "either", types: ["crushing"], melee: 1, damage: [1, 3, 6, 9], intrinsic: true },
 
   // Light
   { name: "Dagger", weight: "light", attr: "either", types: ["piercing"], melee: 1, range: 5, damage: [1, 4, 8, 12] },
@@ -160,7 +163,8 @@ export function build() {
         system: {
           description: "",
           source: "Equipment Catalog",
-          equipped: false,
+          equipped: Boolean(w.intrinsic),
+          intrinsic: Boolean(w.intrinsic),
           weightClass: w.weight,
           attribute: w.attr,
           damageTypes: w.types,

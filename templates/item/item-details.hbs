@@ -63,7 +63,12 @@
       <label>{{localize "MANTLE.Field.range"}}</label>
       {{formInput (lookup fields "range") value=system.range disabled=(not editable)}}
     </div>
+    <div class="field-row">
+      <label>{{localize "MANTLE.Field.intrinsic"}}</label>
+      {{formInput (lookup fields "intrinsic") value=system.intrinsic disabled=(not editable)}}
+    </div>
     <p class="hint">{{localize "MANTLE.Hint.reach"}}</p>
+    <p class="hint">{{localize "MANTLE.Hint.intrinsic"}}</p>
   {{/if}}
 
   {{#if is.armor}}

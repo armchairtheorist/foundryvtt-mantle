@@ -283,6 +283,45 @@ MANTLE.armorClasses = {
   martial: "MANTLE.ArmorClass.martial"
 };
 
+/**
+ * The Unarmed Attack, which every character always has equipped and which
+ * never costs a gear slot.
+ *
+ * Kept here as a weapon profile rather than as an item the sheet has to be
+ * given, so a freshly created character can already punch. The compendium
+ * carries a matching item for anyone who wants to modify their own copy; that
+ * one is flagged intrinsic, so it too costs no slot.
+ */
+MANTLE.unarmedAttack = {
+  name: "MANTLE.Sheet.unarmedAttack",
+  intrinsic: true,
+  equipped: true,
+  weightClass: "light",
+  attribute: "either",
+  damageTypes: ["crushing"],
+  tags: [],
+  melee: 1,
+  range: null,
+  gearSlots: 0,
+  attackCost: 2,
+  damage: { 0: "1 damage", 1: "3 damage", 2: "6 damage", 3: "9 damage", overflow: "" },
+  special: ""
+};
+
+/* -------------------------------------------- */
+/*  Reactions                                    */
+/* -------------------------------------------- */
+
+/**
+ * The reactive defenses the sheet offers as buttons. Both are opposed rolls:
+ * the successes rolled here are subtracted from the attacker's, which is what
+ * the roll card's net-success stepper is for.
+ */
+MANTLE.reactions = {
+  dodge: { label: "MANTLE.Reaction.dodge", attribute: "agi", vigorCost: 2 },
+  deflect: { label: "MANTLE.Reaction.deflect", vigorCost: 1 }
+};
+
 /* -------------------------------------------- */
 /*  Spellcasting                                 */
 /* -------------------------------------------- */

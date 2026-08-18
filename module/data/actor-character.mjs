@@ -8,7 +8,14 @@
  */
 
 import { MANTLE } from "../config.mjs";
-import { deriveCharacter, isInCrisis, isStressed } from "./derive.mjs";
+import {
+  deriveCharacter,
+  gatherBonuses,
+  countSlotUsage,
+  isInCrisis,
+  isStressed,
+  BONUS_KEYS
+} from "./derive.mjs";
 import { fields, count, text, resource, bonuses } from "./_fields.mjs";
 
 export default class CharacterData extends foundry.abstract.TypeDataModel {
@@ -65,10 +72,14 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
 
   /**
    * Zero the accumulators so Active Effects have a clean surface to add into.
-   * Without this, bonuses would compound on every re-prepare.
+   *
+   * Driven from the schema's own field list rather than from `this.bonuses`.
+   * Iterating the live object is one initialization change away from resetting
+   * nothing at all — and a reset that silently does nothing is exactly the kind
+   * of bug that shows up much later as a stat that keeps growing.
    */
   prepareBaseData() {
-    for (const key of Object.keys(this.bonuses)) this.bonuses[key] = 0;
+    for (const key of BONUS_KEYS) this.bonuses[key] = 0;
   }
 
   /* -------------------------------------------- */
@@ -89,22 +100,30 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
     // character has at most one; if somehow more, the first wins.
     const ancestry = archetypes.find((a) => a.system.kind === "ancestry");
 
-    // Archetype bonuses are per rank, so only ranks actually reached count.
-    // These are summed here rather than applied as Active Effects: effects
-    // cannot easily be made rank-aware without one effect per rank, toggled as
-    // the rank changes.
-    for (const archetype of archetypes) {
-      for (const feature of archetype.system.activeFeatures ?? []) {
-        for (const [key, value] of Object.entries(feature.bonuses ?? {})) {
-          if (value) this.bonuses[key] += value;
-        }
-      }
-    }
+    // Archetype ranks and worn armor are totalled here rather than applied as
+    // Active Effects: an effect cannot easily be made rank-aware without one
+    // effect per rank, toggled as the rank changes.
+    //
+    // The totals land in a *new* object rather than being added into
+    // `this.bonuses`. Adding into the stored accumulator is only correct while
+    // something zeroes it between every pair of derivations, and Foundry calls
+    // `prepareDerivedData` more often than it calls `prepareBaseData` — which
+    // is how Max Vitality ended up climbing on its own.
+    this.bonusTotals = gatherBonuses({
+      effects: this.bonuses,
+      archetypes: archetypes.map((a) => ({
+        rank: a.system.rank ?? 0,
+        features: a.system.rankFeatures ?? []
+      })),
+      armor: this.parent.items
+        .filter((i) => i.type === "armor" && i.system.equipped)
+        .map((i) => ({ guard: i.system.guard ?? 0 }))
+    });
 
     const derived = deriveCharacter({
       attributes: this.attributes,
       characterRank,
-      bonuses: this.bonuses,
+      bonuses: this.bonusTotals,
       ancestry: ancestry
         ? { spd: ancestry.system.spd, sen: ancestry.system.sen, size: ancestry.system.size }
         : {}
@@ -168,30 +187,20 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
   /* -------------------------------------------- */
 
   /**
-   * Tally how much of each slot budget is spent, so the sheet can warn on
-   * overflow. Deliberately advisory: Mantle expects the GM to adjudicate
-   * unusual builds, so nothing here blocks an illegal loadout.
+   * Read the loadout out of the actor's items and hand it to the pure tally.
    *
    * @returns {{gear: number, wondrous: number, mastery: Record<string, number>}}
    */
   #countSlotUsage() {
-    const items = this.parent.items;
-    const equipped = (i) => i.system.equipped === true;
-
-    // Superheavy weapons cost two gear slots; everything else costs one.
-    const gear = items
-      .filter((i) => ["weapon", "armor", "focus"].includes(i.type) && equipped(i))
-      .reduce((sum, i) => sum + (i.system.gearSlots ?? 1), 0);
-
-    const wondrous = items.filter((i) => i.type === "wondrous" && equipped(i)).length;
-
-    const mastery = { body: 0, mind: 0, soul: 0, wildcard: 0 };
-    for (const item of items) {
-      if (item.type !== "mastery" || !equipped(item)) continue;
-      const board = item.system.slotBoard ?? item.system.masteryType;
-      if (board in mastery) mastery[board] += item.system.slotCost ?? 1;
-    }
-
-    return { gear, wondrous, mastery };
+    return countSlotUsage(
+      this.parent.items.map((item) => ({
+        type: item.type,
+        equipped: item.system.equipped === true,
+        gearSlots: item.system.gearSlots,
+        masteryType: item.system.masteryType,
+        slotBoard: item.system.slotBoard,
+        slotCost: item.system.slotCost
+      }))
+    );
   }
 }

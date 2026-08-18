@@ -103,6 +103,20 @@
       <i class="fa-solid fa-clover"></i> {{localize "MANTLE.Sheet.testLuck"}}
     </button>
 
+    {{!-- Reactive defenses. Both are opposed rolls: the successes rolled here
+          are what the attacker's card gets stepped down by. --}}
+    <button type="button" class="reaction dodge" data-action="rollDodge"
+            data-tooltip="{{localize 'MANTLE.Reaction.dodgeHint'}}">
+      <i class="fa-solid fa-person-running"></i> {{localize "MANTLE.Reaction.dodge"}}
+    </button>
+
+    {{#if canDeflect}}
+      <button type="button" class="reaction deflect" data-action="rollDeflect"
+              data-tooltip="{{localize 'MANTLE.Reaction.deflectHint'}}">
+        <i class="fa-solid fa-shield-halved"></i> {{localize "MANTLE.Reaction.deflect"}}
+      </button>
+    {{/if}}
+
     <button type="button" class="refresh-turn" data-action="refreshTurn"
             data-tooltip="{{localize 'MANTLE.Sheet.refreshTurnHint'}}">
       <i class="fa-solid fa-rotate"></i> {{localize "MANTLE.Sheet.refreshTurn"}}

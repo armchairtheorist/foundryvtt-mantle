@@ -1,6 +1,6 @@
 {
   "name": "foundryvtt-mantle",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "The Mantle TTRPG as a game system for Foundry Virtual Tabletop",
   "private": true,
   "type": "module",

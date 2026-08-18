@@ -1,8 +1,8 @@
 {
   "id": "mantle",
   "title": "Mantle",
-  "description": "A tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. Roll pools of d6, read them twice — once for successes, once for patterns.",
-  "version": "0.3.0",
+  "description": "A tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. Roll pools of d6, read them twice \u2014 once for successes, once for patterns.",
+  "version": "0.4.0",
   "compatibility": {
     "minimum": "14",
     "verified": "14.366"
@@ -65,6 +65,17 @@
       "label": "Mantle: Arts & Resonances",
       "type": "Item",
       "path": "packs/spellcasting",
+      "system": "mantle",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "limitbreaks",
+      "label": "Mantle: Limit Breaks",
+      "type": "Item",
+      "path": "packs/limitbreaks",
       "system": "mantle",
       "ownership": {
         "PLAYER": "OBSERVER",
@@ -160,7 +171,7 @@
   },
   "url": "https://github.com/armchairtheorist/foundryvtt-mantle",
   "manifest": "https://github.com/armchairtheorist/foundryvtt-mantle/releases/latest/download/system.json",
-  "download": "https://github.com/armchairtheorist/foundryvtt-mantle/releases/download/v0.3.0/mantle.zip",
+  "download": "https://github.com/armchairtheorist/foundryvtt-mantle/releases/download/v0.4.0/mantle.zip",
   "readme": "https://github.com/armchairtheorist/foundryvtt-mantle/blob/main/README.md",
   "bugs": "https://github.com/armchairtheorist/foundryvtt-mantle/issues",
   "socket": false,
@@ -173,7 +184,8 @@
         "archetypes",
         "masteries",
         "equipment",
-        "spellcasting"
+        "spellcasting",
+        "limitbreaks"
       ]
     }
   ]

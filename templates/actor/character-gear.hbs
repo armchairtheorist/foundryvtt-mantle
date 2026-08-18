@@ -19,18 +19,63 @@
 
   <div class="section weapons">
     <h3>{{localize "MANTLE.Sheet.weapons"}}</h3>
-    {{#each items.weapons as |weapon|}}
-      <div class="entry weapon {{#unless weapon.system.equipped}}unequipped{{/unless}}" data-item-id="{{weapon.id}}">
+
+    {{!-- Every character always has the Unarmed Attack, and it costs no gear
+          slot, so it is listed here whether or not the player owns the item. --}}
+    {{#unless unarmed.owned}}
+      <div class="entry weapon intrinsic">
         <div class="entry-head">
-          <a class="equip-toggle" data-action="toggleEquipped">
-            <i class="fa-solid {{#if weapon.system.equipped}}fa-square-check{{else}}fa-square{{/if}}"></i>
-          </a>
+          <i class="fa-solid fa-hand-fist intrinsic-icon"
+             data-tooltip="{{localize 'MANTLE.Sheet.intrinsicHint'}}"></i>
+          <span class="name">{{unarmed.name}}</span>
+          <span class="weight">{{localize (lookup (lookup config.weightClasses unarmed.system.weightClass) "label")}}</span>
+          <span class="attribute">{{localize (lookup (lookup config.attributes unarmed.system.attribute) "abbr")}}</span>
+          <span class="cost">{{unarmed.system.attackCost}} {{localize "MANTLE.Resource.vigorShort"}}</span>
+          <a class="control roll" data-action="rollUnarmed"
+             data-tooltip="{{localize 'MANTLE.Sheet.rollAttack'}}"><i class="fa-solid fa-dice-d6"></i></a>
+        </div>
+
+        <div class="entry-tags">
+          {{#each unarmed.system.damageTypes as |type|}}
+            <span class="tag damage">{{localize (lookup ../config.damageTypes type)}}</span>
+          {{/each}}
+          <span class="tag">{{localize "MANTLE.Tag.melee"}} {{unarmed.system.melee}}</span>
+          <span class="tag free">{{localize "MANTLE.Sheet.noSlot"}}</span>
+        </div>
+
+        <div class="ladder">
+          <span class="band"><b>0s</b> {{unarmed.system.damage.[0]}}</span>
+          <span class="band"><b>1s</b> {{unarmed.system.damage.[1]}}</span>
+          <span class="band"><b>2s</b> {{unarmed.system.damage.[2]}}</span>
+          <span class="band"><b>3+</b> {{unarmed.system.damage.[3]}}</span>
+        </div>
+      </div>
+    {{/unless}}
+
+    {{#each items.weapons as |weapon|}}
+      <div class="entry weapon {{#if weapon.system.intrinsic}}intrinsic{{/if}} {{#unless weapon.system.equipped}}unequipped{{/unless}}" data-item-id="{{weapon.id}}">
+        <div class="entry-head">
+          {{#if weapon.system.intrinsic}}
+            <i class="fa-solid fa-hand-fist intrinsic-icon"
+               data-tooltip="{{localize 'MANTLE.Sheet.intrinsicHint'}}"></i>
+          {{else}}
+            <a class="equip-toggle" data-action="toggleEquipped">
+              <i class="fa-solid {{#if weapon.system.equipped}}fa-square-check{{else}}fa-square{{/if}}"></i>
+            </a>
+          {{/if}}
           <span class="name" data-action="editItem">{{weapon.name}}</span>
           <span class="weight">{{localize (lookup (lookup ../config.weightClasses weapon.system.weightClass) "label")}}</span>
           <span class="attribute">{{localize (lookup (lookup ../config.attributes weapon.system.attribute) "abbr")}}</span>
           <span class="cost">{{weapon.system.attackCost}} {{localize "MANTLE.Resource.vigorShort"}}</span>
           <a class="control roll" data-action="rollWeapon"
              data-tooltip="{{localize 'MANTLE.Sheet.rollAttack'}}"><i class="fa-solid fa-dice-d6"></i></a>
+          {{#if weapon.system.canDeflect}}
+            {{!-- Which weapon deflects decides the attribute rolled, so the
+                  reaction is offered on the weapon rather than only in the
+                  header. --}}
+            <a class="control deflect" data-action="rollDeflect"
+               data-tooltip="{{localize 'MANTLE.Reaction.deflectHint'}}"><i class="fa-solid fa-shield-halved"></i></a>
+          {{/if}}
           <a class="control" data-action="deleteItem"><i class="fa-solid fa-trash"></i></a>
         </div>
 

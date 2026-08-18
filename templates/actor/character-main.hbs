@@ -13,8 +13,12 @@
         </div>
         <div class="core-attributes">
           {{#each core.attributes as |attr|}}
+            {{!-- The abbreviation is the roll button: clicking it opens the
+                  action roll dialog, where modifiers and a trained skill are
+                  chosen. The number beside it stays editable. --}}
             <div class="attribute">
-              <label data-tooltip="{{localize attr.label}}">{{localize attr.abbr}}</label>
+              <label class="rollable" data-action="rollAttribute" data-attribute="{{attr.key}}"
+                     data-tooltip="{{localize attr.label}} — {{localize 'MANTLE.Action.rollHint'}}">{{localize attr.abbr}}</label>
               <input type="number" name="system.attributes.{{attr.key}}" value="{{attr.value}}"
                      min="0" {{#unless ../../editable}}disabled{{/unless}}>
             </div>

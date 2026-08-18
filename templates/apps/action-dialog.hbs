@@ -1,0 +1,52 @@
+{{!--
+  The action roll dialog.
+
+  Every modifier sums before anything is rolled, so the pool readout at the
+  bottom is the whole point: it is exactly what will hit the table.
+--}}
+<form class="mantle action-dialog">
+
+  <label class="row">
+    {{localize "MANTLE.Action.attribute"}}
+    <select name="attribute">
+      {{#each attributes as |attribute|}}
+        <option value="{{attribute.key}}" {{#if attribute.selected}}selected{{/if}}>
+          {{attribute.label}} ({{attribute.value}}d)
+        </option>
+      {{/each}}
+    </select>
+  </label>
+
+  {{!-- Training is binary and worth +2d, at most one skill per roll, and never
+        on an attack — so a flat list of the trained ones is the whole choice. --}}
+  <label class="row">
+    {{localize "MANTLE.Action.skill"}}
+    <select name="skill">
+      <option value="">{{localize "MANTLE.Field.none"}}</option>
+      {{#each skills as |skill|}}
+        <option value="{{skill.key}}">{{skill.label}} (+{{../skillBonus}}d)</option>
+      {{/each}}
+    </select>
+  </label>
+
+  {{#unless skills.length}}
+    <p class="hint">{{localize "MANTLE.Action.noTrainedSkills"}}</p>
+  {{/unless}}
+
+  <label class="row">
+    {{localize "MANTLE.Condition.impaired"}}
+    <input type="number" name="impaired" value="0" min="0" max="10"
+           data-tooltip="{{localize 'MANTLE.Action.impairedHint'}}">
+  </label>
+
+  <label class="row">
+    {{localize "MANTLE.Modifier.situational"}}
+    <input type="number" name="situational" value="0" min="-10" max="10"
+           data-tooltip="{{localize 'MANTLE.Action.situationalHint'}}">
+  </label>
+
+  <div class="action-summary">
+    <span class="label">{{localize "MANTLE.Action.pool"}}</span>
+    <span class="value" data-pool>0d6</span>
+  </div>
+</form>

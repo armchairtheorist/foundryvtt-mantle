@@ -60,6 +60,102 @@ import { MANTLE } from "../config.mjs";
 export const floor = Math.floor;
 
 /**
+ * Every bonus accumulator, in the order the schema declares them. Kept here so
+ * both the data model and the tests can enumerate them without reaching into
+ * Foundry.
+ *
+ * @type {readonly string[]}
+ */
+export const BONUS_KEYS = Object.freeze([
+  "vitality", "strain", "resolve", "guard", "vigorRefresh", "vigorCap",
+  "spd", "sen", "woundSlots", "burdenSlots", "gearSlots", "wondrousSlots",
+  "consumablePoints", "languages",
+  "masteryBody", "masteryMind", "masterySoul", "masteryWildcard"
+]);
+
+/**
+ * Total every flat bonus a character has into a fresh object.
+ *
+ * Deliberately returns a new object and never touches its inputs. The previous
+ * version summed archetype ranks *into* the stored accumulator, which is only
+ * correct as long as something zeroes that accumulator between every pair of
+ * derivations — and Foundry will happily call `prepareDerivedData` more often
+ * than that. When it did, Max Vitality crept upward on every re-render.
+ *
+ * @param {object} input
+ * @param {Record<string, number>} [input.effects]
+ *   What Active Effects have already written into `system.bonuses`.
+ * @param {{rank: number, features: {rank: number, bonuses: Bonuses}[]}[]} [input.archetypes]
+ *   Archetypes with all their rank features; only ranks reached are counted.
+ * @param {{guard: number}[]} [input.armor] - Equipped armor
+ * @returns {Bonuses}
+ */
+export function gatherBonuses({ effects = {}, archetypes = [], armor = [] } = {}) {
+  /** @type {Record<string, number>} */
+  const totals = {};
+  for (const key of BONUS_KEYS) totals[key] = Number(effects[key]) || 0;
+
+  /** @param {string} key @param {unknown} value */
+  const add = (key, value) => {
+    const amount = Number(value) || 0;
+    if (amount && key in totals) totals[key] += amount;
+  };
+
+  // An archetype's bonuses are per rank, and a rank-1 Warrior must not receive
+  // rank-2's Guard, so only features at or below the rank held are counted.
+  for (const archetype of archetypes) {
+    for (const feature of archetype.features ?? []) {
+      if (feature.rank > archetype.rank) continue;
+      for (const [key, value] of Object.entries(feature.bonuses ?? {})) add(key, value);
+    }
+  }
+
+  // Armor raises Max Guard while it is worn. Summed rather than maxed: the
+  // rules allow only one armor at a time, but the sheet reports rather than
+  // refuses, so an illegal loadout should read as obviously wrong.
+  for (const piece of armor) add("guard", piece.guard);
+
+  return totals;
+}
+
+/**
+ * Tally how much of each slot budget a loadout spends.
+ *
+ * Deliberately advisory: Mantle expects the GM to adjudicate unusual builds, so
+ * nothing here refuses an illegal loadout — it only reports what is spent so the
+ * sheet can flag an overspent board.
+ *
+ * @param {{type: string, equipped?: boolean, gearSlots?: number,
+ *          masteryType?: string, slotBoard?: string, slotCost?: number}[]} items
+ * @returns {{gear: number, wondrous: number, mastery: Record<string, number>}}
+ */
+export function countSlotUsage(items) {
+  let gear = 0;
+  let wondrous = 0;
+  /** @type {Record<string, number>} */
+  const mastery = { body: 0, mind: 0, soul: 0, wildcard: 0 };
+
+  for (const entry of items) {
+    if (entry.equipped !== true) continue;
+
+    // Superheavy weapons cost two gear slots, an intrinsic weapon costs none,
+    // and everything else costs one.
+    if (["weapon", "armor", "focus"].includes(entry.type)) gear += entry.gearSlots ?? 1;
+    else if (entry.type === "wondrous") wondrous += 1;
+    else if (entry.type === "mastery") {
+      // `||`, not `??`. An unset slotBoard is the empty string rather than
+      // null, so `??` never falls through to the mastery's own type — and every
+      // equipped mastery was counted against a board named "", which is no
+      // board at all. Every board read 0 used no matter what was slotted.
+      const board = entry.slotBoard || entry.masteryType || "";
+      if (board in mastery) mastery[board] += entry.slotCost ?? 1;
+    }
+  }
+
+  return { gear, wondrous, mastery };
+}
+
+/**
  * Sum each core from its two attributes.
  *
  * @param {Attributes} attributes
