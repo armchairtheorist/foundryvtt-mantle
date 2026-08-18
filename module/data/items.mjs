@@ -31,7 +31,8 @@ const BOARD_CHOICES = {
   body: "MANTLE.Slot.body",
   mind: "MANTLE.Slot.mind",
   soul: "MANTLE.Slot.soul",
-  wildcard: "MANTLE.Slot.wildcard"
+  wildcard: "MANTLE.Slot.wildcard",
+  repertoire: "MANTLE.Slot.repertoire"
 };
 const CORE_CHOICES = {
   "": "MANTLE.Field.none",
@@ -129,7 +130,8 @@ export class ArchetypeData extends TypeDataModel {
             strain: modifier(),
             resolve: modifier(),
             guard: modifier(),
-            masteryWildcard: modifier()
+            masteryWildcard: modifier(),
+            masteryRepertoire: modifier()
           })
         })
       )
@@ -162,7 +164,10 @@ export class MasteryData extends TypeDataModel {
        */
       slotCost: count(1, { min: 1 }),
 
-      /** Which board actually paid for it: its own type, or wildcard. */
+      /**
+       * Which board actually paid for it: its own type, a wildcard slot, or —
+       * for an Art or Resonance on a caster — a repertoire slot.
+       */
       slotBoard: options(BOARD_CHOICES, "", { blank: true }),
 
       prerequisite: text(),
@@ -178,11 +183,16 @@ export class MasteryData extends TypeDataModel {
 
   prepareDerivedData() {
     // Which board is actually paying for this mastery. A mastery may sit on its
-    // own core's board or on a wildcard slot, and nowhere else — a BODY mastery
-    // cannot be slotted into MIND — so the choice is genuinely binary and the
-    // sheet cycles between the two.
+    // own core's board, on a wildcard slot, or — if it is an Art or a Resonance
+    // and its owner is a caster — on a repertoire slot. It can never sit on
+    // another core's board, so the sheet cycles through the legal few rather
+    // than offering a dropdown of mostly-illegal options.
     this.board = this.slotBoard || this.masteryType;
     this.onWildcard = this.board === "wildcard";
+    this.onRepertoire = this.board === "repertoire";
+
+    /** Arts and Resonances are the only masteries a repertoire slot may hold. */
+    this.repertoireEligible = /\b(Art|Resonance)$/.test(this.parent?.name ?? "");
   }
 }
 

@@ -18,6 +18,13 @@ import { postRollCard } from "../chat/cards.mjs";
 import { promptCast } from "../apps/cast-dialog.mjs";
 import { promptAction } from "../apps/action-dialog.mjs";
 import {
+  allConditionStacks,
+  changeCondition,
+  clearConditionsForTurn,
+  conditionStacks,
+  setCondition
+} from "./conditions.mjs";
+import {
   applyDamage,
   applyStrain,
   damageAffinity,
@@ -69,6 +76,54 @@ export default class MantleActor extends Actor {
   /** Equipped weapons that can be used for the Deflect reaction. */
   get deflectWeapons() {
     return this.weapons.filter((weapon) => weapon.system.canDeflect);
+  }
+
+  /* -------------------------------------------- */
+
+  /** Every condition this actor carries, as id to stacks. */
+  get conditions() {
+    return allConditionStacks(this);
+  }
+
+  /**
+   * How many stacks of one condition this actor carries.
+   *
+   * @param {string} id
+   * @returns {number}
+   */
+  conditionStacks(id) {
+    return conditionStacks(this, id);
+  }
+
+  /**
+   * Inflict or clear stacks of a condition.
+   *
+   * @param {string} id
+   * @param {number} [delta]
+   * @returns {Promise<number>} Stacks after the change
+   */
+  async changeCondition(id, delta = 1) {
+    return changeCondition(this, id, delta);
+  }
+
+  /**
+   * Remove a condition outright, whatever it was stacked to.
+   *
+   * @param {string} id
+   * @returns {Promise<void>}
+   */
+  async clearCondition(id) {
+    return setCondition(this, id, 0);
+  }
+
+  /**
+   * Run the end-of-turn condition pass: Wracked damage, auto-clears,
+   * roll-to-clears, and the Faltering and Unraveling checks.
+   *
+   * @returns {Promise<object>}
+   */
+  async endTurn() {
+    return clearConditionsForTurn(this);
   }
 
   /* -------------------------------------------- */

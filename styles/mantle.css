@@ -1160,6 +1160,14 @@
     color: var(--mantle-valor);
     font-weight: 700;
   }
+
+  /* Repertoire slots come from Starting Repertoire and hold only Arts and
+     Resonances, so they read as their own thing rather than as a wildcard. */
+  &.repertoire {
+    border-color: var(--mantle-mind);
+    color: var(--mantle-mind);
+    font-weight: 700;
+  }
 }
 
 /* -------------------------------------------- */
@@ -1424,5 +1432,261 @@
     grid-template-columns: 12em 1fr;
 
     .name { font-weight: 600; }
+  }
+}
+
+/* -------------------------------------------- */
+/*  Conditions                                   */
+/* -------------------------------------------- */
+
+/* Every condition is shown, present or not: a GM reaching for Provoked mid-turn
+   should not have to remember which submenu it lives in, and sixteen small
+   icons cost less screen than a dropdown costs attention. */
+.mantle .conditions {
+  h3 .end-turn {
+    flex: 0 0 auto;
+    width: auto;
+    font-size: 0.75em;
+    padding: 1px 8px;
+    line-height: 1.6;
+  }
+
+  .condition-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 4px;
+  }
+
+  .condition {
+    position: relative;
+    border: 1px solid transparent;
+    border-radius: 4px;
+
+    .face {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 4px;
+      cursor: pointer;
+      opacity: 0.4;
+    }
+
+    img {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+      border: none;
+    }
+
+    .label {
+      font-size: 0.72em;
+      line-height: 1.1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &:hover .face { opacity: 0.8; }
+
+    /* An active condition has to be unmistakable at a glance — mid-fight it is
+       the difference between rolling four dice and rolling two. */
+    &.active {
+      border-color: var(--mantle-border);
+      background: var(--mantle-panel);
+
+      .face { opacity: 1; }
+      .label { font-weight: 600; }
+    }
+
+    .count {
+      margin-left: auto;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--mantle-vitality);
+    }
+
+    .minus {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 15px;
+      height: 15px;
+      display: grid;
+      place-items: center;
+      font-size: 0.6em;
+      border-radius: 50%;
+      border: 1px solid var(--mantle-border);
+      background: var(--mantle-panel);
+      cursor: pointer;
+    }
+
+    /* Persistent conditions do not come off on their own, so they read as the
+       standing problem they are rather than as something end-of-turn fixes. */
+    &.active.clear-persistent {
+      border-color: var(--mantle-vitality);
+    }
+  }
+}
+
+/* -------------------------------------------- */
+/*  Party sheet                                  */
+/* -------------------------------------------- */
+
+.mantle .party-sheet {
+  .party-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--mantle-border);
+
+    .portrait {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      border: 1px solid var(--mantle-border);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .name {
+      font-size: 1.3em;
+      font-weight: 700;
+    }
+  }
+
+  /* Valor is the table's resource, not one character's, so it gets the whole
+     width and the largest number on the sheet. */
+  .valor-pool {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "label pair controls"
+      "note  note note";
+    align-items: center;
+    gap: 4px 10px;
+    margin: 12px 0;
+    padding: 10px 12px;
+    border: 2px solid var(--mantle-valor);
+    border-radius: 6px;
+
+    > label {
+      grid-area: label;
+      text-transform: uppercase;
+      font-size: 0.8em;
+      letter-spacing: 0.08em;
+      color: var(--mantle-valor);
+      font-weight: 700;
+    }
+
+    .pair {
+      grid-area: pair;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+
+      input {
+        width: 3em;
+        font-size: 1.8em;
+        font-weight: 700;
+        text-align: right;
+        color: var(--mantle-valor);
+      }
+
+      .max {
+        font-size: 1.1em;
+        color: var(--mantle-muted);
+      }
+    }
+
+    .valor-controls {
+      grid-area: controls;
+
+      a {
+        cursor: pointer;
+        color: var(--mantle-valor);
+      }
+    }
+
+    .merit-note {
+      grid-area: note;
+      font-size: 0.8em;
+      color: var(--mantle-muted);
+    }
+
+    &.merit .merit-note {
+      color: var(--mantle-valor);
+      font-weight: 600;
+    }
+  }
+
+  .spends {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    h3 { flex: 1 0 100%; }
+
+    button.spend {
+      flex: 1 1 30%;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 6px;
+
+      .cost {
+        font-weight: 700;
+        color: var(--mantle-valor);
+      }
+
+      /* Priced out rather than hidden: knowing what you cannot yet afford is
+         half the reason to look at the pool. */
+      &.unaffordable {
+        opacity: 0.45;
+      }
+    }
+
+    .hint { flex: 1 0 100%; }
+  }
+
+  .entry.member {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 5px;
+
+    img {
+      width: 26px;
+      height: 26px;
+      object-fit: cover;
+      border: 1px solid var(--mantle-border);
+      border-radius: 3px;
+    }
+
+    .name {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .soul {
+      margin-left: auto;
+      font-size: 0.8em;
+      color: var(--mantle-muted);
+    }
+
+    .control {
+      cursor: pointer;
+      color: var(--mantle-muted);
+
+      &:hover { color: var(--mantle-vitality); }
+    }
+
+    /* A member whose actor was deleted still counts against Max Valor until it
+       is taken off the list, so it is shown rather than dropped. */
+    &.missing .name {
+      color: var(--mantle-warning);
+      font-style: italic;
+      cursor: default;
+    }
   }
 }

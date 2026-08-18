@@ -54,6 +54,7 @@ import { MANTLE } from "../config.mjs";
  * @property {number} [masteryMind]
  * @property {number} [masterySoul]
  * @property {number} [masteryWildcard]
+ * @property {number} [masteryRepertoire]
  */
 
 /** Mantle rounds down everywhere unless a rule says otherwise. */
@@ -70,7 +71,7 @@ export const BONUS_KEYS = Object.freeze([
   "vitality", "strain", "resolve", "guard", "vigorRefresh", "vigorCap",
   "spd", "sen", "woundSlots", "burdenSlots", "gearSlots", "wondrousSlots",
   "consumablePoints", "languages",
-  "masteryBody", "masteryMind", "masterySoul", "masteryWildcard"
+  "masteryBody", "masteryMind", "masterySoul", "masteryWildcard", "masteryRepertoire"
 ]);
 
 /**
@@ -133,7 +134,7 @@ export function countSlotUsage(items) {
   let gear = 0;
   let wondrous = 0;
   /** @type {Record<string, number>} */
-  const mastery = { body: 0, mind: 0, soul: 0, wildcard: 0 };
+  const mastery = { body: 0, mind: 0, soul: 0, wildcard: 0, repertoire: 0 };
 
   for (const entry of items) {
     if (entry.equipped !== true) continue;
@@ -267,7 +268,12 @@ export function deriveMasterySlots(cores, characterRank, bonuses = {}) {
     body: cores.body + (bonuses.masteryBody ?? 0),
     mind: cores.mind + (bonuses.masteryMind ?? 0),
     soul: cores.soul + (bonuses.masterySoul ?? 0),
-    wildcard: MANTLE.baseline.wildcardMasterySlots + fromRank + (bonuses.masteryWildcard ?? 0)
+    wildcard: MANTLE.baseline.wildcardMasterySlots + fromRank + (bonuses.masteryWildcard ?? 0),
+
+    // Repertoire slots exist only if something granted them — the Scholar's and
+    // Channeler's Starting Repertoire, which hands over three that must hold
+    // Arts and Resonances. A non-caster has none, and the board is hidden.
+    repertoire: bonuses.masteryRepertoire ?? 0
   };
 }
 

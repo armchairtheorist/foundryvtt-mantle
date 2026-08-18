@@ -9,6 +9,7 @@
  */
 
 import { MANTLE } from "../../config.mjs";
+import { prepareConditions } from "./_conditions-context.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -36,7 +37,10 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
       rollDodge: MantleCharacterSheet.#onRollDodge,
       rollDeflect: MantleCharacterSheet.#onRollDeflect,
       testLuck: MantleCharacterSheet.#onTestLuck,
-      castSpell: MantleCharacterSheet.#onCastSpell
+      castSpell: MantleCharacterSheet.#onCastSpell,
+      addCondition: MantleCharacterSheet.#onAddCondition,
+      removeCondition: MantleCharacterSheet.#onRemoveCondition,
+      endTurn: MantleCharacterSheet.#onEndTurn
     }
   };
 
@@ -93,6 +97,8 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     // Deflect needs a weapon that permits it; without one the button would only
     // ever produce a warning, so it is not offered at all.
     context.canDeflect = this.document.deflectWeapons.length > 0;
+
+    context.conditions = prepareConditions(this.document);
 
     return context;
   }
@@ -203,9 +209,11 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     return {
       gear: entry("MANTLE.Slot.gear", slotsUsed.gear, slots.gear),
       wondrous: entry("MANTLE.Slot.wondrous", slotsUsed.wondrous, slots.wondrous),
-      mastery: Object.entries(slots.mastery).map(([board, total]) =>
-        entry(`MANTLE.Slot.${board}`, slotsUsed.mastery[board] ?? 0, total)
-      )
+      // The repertoire board only exists for casters, so a character with no
+      // repertoire slots gets no meter for it rather than a permanent 0 / 0.
+      mastery: Object.entries(slots.mastery)
+        .filter(([board, total]) => board !== "repertoire" || total > 0)
+        .map(([board, total]) => entry(`MANTLE.Slot.${board}`, slotsUsed.mastery[board] ?? 0, total))
     };
   }
 
@@ -288,11 +296,12 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
   }
 
   /**
-   * Move a mastery between its own board and a wildcard slot.
+   * Cycle a mastery between the boards that could legally pay for it.
    *
-   * A mastery may only sit on its own core's board or on wildcard — a BODY
-   * mastery cannot go into MIND — so there are exactly two destinations, and a
-   * click that cycles between them beats a dropdown of mostly-illegal options.
+   * That is its own core's board and wildcard — never another core's — plus a
+   * repertoire slot when the mastery is an Art or a Resonance and the character
+   * has repertoire slots to spend. Cycling through the legal two or three beats
+   * a dropdown of mostly-illegal options.
    *
    * @this {MantleCharacterSheet}
    * @param {PointerEvent} _event
@@ -302,8 +311,13 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     const item = this.#itemFor(target);
     if (item?.type !== "mastery") return;
 
-    const own = item.system.masteryType;
-    const next = item.system.board === "wildcard" ? own : "wildcard";
+    const boards = [item.system.masteryType, "wildcard"];
+    if (item.system.repertoireEligible && (this.document.system.slots?.mastery?.repertoire ?? 0) > 0) {
+      boards.push("repertoire");
+    }
+
+    const current = boards.indexOf(item.system.board);
+    const next = boards[(current + 1) % boards.length];
     await item.update({ "system.slotBoard": next });
   }
 
@@ -479,5 +493,32 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
   #itemFor(target) {
     const id = target.closest("[data-item-id]")?.dataset.itemId;
     return id ? this.document.items.get(id) : null;
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onAddCondition(_event, target) {
+    const id = target.dataset.condition;
+    if (id) await this.document.changeCondition(id, 1);
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onRemoveCondition(_event, target) {
+    const id = target.dataset.condition;
+    if (id) await this.document.changeCondition(id, -1);
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   */
+  static async #onEndTurn() {
+    await this.document.endTurn();
   }
 }

@@ -120,7 +120,8 @@ MANTLE.slotBoards = {
   body: "MANTLE.Slot.body",
   mind: "MANTLE.Slot.mind",
   soul: "MANTLE.Slot.soul",
-  wildcard: "MANTLE.Slot.wildcard"
+  wildcard: "MANTLE.Slot.wildcard",
+  repertoire: "MANTLE.Slot.repertoire"
 };
 
 /** Mastery types map one-to-one onto the cores; wildcard slots accept any type. */

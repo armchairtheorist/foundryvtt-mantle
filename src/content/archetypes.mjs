@@ -113,7 +113,7 @@ const PATHS = [
     domains: ["magic", "scholar"],
     ranks: [
       rank(1, "Spellcasting", "You may perform the Cast a Spell maneuver, using REA as the spellcasting attribute.", { strain: 1 }),
-      rank(1, "Starting Repertoire", "You get 3 bonus mastery slots that must be filled with Resonances and Arts, including at least 1 of each."),
+      rank(1, "Starting Repertoire", "You get 3 bonus mastery slots that must be filled with Resonances and Arts, including at least 1 of each.", { masteryRepertoire: 3 }),
       rank(1, "Spell Focus", "You may use your gear slots to equip spell foci. Casting without one incurs a -1d penalty."),
       rank(1, "Skill Training", "Receive training in Magic Theory, and 3 additional narrative skills from the Knowledge skill group."),
       rank(2, "Detect Magic", "You have access to the Detect Magic maneuver (Vigor 2).", { strain: 1 }),
@@ -129,7 +129,7 @@ const PATHS = [
     domains: ["magic", "channeler"],
     ranks: [
       rank(1, "Spellcasting", "You may perform the Cast a Spell maneuver, using INS as the spellcasting attribute.", { resolve: 1 }),
-      rank(1, "Starting Repertoire", "You get 3 bonus mastery slots that must be filled with Resonances and Arts, including at least 1 of each."),
+      rank(1, "Starting Repertoire", "You get 3 bonus mastery slots that must be filled with Resonances and Arts, including at least 1 of each.", { masteryRepertoire: 3 }),
       rank(1, "Spell Focus", "You may use your gear slots to equip spell foci. Casting without one incurs a -1d penalty."),
       rank(1, "Skill Training", "Receive training in 2 narrative skills from the Influence skill group, and 2 from any group."),
       rank(2, "Patron's Aura", "You project an aura of divine protection covering all squares within 5 squares of you. You also gain the Helping Hand reaction.", { resolve: 1 }),

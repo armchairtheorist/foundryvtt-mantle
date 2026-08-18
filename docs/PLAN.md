@@ -64,7 +64,7 @@ What we *do* need tooling for:
 
 | Need | Tool | Notes |
 |---|---|---|
-| Compendium packs | `@foundryvtt/foundryvtt-cli` **3.0.4** | Packs are LevelDB since v11; they must be compiled. Source JSON lives in `src/packs/`, build output in `packs/`. |
+| Compendium packs | `@foundryvtt/foundryvtt-cli` **3.0.4** | Packs are LevelDB since v11; they must be compiled. Source lives as JS modules in `src/content/`, build output in `packs/`. |
 | API autocomplete | `fvtt-types` **14.366.0-beta** | Dev-only. Also serves as my offline copy of the v14 API — see §9. |
 | Releases | GitHub Actions | On tag: zip the system, attach to a Release, publish the manifest URL so Foundry can install and auto-update. |
 
@@ -99,7 +99,7 @@ module/
 templates/                  Handlebars
 styles/mantle.css
 lang/en.json
-src/packs/<pack>/*.json     compendium source (version-controlled)
+src/content/<pack>.mjs      compendium source (version-controlled)
 packs/                      build output (git-ignored)
 docs/
 ```
@@ -346,6 +346,23 @@ and still have a system that runs.
 | **3 — Spellcasting** | Cast dialog, shaping economy, Art × Resonance resolution | An Ignis Rend and a Lux Mend both resolve correctly, shaped and unshaped |
 | **4 — Content** | Compendium packs built from all six catalogs, including the four pregen PCs as ready-to-play Actors | You can drag a Warrior, a Rapier, and Bloodlust onto a sheet, or import Mira whole |
 | **5 — Table polish** | Valor tracker, conditions as status effects, adversary sheet, challenge-class and tier templates, module integration | A GM can run *The Toll Road* encounter from the Quick Start |
+
+All five phases are implemented as of v0.6.0. What is deliberately **not** built,
+and why:
+
+- **Specialist path archetypes** and the **Rogue** basic path — not yet written
+  in the catalogs. The schemas hold them; the compendium ships what exists.
+- **Automated condition effects.** Impaired is offered pre-filled in the action
+  dialog rather than subtracted silently, and Hindered's SPD halving is left to
+  the GM. The assisted model is deliberate: a modifier applied twice is worse
+  than one applied by hand.
+- **Turn order.** Mantle uses side-alternating zipper initiative, so the system
+  registers no initiative formula and defers to Lancer Initiative or the default
+  tracker.
+- **Mastery bonuses as data.** Vigorous grants +1 Vigor refresh, and several
+  masteries grant similar flat bonuses; those are currently rules text a player
+  applies, not fields the derivation reads. The archetype bonus machinery would
+  extend to them directly.
 
 ---
 

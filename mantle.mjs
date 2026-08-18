@@ -14,6 +14,7 @@ import MantleActor from "./module/documents/actor.mjs";
 import MantleItem from "./module/documents/item.mjs";
 import MantleCharacterSheet from "./module/apps/sheets/character-sheet.mjs";
 import MantleAdversarySheet from "./module/apps/sheets/adversary-sheet.mjs";
+import MantlePartySheet from "./module/apps/sheets/party-sheet.mjs";
 import MantleItemSheet from "./module/apps/sheets/item-sheet.mjs";
 import MantleRoll from "./module/dice/roll.mjs";
 import { registerChatHooks } from "./module/chat/cards.mjs";
@@ -52,12 +53,28 @@ Hooks.once("init", () => {
   // expects custom roll classes to be registered.
   CONFIG.Dice.rolls.push(MantleRoll);
 
+  registerPartials();
   registerSheets();
   registerChatHooks();
   registerConditions();
 
   globalThis.mantle = { config: MANTLE };
 });
+
+/* -------------------------------------------- */
+
+/**
+ * Register shared Handlebars partials.
+ *
+ * The condition bar is the only one so far, and it earns its keep: a Bandit
+ * Captain carries Hindered exactly the way a player character does, so both
+ * actor sheets render the same markup rather than two copies that drift.
+ */
+function registerPartials() {
+  foundry.applications.handlebars.loadTemplates([
+    "systems/mantle/templates/parts/conditions.hbs"
+  ]);
+}
 
 /* -------------------------------------------- */
 
@@ -77,6 +94,12 @@ function registerSheets() {
     types: ["adversary"],
     makeDefault: true,
     label: "MANTLE.Sheet.adversary"
+  });
+
+  Actors.registerSheet("mantle", MantlePartySheet, {
+    types: ["party"],
+    makeDefault: true,
+    label: "MANTLE.Sheet.party"
   });
 
   Items.unregisterSheet("core", sheets.ItemSheetV2);

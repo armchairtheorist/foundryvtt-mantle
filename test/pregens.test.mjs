@@ -13,7 +13,15 @@
 
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-import { deriveCharacter, isInCrisis, isStressed, checkEquilibrium } from "../module/data/derive.mjs";
+import {
+  deriveCharacter,
+  gatherBonuses,
+  countSlotUsage,
+  isInCrisis,
+  isStressed,
+  checkEquilibrium
+} from "../module/data/derive.mjs";
+import { build as buildPregens } from "../src/content/pregens.mjs";
 
 /**
  * Assert every key of `expected` against the derived result, naming the stat in
@@ -272,5 +280,143 @@ describe("derived output shape", () => {
       [],
       `derived keys shadow stored fields: ${collisions.join(", ")}`
     );
+  });
+});
+
+/* -------------------------------------------- */
+
+describe("the pregens ship as ready-to-play actors", () => {
+  const pregens = buildPregens();
+  const byName = new Map(pregens.map((p) => [p.name, p]));
+
+  /**
+   * Re-derive a built pregen the way the character sheet will, from its own
+   * stored attributes and embedded items — no transcribed bonuses.
+   *
+   * @param {string} name
+   */
+  function derive(name) {
+    const actor = byName.get(name);
+    assert.ok(actor, `${name} is in the pack`);
+
+    const archetypes = actor.items.filter((/** @type {any} */ i) => i.type === "archetype");
+
+    return deriveCharacter({
+      attributes: actor.system.attributes,
+      characterRank: archetypes.reduce((/** @type {number} */ sum, /** @type {any} */ a) =>
+        sum + a.system.rank, 0),
+      ancestry: (() => {
+        const ancestry = archetypes.find((/** @type {any} */ a) => a.system.kind === "ancestry");
+        return ancestry
+          ? { spd: ancestry.system.spd, sen: ancestry.system.sen, size: ancestry.system.size }
+          : {};
+      })(),
+      bonuses: gatherBonuses({
+        archetypes: archetypes.map((/** @type {any} */ a) => ({
+          rank: a.system.rank,
+          features: a.system.rankFeatures
+        })),
+        armor: actor.items
+          .filter((/** @type {any} */ i) => i.type === "armor" && i.system.equipped)
+          .map((/** @type {any} */ i) => ({ guard: i.system.guard }))
+      })
+    });
+  }
+
+  test("all four are present", () => {
+    assert.deepEqual(pregens.map((p) => p.name).sort(), ["Kira", "Maya", "Mira", "Vera"]);
+  });
+
+  /**
+   * The acceptance test for the whole pipeline: build a character from
+   * catalog content alone and check the printed stat block falls out.
+   *
+   * The bonuses are not transcribed here the way they are above — they come
+   * from the archetypes and armor the actor actually carries. So this catches
+   * the class of error the transcribed tests cannot: a pregen given the wrong
+   * archetype rank, or shipped without its armor.
+   */
+  test("each one reproduces its printed stat block from its own items", () => {
+    const printed = {
+      Mira: { maxVitality: 21, maxStrain: 5, maxResolve: 6, maxGuard: 4, spd: 5, sen: 10 },
+      Kira: { maxVitality: 21, maxStrain: 5, maxResolve: 7, maxGuard: 3, spd: 4, sen: 12 },
+      Maya: { maxVitality: 10, maxStrain: 10, maxResolve: 7, maxGuard: 2, spd: 5, sen: 10 },
+      Vera: { maxVitality: 12, maxStrain: 8, maxResolve: 8, maxGuard: 2, spd: 6, sen: 15 }
+    };
+
+    for (const [name, expected] of Object.entries(printed)) {
+      expectStats(derive(name), expected, name);
+    }
+  });
+
+  test("every track starts at the maximum the sheet will compute", () => {
+    // A pregen handed to a player mid-session should be ready to fight. A track
+    // that starts at some other number reads as damage nobody dealt.
+    for (const actor of pregens) {
+      const derived = derive(actor.name);
+      assert.equal(actor.system.vitality.value, derived.maxVitality, `${actor.name}: vitality`);
+      assert.equal(actor.system.guard.value, derived.maxGuard, `${actor.name}: guard`);
+      assert.equal(actor.system.resolve.value, derived.maxResolve, `${actor.name}: resolve`);
+      assert.equal(actor.system.strain.value, 0, `${actor.name}: strain starts empty`);
+    }
+  });
+
+  test("no build overspends a mastery board", () => {
+    // The reason the repertoire board exists: without it both casters read as
+    // three slots over on their own cores, which looks exactly like a bug.
+    for (const actor of pregens) {
+      const slots = derive(actor.name).slots.mastery;
+      const used = countSlotUsage(
+        actor.items.map((/** @type {any} */ item) => ({
+          type: item.type,
+          equipped: item.system.equipped === true,
+          gearSlots: item.system.gearSlots,
+          masteryType: item.system.masteryType,
+          slotBoard: item.system.slotBoard,
+          slotCost: item.system.slotCost
+        }))
+      ).mastery;
+
+      for (const [board, total] of Object.entries(slots)) {
+        assert.ok(
+          used[board] <= total,
+          `${actor.name}: ${board} board uses ${used[board]} of ${total}`
+        );
+      }
+    }
+  });
+
+  test("each caster carries the Arts and Resonances their masteries grant", () => {
+    // Maya's Ignis Resonance mastery is the slot she spent; the Ignis item is
+    // what the Cast dialog offers. Shipping one without the other gives her a
+    // spell list she cannot cast from.
+    for (const name of ["Maya", "Vera"]) {
+      const actor = byName.get(name);
+      assert.ok(actor);
+
+      const masteries = actor.items
+        .filter((/** @type {any} */ i) => i.type === "mastery")
+        .map((/** @type {any} */ i) => i.name);
+      const granted = actor.items
+        .filter((/** @type {any} */ i) => ["art", "resonance"].includes(i.type))
+        .map((/** @type {any} */ i) => i.name);
+
+      for (const mastery of masteries) {
+        const base = mastery.replace(/ (Art|Resonance)$/, "");
+        if (base === mastery) continue;
+        assert.ok(granted.includes(base), `${name}: ${mastery} but no ${base}`);
+      }
+
+      assert.ok(granted.length > 0, `${name} has something to cast`);
+    }
+  });
+
+  test("every embedded item is equipped, except the archetypes that cannot be", () => {
+    for (const actor of pregens) {
+      for (const item of actor.items) {
+        if (item.type === "archetype") continue;
+        assert.equal(item.system.equipped, true, `${actor.name}: ${item.name}`);
+      }
+    }
   });
 });

@@ -163,7 +163,8 @@ export function bonuses() {
     masteryBody: modifier(),
     masteryMind: modifier(),
     masterySoul: modifier(),
-    masteryWildcard: modifier()
+    masteryWildcard: modifier(),
+    masteryRepertoire: modifier()
   });
 }
 

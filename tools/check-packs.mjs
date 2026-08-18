@@ -89,6 +89,29 @@ for (const file of modules) {
     for (const field of REQUIRED[doc.type] ?? []) {
       if (doc.system?.[field] === undefined) problems.push(`${where}: missing system.${field}`);
     }
+
+    // Embedded documents live in the same database under a compound key. A
+    // wrong one makes the CLI throw outright; a missing one makes it drop the
+    // item silently, which is how an actor ships with an empty inventory over a
+    // green build.
+    for (const item of doc.items ?? []) {
+      const itemWhere = `${where} / ${item.name ?? "(unnamed item)"}`;
+
+      if (!/^[A-Za-z0-9]{16}$/.test(item._id ?? "")) {
+        problems.push(`${itemWhere}: embedded _id must be 16 alphanumeric characters`);
+      }
+
+      const expectedItemKey = `!actors.items!${doc._id}.${item._id}`;
+      if (item._key !== expectedItemKey) {
+        problems.push(
+          `${itemWhere}: embedded _key must be ${expectedItemKey}, got ${JSON.stringify(item._key)}`
+        );
+      }
+
+      if (!ITEM_TYPES.has(item.type)) {
+        problems.push(`${itemWhere}: unknown embedded subtype ${JSON.stringify(item.type)}`);
+      }
+    }
   }
 }
 

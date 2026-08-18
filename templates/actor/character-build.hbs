@@ -61,7 +61,7 @@
               board or on a wildcard slot and nowhere else, so clicking cycles
               between exactly those two — which is how a player moves a mastery
               off an overspent board and onto a spare wildcard. --}}
-        <a class="board {{#if mastery.system.onWildcard}}wildcard{{/if}}" data-action="cycleBoard"
+        <a class="board {{#if mastery.system.onWildcard}}wildcard{{/if}} {{#if mastery.system.onRepertoire}}repertoire{{/if}}" data-action="cycleBoard"
            data-tooltip="{{localize 'MANTLE.Sheet.cycleBoardHint'}}">
           {{localize (lookup ../config.slotBoards mastery.system.board)}}
         </a>

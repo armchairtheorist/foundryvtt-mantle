@@ -15,42 +15,37 @@ import { build as buildMasteries } from "../src/content/masteries.mjs";
 import { build as buildEquipment } from "../src/content/equipment.mjs";
 import { build as buildLimitBreaks } from "../src/content/limitbreaks.mjs";
 import { MANTLE } from "../module/config.mjs";
-import { deriveCharacter } from "../module/data/derive.mjs";
+import { deriveCharacter, gatherBonuses } from "../module/data/derive.mjs";
 
 const archetypes = buildArchetypes();
 
+/** The bonuses these tests assert on. gatherBonuses returns every accumulator;
+ *  the rest are zero for every archetype in the catalog and would only make the
+ *  expected objects below harder to read. */
+const TRACKED = ["vitality", "strain", "resolve", "guard", "masteryWildcard", "masteryRepertoire"];
+
 /**
- * Sum the bonuses an archetype grants up to and including a given rank, which
- * is what the character model does at runtime.
+ * Total the bonuses a build grants, through the same `gatherBonuses` the
+ * character model runs.
  *
- * @param {string} name
- * @param {number} rank
- */
-function bonusesFor(name, rank) {
-  const archetype = archetypes.find((a) => a.name === name);
-  assert.ok(archetype, `archetype ${name} exists`);
-
-  /** @type {Record<string, number>} */
-  const totals = { vitality: 0, strain: 0, resolve: 0, guard: 0, masteryWildcard: 0 };
-  for (const feature of archetype.system.rankFeatures) {
-    if (feature.rank > rank) continue;
-    for (const [key, value] of Object.entries(feature.bonuses ?? {})) {
-      if (value) totals[key] += value;
-    }
-  }
-  return totals;
-}
-
-/**
- * @param {Array<[string, number]>} build
+ * Calling the real function rather than re-summing here is the point: a test
+ * with its own copy of the arithmetic passes happily while the code it is
+ * meant to guard drifts away from it.
+ *
+ * @param {Array<[string, number]>} build - Archetype name and rank held
+ * @returns {Record<string, number>}
  */
 function combined(build) {
-  /** @type {Record<string, number>} */
-  const totals = { vitality: 0, strain: 0, resolve: 0, guard: 0, masteryWildcard: 0 };
-  for (const [name, rank] of build) {
-    for (const [key, value] of Object.entries(bonusesFor(name, rank))) totals[key] += value;
-  }
-  return totals;
+  const totals = gatherBonuses({
+    archetypes: build.map(([name, rank]) => {
+      const archetype = archetypes.find((a) => a.name === name);
+      assert.ok(archetype, `archetype ${name} exists`);
+      return { rank, features: archetype.system.rankFeatures };
+    })
+  });
+
+  const all = /** @type {Record<string, number>} */ (totals);
+  return Object.fromEntries(TRACKED.map((key) => [key, all[key]]));
 }
 
 describe("archetype bonuses match the pre-generated characters", () => {
@@ -60,7 +55,8 @@ describe("archetype bonuses match the pre-generated characters", () => {
       strain: 1,
       resolve: 0,
       guard: 2, // the other 2 Guard come from her Chain Shirt
-      masteryWildcard: 0
+      masteryWildcard: 0,
+      masteryRepertoire: 0
     });
   });
 
@@ -70,7 +66,8 @@ describe("archetype bonuses match the pre-generated characters", () => {
       strain: 0,
       resolve: 0,
       guard: 0, // all 3 Guard come from Plate Armor
-      masteryWildcard: 0
+      masteryWildcard: 0,
+      masteryRepertoire: 0
     });
   });
 
@@ -80,7 +77,8 @@ describe("archetype bonuses match the pre-generated characters", () => {
       strain: 3,
       resolve: 0,
       guard: 0,
-      masteryWildcard: 1
+      masteryWildcard: 1,
+      masteryRepertoire: 3 // Starting Repertoire, for the Arts and Resonances
     });
   });
 
@@ -90,15 +88,16 @@ describe("archetype bonuses match the pre-generated characters", () => {
       strain: 2,
       resolve: 2,
       guard: 0,
-      masteryWildcard: 0
+      masteryWildcard: 0,
+      masteryRepertoire: 3 // Starting Repertoire, for the Arts and Resonances
     });
   });
 
   test("a rank 1 Warrior does not receive rank 2's bonuses", () => {
     // The reason archetype bonuses are data summed per rank rather than Active
     // Effects: effects are not rank-aware without one effect per rank.
-    assert.deepEqual(bonusesFor("Warrior", 1).guard, 1);
-    assert.deepEqual(bonusesFor("Warrior", 3).guard, 3);
+    assert.equal(combined([["Warrior", 1]]).guard, 1);
+    assert.equal(combined([["Warrior", 3]]).guard, 3);
   });
 });
 

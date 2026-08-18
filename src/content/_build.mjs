@@ -88,9 +88,17 @@ export function item({ pack, name, type, system, img }) {
  * @param {string} options.type
  * @param {object} options.system
  * @param {string} [options.img]
+ * @param {object[]} [options.items] - Embedded items, already shaped as documents
  * @returns {PackDocument}
  */
-export function actor({ pack, name, type, system, img }) {
+export function actor({ pack, name, type, system, img, items = [] }) {
+  // A player character's token is linked to its actor: damage taken on the
+  // canvas is damage on the sheet, and there is only ever one of them. An
+  // adversary's is not — four Goblin Skirmishers are four separate creatures
+  // that happen to share a stat block, and linking them would have one death
+  // kill the squad.
+  const actorLink = type === "character";
+
   const _id = stableId(`${pack}/${type}/${name}`);
   return {
     _id,
@@ -99,12 +107,12 @@ export function actor({ pack, name, type, system, img }) {
     type,
     img: img ?? "icons/svg/mystery-man.svg",
     system,
-    items: [],
+    items,
     effects: [],
     folder: null,
     sort: 0,
     ownership: { default: 0 },
-    prototypeToken: { name, actorLink: false },
+    prototypeToken: { name, actorLink },
     flags: {},
     _stats: { systemId: "mantle" }
   };

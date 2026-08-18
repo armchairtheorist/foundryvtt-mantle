@@ -1,0 +1,175 @@
+/**
+ * Condition stacking and the end-of-turn pass.
+ *
+ * The clear rules are where a fight actually resolves — a Faltering check that
+ * reads the comparison backwards turns a survivable first Wound into a death
+ * sentence, and nothing about it would look wrong on screen. Every figure below
+ * is from the Quick Start's Conditions section (v0.21).
+ *
+ * Run with: npm test
+ */
+
+import { test, describe } from "node:test";
+import assert from "node:assert/strict";
+import {
+  applyStacks,
+  conditionModifiers,
+  conditionSideEffects,
+  endOfTurnPlan,
+  escalate,
+  stackCap,
+  DEFAULT_CAP,
+  WRACKED_DAMAGE_PER_STACK
+} from "../module/rules/conditions.mjs";
+import { MANTLE } from "../module/config.mjs";
+
+describe("stacking", () => {
+  test("stacked conditions cap at 3", () => {
+    assert.equal(stackCap("impaired"), 3);
+    assert.equal(stackCap("hindered"), 3);
+    assert.equal(stackCap("wracked"), 3);
+    assert.equal(DEFAULT_CAP, 3);
+  });
+
+  test("Faltering and Unraveling are uncapped", () => {
+    assert.equal(stackCap("faltering"), Infinity);
+    assert.equal(stackCap("unraveling"), Infinity);
+  });
+
+  test("a non-stackable condition counts as exactly one stack", () => {
+    // Which is what makes "remove stacks equal to your successes" work the same
+    // for Frightened as it does for Hindered.
+    assert.equal(stackCap("frightened"), 1);
+    assert.equal(applyStacks("frightened", 0, 3), 1);
+  });
+
+  test("applying stacks is cumulative up to the cap", () => {
+    // Impaired 1 plus an incoming Impaired 2 is Impaired 3.
+    assert.equal(applyStacks("impaired", 1, 2), 3);
+    assert.equal(applyStacks("impaired", 2, 2), 3, "clamped, not 4");
+  });
+
+  test("clearing never goes below zero", () => {
+    assert.equal(applyStacks("impaired", 2, -5), 0);
+  });
+
+  test("every condition in the catalog has a cap the rules recognise", () => {
+    for (const id of Object.keys(MANTLE.conditions)) {
+      const cap = stackCap(id);
+      assert.ok(cap === 1 || cap === 3 || cap === Infinity, `${id}: cap ${cap}`);
+    }
+  });
+});
+
+/* -------------------------------------------- */
+
+describe("the end-of-turn pass", () => {
+  test("sorts each condition into its clear type", () => {
+    const plan = endOfTurnPlan({ impaired: 2, hindered: 1, cursed: 1, faltering: 1 });
+
+    assert.deepEqual(plan.auto, ["impaired"]);
+    assert.deepEqual(plan.roll.map((entry) => entry.id), ["hindered"]);
+    assert.deepEqual(plan.persistent, ["cursed"]);
+    assert.deepEqual(plan.escalating, ["faltering"]);
+  });
+
+  test("a roll-to-clear condition carries the attributes it may use", () => {
+    const plan = endOfTurnPlan({ hindered: 1, exhausted: 1 });
+
+    const hindered = plan.roll.find((entry) => entry.id === "hindered");
+    assert.deepEqual(hindered?.attributes, ["pow", "agi"], "POW or AGI");
+
+    const exhausted = plan.roll.find((entry) => entry.id === "exhausted");
+    assert.deepEqual(exhausted?.attributes, ["pow"]);
+  });
+
+  test("Wracked deals 2 penetrating damage per stack, and still auto-clears", () => {
+    const plan = endOfTurnPlan({ wracked: 3 });
+
+    assert.deepEqual(plan.wracked, [{ id: "wracked", stacks: 3, damage: 6 }]);
+    assert.equal(WRACKED_DAMAGE_PER_STACK, 2);
+
+    // The damage is taken *before* the stack drops, so the same condition
+    // appears in both lists — that ordering is the rule, not a duplicate.
+    assert.deepEqual(plan.auto, ["wracked"]);
+  });
+
+  test("conditions at zero stacks are not in the plan at all", () => {
+    const plan = endOfTurnPlan({ impaired: 0, hindered: 0 });
+    assert.deepEqual(plan.auto, []);
+    assert.deepEqual(plan.roll, []);
+  });
+
+  test("every condition in the catalog lands somewhere in the plan", () => {
+    // A condition whose clear type the plan does not recognise would silently
+    // never resolve, which is the kind of gap nobody notices for months.
+    const stacks = Object.fromEntries(Object.keys(MANTLE.conditions).map((id) => [id, 1]));
+    const plan = endOfTurnPlan(stacks);
+
+    const sorted = new Set([
+      ...plan.auto,
+      ...plan.roll.map((entry) => entry.id),
+      ...plan.persistent,
+      ...plan.escalating
+    ]);
+
+    for (const id of Object.keys(MANTLE.conditions)) assert.ok(sorted.has(id), id);
+  });
+});
+
+/* -------------------------------------------- */
+
+describe("Faltering and Unraveling", () => {
+  test("the first stack can never collapse you", () => {
+    // Roll below your stacks and you go down. At 1 stack, no d6 result is
+    // below 1 — which is exactly what makes the first Critical Wound survivable.
+    for (let die = 1; die <= 6; die += 1) {
+      assert.equal(escalate(1, die).collapses, false, `die ${die}`);
+    }
+  });
+
+  test("the stack grows on every turn you survive", () => {
+    assert.deepEqual(escalate(1, 3), { collapses: false, stacksAfter: 2 });
+    assert.deepEqual(escalate(2, 5), { collapses: false, stacksAfter: 3 });
+  });
+
+  test("rolling below your stacks collapses you", () => {
+    assert.equal(escalate(3, 2).collapses, true);
+    assert.equal(escalate(3, 3).collapses, false, "equal is a pass, not a fail");
+  });
+
+  test("collapse odds match the stack count", () => {
+    // At N stacks, N-1 of the six faces fail — 2 stacks is 1-in-6, 6 stacks is
+    // certain death. Worth asserting, because reading the comparison the wrong
+    // way round produces a plausible table that is off by one everywhere.
+    for (let stacks = 1; stacks <= 6; stacks += 1) {
+      const failures = [1, 2, 3, 4, 5, 6].filter((die) => escalate(stacks, die).collapses).length;
+      assert.equal(failures, stacks - 1, `${stacks} stacks`);
+    }
+  });
+});
+
+/* -------------------------------------------- */
+
+describe("side effects and modifiers", () => {
+  test("Defeated clears Faltering and Lost clears Unraveling", () => {
+    assert.deepEqual(conditionSideEffects("defeated").clears, ["faltering"]);
+    assert.deepEqual(conditionSideEffects("lost").clears, ["unraveling"]);
+  });
+
+  test("Surprised carries Slowed with it", () => {
+    assert.deepEqual(conditionSideEffects("surprised").carries, ["slowed"]);
+  });
+
+  test("a condition with no side effects reports none rather than undefined", () => {
+    assert.deepEqual(conditionSideEffects("impaired"), { clears: [], carries: [] });
+  });
+
+  test("Impaired costs a die per stack", () => {
+    assert.deepEqual(conditionModifiers({ impaired: 2 }), { impaired: 2, hindered: false });
+  });
+
+  test("a creature with no conditions has no modifiers", () => {
+    assert.deepEqual(conditionModifiers({}), { impaired: 0, hindered: false });
+  });
+});

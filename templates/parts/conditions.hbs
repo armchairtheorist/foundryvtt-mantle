@@ -1,0 +1,39 @@
+{{!--
+  The condition bar, shared by the character and adversary sheets.
+
+  Every condition in the catalog is shown, present or not, because a GM reaching
+  for "Provoked" mid-turn should not have to remember where it lives. Inactive
+  ones are dimmed; active ones carry their stack count and a control to spend
+  one back.
+--}}
+<div class="section conditions">
+  <h3>
+    {{localize "MANTLE.Sheet.conditions"}}
+    <button type="button" class="end-turn" data-action="endTurn"
+            data-tooltip="{{localize 'MANTLE.Condition.endOfTurnHint'}}">
+      <i class="fa-solid fa-hourglass-end"></i> {{localize "MANTLE.Condition.endOfTurn"}}
+    </button>
+  </h3>
+
+  <div class="condition-grid">
+    {{#each conditions as |condition|}}
+      <div class="condition {{#if condition.stacks}}active{{/if}} clear-{{condition.clear}}"
+           data-condition="{{condition.id}}">
+        <a class="face" data-action="addCondition" data-condition="{{condition.id}}"
+           data-tooltip="{{localize condition.tooltip}}">
+          <img src="{{condition.img}}" alt="{{localize condition.label}}">
+          <span class="label">{{localize condition.label}}</span>
+          {{#if condition.stacks}}
+            <span class="count">{{condition.stacks}}</span>
+          {{/if}}
+        </a>
+        {{#if condition.stacks}}
+          <a class="minus" data-action="removeCondition" data-condition="{{condition.id}}"
+             data-tooltip="{{localize 'MANTLE.Condition.removeStack'}}">
+            <i class="fa-solid fa-minus"></i>
+          </a>
+        {{/if}}
+      </div>
+    {{/each}}
+  </div>
+</div>

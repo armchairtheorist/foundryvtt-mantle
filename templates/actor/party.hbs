@@ -1,0 +1,85 @@
+{{!--
+  The Party sheet: one shared Valor pool, its members, and the three ways it is
+  spent.
+
+  Give every player Owner permission on this actor and they can spend Valor
+  themselves — the pool is the point, and routing every spend through the GM
+  would make it feel like the GM's resource rather than the table's.
+--}}
+<section class="party-sheet">
+
+  <header class="party-header">
+    <img class="portrait" src="{{document.img}}" data-edit="img" alt="{{document.name}}"
+         data-action="editImage" data-tooltip="{{localize 'MANTLE.Sheet.changePortrait'}}">
+    <input class="name" type="text" name="name" value="{{document.name}}"
+           {{#unless editable}}disabled{{/unless}}>
+  </header>
+
+  <div class="valor-pool {{#if system.meritEarned}}merit{{/if}}">
+    <label>{{localize "MANTLE.Valor.valor"}}</label>
+    <div class="pair">
+      <input type="number" name="system.valor.value" value="{{system.valor.value}}"
+             {{#unless editable}}disabled{{/unless}}>
+      <span class="max">/ {{system.valor.max}}</span>
+    </div>
+
+    <div class="valor-controls">
+      <a data-action="gainValor" data-amount="1" data-tooltip="{{localize 'MANTLE.Valor.gainHint'}}">
+        <i class="fa-solid fa-plus"></i>
+      </a>
+    </div>
+
+    {{!-- Entering downtime at half the cap or better earns the party a merit,
+          so the threshold is worth showing rather than making everyone work it
+          out from the cap. --}}
+    <span class="merit-note" data-tooltip="{{localize 'MANTLE.Valor.meritHint'}}">
+      {{#if system.meritEarned}}
+        {{localize "MANTLE.Valor.meritEarned"}}
+      {{else}}
+        {{localize "MANTLE.Valor.meritAt"}} {{system.meritThreshold}}
+      {{/if}}
+    </span>
+  </div>
+
+  <div class="section spends">
+    <h3>{{localize "MANTLE.Valor.spend"}}</h3>
+    {{#each spends as |spend|}}
+      <button type="button" class="spend {{#unless spend.affordable}}unaffordable{{/unless}}"
+              data-action="spendValor" data-cost="{{spend.cost}}" data-label="{{spend.label}}">
+        <span class="what">{{localize spend.label}}</span>
+        <span class="cost">{{spend.cost}}</span>
+      </button>
+    {{/each}}
+    <p class="hint">{{localize "MANTLE.Valor.feathHint"}}</p>
+  </div>
+
+  <div class="section members">
+    <h3>
+      {{localize "MANTLE.Party.members"}}
+      <span class="slots">{{system.memberCount}}</span>
+      <a class="control add" data-action="addMember"
+         data-tooltip="{{localize 'MANTLE.Party.addHint'}}"><i class="fa-solid fa-plus"></i></a>
+    </h3>
+
+    {{#each members as |member|}}
+      <div class="entry member {{#unless member.found}}missing{{/unless}}">
+        <img src="{{member.img}}" alt="{{member.name}}">
+        <span class="name" data-action="openMember" data-uuid="{{member.uuid}}">{{member.name}}</span>
+        <span class="soul">{{localize "MANTLE.Core.soul"}} {{member.soul}}</span>
+        <a class="control" data-action="removeMember" data-uuid="{{member.uuid}}">
+          <i class="fa-solid fa-xmark"></i>
+        </a>
+      </div>
+    {{else}}
+      <p class="empty">{{localize "MANTLE.Party.noMembers"}}</p>
+    {{/each}}
+
+    <p class="hint">{{localize "MANTLE.Party.capHint"}}</p>
+  </div>
+
+  <div class="section notes">
+    <h3>{{localize "MANTLE.Sheet.notes"}}</h3>
+    {{formField (lookup fields "notes") value=system.notes enriched=enrichedNotes
+      toggled=true disabled=(not editable)}}
+  </div>
+</section>

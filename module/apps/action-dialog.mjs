@@ -17,6 +17,7 @@
 
 import { MANTLE } from "../config.mjs";
 import { buildPool } from "../dice/pool.mjs";
+import { conditionModifiers } from "../rules/conditions.mjs";
 
 const { DialogV2 } = foundry.applications.api;
 const TEMPLATE = "systems/mantle/templates/apps/action-dialog.hbs";
@@ -44,10 +45,17 @@ export async function promptAction(actor, { attribute = "pow" } = {}) {
     selected: key === attribute
   }));
 
+  // Impaired is pre-filled from what the character is actually carrying, but
+  // left editable rather than applied silently: the GM may already have
+  // accounted for it, and a penalty applied twice is worse than one applied by
+  // hand.
+  const conditions = conditionModifiers(actor.conditions ?? {});
+
   const content = await foundry.applications.handlebars.renderTemplate(TEMPLATE, {
     attributes,
     skills,
-    skillBonus: MANTLE.skillBonus
+    skillBonus: MANTLE.skillBonus,
+    impaired: conditions.impaired
   });
 
   const result = await DialogV2.wait({

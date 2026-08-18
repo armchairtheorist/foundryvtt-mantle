@@ -14,6 +14,7 @@
  */
 
 import { MANTLE } from "../../config.mjs";
+import { prepareConditions } from "./_conditions-context.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -30,7 +31,10 @@ export default class MantleAdversarySheet extends HandlebarsApplicationMixin(Act
       takeWound: MantleAdversarySheet.#onTakeWound,
       takeBurden: MantleAdversarySheet.#onTakeBurden,
       clearHarm: MantleAdversarySheet.#onClearHarm,
-      resetHarm: MantleAdversarySheet.#onResetHarm
+      resetHarm: MantleAdversarySheet.#onResetHarm,
+      addCondition: MantleAdversarySheet.#onAddCondition,
+      removeCondition: MantleAdversarySheet.#onRemoveCondition,
+      endTurn: MantleAdversarySheet.#onEndTurn
     }
   };
 
@@ -80,6 +84,8 @@ export default class MantleAdversarySheet extends HandlebarsApplicationMixin(Act
     // A template layered onto a stat block that already carries its own class
     // does nothing, and silently doing nothing is worse than saying so.
     context.templateIgnored = system.scaled.templateIgnored;
+
+    context.conditions = prepareConditions(this.document);
 
     return context;
   }
@@ -145,5 +151,32 @@ export default class MantleAdversarySheet extends HandlebarsApplicationMixin(Act
       "system.wounds": [],
       "system.burdens": []
     });
+  }
+
+  /**
+   * @this {MantleAdversarySheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onAddCondition(_event, target) {
+    const id = target.dataset.condition;
+    if (id) await this.document.changeCondition(id, 1);
+  }
+
+  /**
+   * @this {MantleAdversarySheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onRemoveCondition(_event, target) {
+    const id = target.dataset.condition;
+    if (id) await this.document.changeCondition(id, -1);
+  }
+
+  /**
+   * @this {MantleAdversarySheet}
+   */
+  static async #onEndTurn() {
+    await this.document.endTurn();
   }
 }

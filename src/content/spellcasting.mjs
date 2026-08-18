@@ -15,8 +15,33 @@ const PACK = "spellcasting";
 
 const GRAZE = "Caster takes Strain from grazing.";
 
-/** Shape helper: [step, shapeable]. */
+/**
+ * Shape helper: one dimension of an Art's basic shape.
+ *
+ * @param {number} step - Rung on that dimension's shaping ladder
+ * @param {boolean} [shapeable] - False when the Art fixes this dimension
+ */
 const dim = (step, shapeable = true) => ({ step, shapeable });
+
+/**
+ * One Art/Resonance pairing on a Resonance's list.
+ *
+ * Every field past the first two is optional and pairing-specific — a Rend
+ * pairing carries bonus damage, a Bolster pairing carries the effect it grants —
+ * so the rows are authored sparsely and filled in with defaults on the way out.
+ *
+ * @typedef {object} PairingRow
+ * @property {string} art
+ * @property {string} ladder
+ * @property {string[]} [tags]
+ * @property {string} [condition]
+ * @property {string} [opposedBy]
+ * @property {number} [bonusDamage]
+ * @property {string} [bolsterEffect]
+ * @property {string} [qualifyingRolls]
+ * @property {string} [bonusEffect]
+ * @property {string} [notes]
+ */
 
 const ARTS = [
   {
@@ -209,7 +234,7 @@ export function build() {
           source: "Spellcasting Catalog",
           equipped: false,
           slotCost: resonance.slots,
-          arts: resonance.arts.map((entry) => ({
+          arts: resonance.arts.map((/** @type {PairingRow} */ entry) => ({
             art: entry.art,
             ladder: entry.ladder,
             tags: entry.tags ?? [],
