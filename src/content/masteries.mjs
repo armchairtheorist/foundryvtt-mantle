@@ -24,7 +24,7 @@ export const SETS = {
 const S = SETS;
 
 /**
- * @typedef {{prereq?: string, sets?: string[]}} MasteryExtras
+ * @typedef {{prereq?: string, sets?: string[], bonuses?: Record<string, number>}} MasteryExtras
  * @type {Record<string, Array<[string, "body"|"mind"|"soul", number, string, MasteryExtras?]>>}
  */
 const MASTERIES = {
@@ -45,7 +45,7 @@ const MASTERIES = {
     ["Potpourri", "body", 1, "+2 consumable points."],
     ["Quick Mind", "mind", 2, "When an ally finishes their turn, you may declare to take your own turn immediately after. This counts as one of your turns for the round, and is an exception to the usual alternating turn order. Your Vigor refresh at the start of this turn is capped at 1.", { sets: [S.shukuchi] }],
     ["Shared Fortune", "soul", 1, "Spend a blessing on an ally's behalf to grant them a luck roll reroll. They must use the new result.", { prereq: "Fortune's Blessing", sets: [S.overflowingFortune] }],
-    ["Vigorous", "body", 1, "+1 Vigor refresh."],
+    ["Vigorous", "body", 1, "+1 Vigor refresh.", { bonuses: { vigorRefresh: 1 } }],
     ["Willpower", "mind", 1, "+1d when opposing rolls with INS."]
   ],
 
@@ -78,7 +78,7 @@ const MASTERIES = {
     ["Charging Frenzy", "body", 1, "When the Enter Frenzy maneuver takes you from 0 to 1 Frenzy stack, you may immediately take the Move maneuver at no Vigor cost. This is in addition to the free Move maneuver you get every turn."],
     ["Taunt", "soul", 1, "Gain the Taunt maneuver (Vigor 2): Target one creature within 10 squares that you can reasonably communicate with. Creatures with the Mindless tag cannot be taunted. Make a PRE action roll opposed by the target's INS. On 1+ net successes, the target gains the Provoked condition with you as its source."],
     ["Terrifying Presence", "soul", 1, "When you use the Enter Frenzy maneuver, make a PRE action roll opposed by the target's INS for each enemy within 5 squares. Each enemy you beat with 1+ net successes gains the Frightened condition, with you as the source."],
-    ["Wild Swing", "body", 1, "Gain the Wild Swing maneuver (Vigor 4): Make a melee attack against every creature within your melee weapon's range — enemy and ally alike. Each attack uses the same weapon and rolls its own pool at -1d. Allies may use reactive defenses against these attacks as normal."]
+    ["Wild Swing", "body", 1, "Gain the Wild Swing maneuver (Vigor 5): Make a melee attack against every creature within your melee weapon's range — enemy and ally alike. Each attack uses the same weapon and rolls its own pool at -1d. Allies may use reactive defenses against these attacks as normal."]
   ],
 
   magic: [
@@ -114,7 +114,7 @@ const MASTERIES = {
   human: [
     ["Aggression", "soul", 1, "Gain +1 BODY mastery slot.", { sets: [S.peakHuman, S.humanExcellence] }],
     ["Brazenface", "body", 1, "Gain +1 MIND mastery slot.", { sets: [S.humanExcellence, S.enlightenment] }],
-    ["Iron Will", "soul", 1, "+2 Max Strain. Gain the Iron Will reaction (Vigor 1). Trigger: another creature targets you with a Strain attack. Effect: halve the Strain damage (minimum 0)."],
+    ["Iron Will", "soul", 1, "+2 Max Strain. Gain the Iron Will reaction (Vigor 1). Trigger: another creature targets you with a Strain attack. Effect: halve the Strain damage (minimum 0).", { bonuses: { strain: 2 } }],
     ["Mind Over Matter", "mind", 1, "Gain +1 BODY mastery slot.", { sets: [S.peakHuman, S.humanExcellence] }],
     ["Open Mind", "mind", 1, "Gain +1 SOUL mastery slot.", { sets: [S.peakHuman, S.enlightenment] }],
     ["Self-Examination", "body", 1, "Gain +1 SOUL mastery slot.", { sets: [S.peakHuman, S.enlightenment] }],
@@ -163,6 +163,7 @@ export function build() {
             slotCost,
             slotBoard: "",
             prerequisite: extras.prereq ?? "",
+            bonuses: extras.bonuses ?? {},
             sets: extras.sets ?? []
           }
         })

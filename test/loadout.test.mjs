@@ -15,8 +15,10 @@ import {
   gatherBonuses,
   countSlotUsage,
   deriveCharacter,
+  deriveVigorRefresh,
   BONUS_KEYS
 } from "../module/data/derive.mjs";
+import { MANTLE } from "../module/config.mjs";
 
 /** A Human R3 / Warrior R2 spread, as the archetype catalog grants it. */
 const ARCHETYPES = [
@@ -56,6 +58,31 @@ describe("gatherBonuses", () => {
     // Armor and archetype Guard stack rather than one replacing the other.
     const both = gatherBonuses({ archetypes: ARCHETYPES, armor: [{ guard: 3 }] });
     assert.equal(both.guard, 5);
+  });
+
+  test("adds the flat bonuses equipped masteries grant", () => {
+    // Vigorous is +1 Vigor refresh and Iron Will +2 Max Strain, and both now
+    // reach the derivation as data rather than as rules text a player applies.
+    const totals = gatherBonuses({ masteries: [{ vigorRefresh: 1 }, { strain: 2 }] });
+    assert.equal(totals.vigorRefresh, 1);
+    assert.equal(totals.strain, 2);
+  });
+
+  test("adds the flat riders a condition carries", () => {
+    const totals = gatherBonuses({ conditions: [MANTLE.conditionBonuses.frenzy] });
+    assert.equal(totals.vigorRefresh, 1);
+    assert.equal(totals.spd, 1);
+  });
+
+  test("every source stacks rather than one winning", () => {
+    // Frenzy's rider is flat and sits on top of everything else, which is what
+    // makes a Frenzied Barbarian with Vigorous refresh two more than a calm one
+    // without it.
+    const totals = gatherBonuses({
+      masteries: [{ vigorRefresh: 1 }],
+      conditions: [{ vigorRefresh: 1 }]
+    });
+    assert.equal(totals.vigorRefresh, 2);
   });
 
   test("carries what Active Effects have already written", () => {
@@ -165,5 +192,46 @@ describe("countSlotUsage", () => {
 
     assert.equal(used.gear, 5);
     assert.equal(used.wondrous, 1);
+  });
+});
+
+/* -------------------------------------------- */
+
+describe("Vigor refresh", () => {
+  /** @param {number} body @param {object} [bonuses] */
+  const refresh = (body, bonuses = {}) =>
+    deriveVigorRefresh({ body, mind: 0, soul: 0 }, bonuses);
+
+  test("is a flat 3 plus half BODY, rounded down", () => {
+    assert.equal(refresh(0), 3);
+    assert.equal(refresh(1), 3);
+    assert.equal(refresh(2), 4);
+    assert.equal(refresh(3), 4);
+    assert.equal(refresh(4), 5);
+    assert.equal(refresh(6), 6);
+  });
+
+  test("BODY has no floor of its own — the flat 3 is the floor", () => {
+    // The revision this replaced gave BODY a minimum of 1, which meant a BODY 0
+    // caster and a BODY 1 fighter refreshed the same. Now they still do, but at
+    // 3 rather than 1, and BODY only starts paying at 2.
+    assert.equal(refresh(0), MANTLE.baseline.vigorRefresh);
+    assert.equal(refresh(0), refresh(1));
+  });
+
+  test("bonuses land on top of the formula, not inside it", () => {
+    assert.equal(refresh(1, { vigorRefresh: 1 }), 4);
+    assert.equal(refresh(0, { vigorRefresh: 2 }), 5);
+  });
+
+  test("Kira refreshes 4 calm and 5 Frenzied", () => {
+    // BODY 2 is 3 + 1 = 4. Frenzy's flat +1 rides on top of the new base rather
+    // than being folded into it, so the two still differ by exactly one.
+    const kira = { body: 2, mind: 1, soul: 1 };
+    const calm = gatherBonuses({});
+    const frenzied = gatherBonuses({ conditions: [MANTLE.conditionBonuses.frenzy] });
+
+    assert.equal(deriveVigorRefresh(kira, calm), 4);
+    assert.equal(deriveVigorRefresh(kira, frenzied), 5);
   });
 });

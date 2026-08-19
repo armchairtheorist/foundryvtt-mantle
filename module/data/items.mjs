@@ -12,7 +12,7 @@
  */
 
 import { MANTLE } from "../config.mjs";
-import { fields, count, modifier, text, choice, options, ladder } from "./_fields.mjs";
+import { fields, count, modifier, text, choice, options, ladder, bonuses } from "./_fields.mjs";
 
 const TypeDataModel = foundry.abstract.TypeDataModel;
 
@@ -173,6 +173,18 @@ export class MasteryData extends TypeDataModel {
       prerequisite: text(),
 
       /**
+       * Flat numeric effects this mastery grants while it is equipped —
+       * Vigorous's +1 Vigor refresh, Iron Will's +2 Max Strain.
+       *
+       * Most masteries grant something the derivation cannot express (a new
+       * maneuver, a pattern, a conditional die), and those stay as rules text
+       * for the player to apply. The ones that *are* just a number belong here,
+       * so the sheet shows the total rather than making everyone remember to
+       * add one to it.
+       */
+      bonuses: bonuses(),
+
+      /**
        * Mastery sets this belongs to. A set, not a single name: the catalog puts
        * Aggression in both Peak Human Condition and Human Excellence, and
        * equipping every member of any one set grants that set's bonus.
@@ -251,6 +263,9 @@ export class WeaponData extends TypeDataModel {
 
     /** Both Deflect and Shield permit the Deflect reaction; Shield ignores weight class. */
     this.canDeflect = this.tags.has("deflect") || this.tags.has("shield");
+
+    /** A Reflexive melee weapon is what enables the Forestall reaction. */
+    this.canForestall = this.isMelee && this.tags.has("reflexive");
   }
 }
 

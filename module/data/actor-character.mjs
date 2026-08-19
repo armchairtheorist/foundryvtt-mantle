@@ -115,9 +115,13 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
         rank: a.system.rank ?? 0,
         features: a.system.rankFeatures ?? []
       })),
+      masteries: this.parent.items
+        .filter((i) => i.type === "mastery" && i.system.equipped)
+        .map((i) => i.system.bonuses ?? {}),
       armor: this.parent.items
         .filter((i) => i.type === "armor" && i.system.equipped)
-        .map((i) => ({ guard: i.system.guard ?? 0 }))
+        .map((i) => ({ guard: i.system.guard ?? 0 })),
+      conditions: this.#conditionBonuses()
     });
 
     const derived = deriveCharacter({
@@ -161,6 +165,8 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
       crisis: isInCrisis({
         wounds: this.wounds.length,
         burdens: this.burdens.length,
+        woundSlots: derived.slots.wound,
+        burdenSlots: derived.slots.burden,
         faltering: this.parent.statuses?.has("faltering") ?? false,
         unraveling: this.parent.statuses?.has("unraveling") ?? false
       }),
@@ -182,6 +188,27 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
     this.innerFocus = this.parent.items.some(
       (i) => i.type === "mastery" && i.system.equipped && i.name === "Inner Focus"
     );
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Flat bonuses from conditions the character is currently carrying.
+   *
+   * Read from `statuses` rather than from stack counts: every rider in the
+   * table is flat for as long as the condition lasts, however deep it is
+   * stacked. Frenzy's per-stack +1d on melee attacks is a roll modifier, not a
+   * derived stat, and is applied on the roll instead.
+   *
+   * @returns {object[]}
+   */
+  #conditionBonuses() {
+    const statuses = this.parent.statuses;
+    if (!statuses) return [];
+
+    return Object.entries(MANTLE.conditionBonuses)
+      .filter(([id]) => statuses.has(id))
+      .map(([, granted]) => granted);
   }
 
   /* -------------------------------------------- */

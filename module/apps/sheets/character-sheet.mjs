@@ -36,6 +36,7 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
       rollAttribute: MantleCharacterSheet.#onRollAttribute,
       rollDodge: MantleCharacterSheet.#onRollDodge,
       rollDeflect: MantleCharacterSheet.#onRollDeflect,
+      rollForestall: MantleCharacterSheet.#onRollForestall,
       testLuck: MantleCharacterSheet.#onTestLuck,
       castSpell: MantleCharacterSheet.#onCastSpell,
       addCondition: MantleCharacterSheet.#onAddCondition,
@@ -94,9 +95,10 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     const unarmed = this.document.unarmedAttack;
     context.unarmed = { name: unarmed.name, system: unarmed.system, owned: Boolean(unarmed.id) };
 
-    // Deflect needs a weapon that permits it; without one the button would only
-    // ever produce a warning, so it is not offered at all.
+    // Each reaction needs a weapon that permits it; without one the button
+    // would only ever produce a warning, so it is not offered at all.
     context.canDeflect = this.document.deflectWeapons.length > 0;
+    context.canForestall = this.document.reflexiveWeapons.length > 0;
 
     context.conditions = prepareConditions(this.document);
 
@@ -429,26 +431,47 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
    * @param {HTMLElement} target
    */
   static async #onRollDeflect(_event, target) {
-    const available = this.document.deflectWeapons;
+    const weapon = await this.#pickWeapon(
+      target,
+      this.document.deflectWeapons,
+      "MANTLE.Reaction.deflect",
+      "MANTLE.Reaction.noDeflectWeapon"
+    );
+    if (weapon) await this.document.rollDeflect(weapon);
+  }
+
+  /**
+   * Resolve which weapon a reaction uses.
+   *
+   * A button on a weapon row names its own weapon. The one in the header does
+   * not, so with a single candidate it is used and with several the player is
+   * asked — for both Deflect and Forestall the weapon decides how the roll
+   * comes out, so guessing would be guessing at the interesting part.
+   *
+   * @param {HTMLElement} target - The button that was clicked
+   * @param {Item[]} available
+   * @param {string} titleKey
+   * @param {string} noneKey
+   * @returns {Promise<Item|null>}
+   */
+  async #pickWeapon(target, available, titleKey, noneKey) {
     if (available.length === 0) {
-      ui.notifications.warn(game.i18n.localize("MANTLE.Reaction.noDeflectWeapon"));
-      return;
+      ui.notifications.warn(game.i18n.localize(noneKey));
+      return null;
     }
 
-    const chosen = this.#itemFor(target) ?? (available.length === 1 ? available[0] : null);
-    if (chosen) {
-      await this.document.rollDeflect(chosen);
-      return;
-    }
+    const named = this.#itemFor(target);
+    if (named && available.includes(named)) return named;
+    if (available.length === 1) return available[0];
 
     const options = available
       .map((weapon) => `<option value="${weapon.id}">${weapon.name}</option>`)
       .join("");
 
     const weaponId = await foundry.applications.api.DialogV2.prompt({
-      window: { title: game.i18n.localize("MANTLE.Reaction.deflect") },
+      window: { title: game.i18n.localize(titleKey) },
       classes: ["mantle"],
-      content: `<form><label class="row">${game.i18n.localize("MANTLE.Reaction.deflectWith")}
+      content: `<form><label class="row">${game.i18n.localize("MANTLE.Reaction.reactWith")}
           <select name="weapon">${options}</select></label></form>`,
       ok: {
         label: game.i18n.localize("MANTLE.Action.roll"),
@@ -457,8 +480,27 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
       rejectClose: false
     });
 
-    const weapon = available.find((entry) => entry.id === weaponId);
-    if (weapon) await this.document.rollDeflect(weapon);
+    return available.find((entry) => entry.id === weaponId) ?? null;
+  }
+
+  /**
+   * Forestall with an equipped Reflexive melee weapon.
+   *
+   * As with Deflect, which weapon matters — it is the weapon that attacks — so
+   * with more than one available the player is asked rather than guessed for.
+   *
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onRollForestall(_event, target) {
+    const weapon = await this.#pickWeapon(
+      target,
+      this.document.reflexiveWeapons,
+      "MANTLE.Reaction.forestall",
+      "MANTLE.Reaction.noReflexiveWeapon"
+    );
+    if (weapon) await this.document.rollForestall(weapon);
   }
 
   /**

@@ -42,6 +42,8 @@ const CATALOG = new Map(
  * @property {Array<[string, number]>} archetypes - Name and rank held
  * @property {Record<string, string[]>} masteries - Board to mastery names
  * @property {string[]} gear - Equipment names, all equipped
+ * @property {Record<string, object>} [gearOverrides]
+ *   System fields to change on this character's copy of a piece of gear
  * @property {string[]} limitBreaks
  * @property {string[]} skills - Trained skill ids
  * @property {string} playstyle
@@ -55,15 +57,19 @@ const PREGENS = [
     attributes: { pow: 0, agi: 3, rea: 0, ins: 1, pre: 0, luck: 0 },
     archetypes: [["Half-Elf", 1], ["Warrior", 2]],
     masteries: {
-      body: ["Lightning Reflexes", "Vigorous", "Bloodlust"],
+      body: ["Lightning Reflexes", "Combat Reflexes", "Bloodlust"],
       mind: ["Overwatch"],
       wildcard: ["Visualization"]
     },
     gear: ["Rapier", "Shortbow", "Chain Shirt"],
+    // Combat Reflexes gives every equipped melee weapon the Reflexive tag,
+    // which is what unlocks the Forestall reaction. The catalog Rapier is left
+    // as printed; only Mira's copy carries the tag.
+    gearOverrides: { Rapier: { tags: ["deflect", "reflexive"] } },
     limitBreaks: ["Deadeye Requiem"],
     skills: ["climbing", "stealth", "tracking", "bestiary", "seduction", "navigation"],
     playstyle:
-      "Open at range with Overwatch, close with the Rapier, Focused Strike against armor."
+      "Open at range with Overwatch, close with the Rapier, Focused Strike against armor. Combat Reflexes makes the Rapier Reflexive, so anything that tries to disengage from you eats a Forestall."
   },
   {
     name: "Kira",
@@ -74,13 +80,13 @@ const PREGENS = [
       body: ["Bloodlust", "Bloodfeast"],
       mind: ["Willpower"],
       soul: ["Berserk"],
-      wildcard: ["Vigorous"]
+      wildcard: ["Taunt"]
     },
     gear: ["Greataxe", "Sling", "Plate Armor"],
     limitBreaks: ["Crescent Onslaught"],
     skills: ["lifting", "endurance", "coercion", "smithing", "tracking", "history"],
     playstyle:
-      "Enter Frenzy every turn and swing the Greataxe — at Frenzy 3 you roll 5d6. Watch your Strain: the rage costs 3 a turn at full stacks against a maximum of 5, and while Frenzied you have no defensive reactions."
+      "Enter Frenzy every turn and swing the Greataxe — at Frenzy 3 you roll 5d6. Taunt whoever is about to reach the casters. Watch your Strain: the rage costs 3 a turn at full stacks against a maximum of 5, and while Frenzied you have no defensive reactions."
   },
   {
     name: "Maya",
@@ -90,7 +96,7 @@ const PREGENS = [
     masteries: {
       mind: ["Mens Resonance", "Cone Shaping", "Arcane Shield"],
       soul: ["Improviser"],
-      wildcard: ["Bolster Art", "Vigorous"],
+      wildcard: ["Bolster Art", "Iron Will"],
       repertoire: ["Ignis Resonance", "Rend Art", "Afflict Art"]
     },
     gear: ["Dagger", "Basic Spell Focus", "Armored Cloak"],
@@ -100,7 +106,7 @@ const PREGENS = [
       "charm", "readPeople", "alchemy", "firstAid"
     ],
     playstyle:
-      "Ignis Rend is the workhorse; Push the Craft when the roll has to land. Mens Afflict when the target's Strain is the softer track."
+      "Ignis Rend is the workhorse; Push the Craft when the roll has to land. Mens Afflict when the target's Strain is the softer track. Iron Will halves incoming Strain for 1 Vigor — worth holding for the Mindbinder."
   },
   {
     name: "Vera",
@@ -175,7 +181,16 @@ export function build() {
       }
     }
 
-    for (const name of [...pregen.gear, ...pregen.limitBreaks]) {
+    for (const name of pregen.gear) {
+      items.push(
+        embed(pregen.name, actorId, name, {
+          equipped: true,
+          ...(pregen.gearOverrides?.[name] ?? {})
+        })
+      );
+    }
+
+    for (const name of pregen.limitBreaks) {
       items.push(embed(pregen.name, actorId, name, { equipped: true }));
     }
 
@@ -243,6 +258,9 @@ function startingResources(pregen, items) {
         rank: a.system.rank,
         features: a.system.rankFeatures
       })),
+      masteries: items
+        .filter((item) => item.type === "mastery" && item.system.equipped)
+        .map((item) => item.system.bonuses),
       armor: items
         .filter((item) => item.type === "armor")
         .map((item) => ({ guard: item.system.guard }))

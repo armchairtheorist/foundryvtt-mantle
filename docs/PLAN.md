@@ -193,7 +193,7 @@ So the pipeline is:
    Max Strain    = MIND + SOUL + 3  + bonuses.strain
    Resolve       = SOUL + 6         + bonuses.resolve
    Max Guard     = 0 + armor        + bonuses.guard
-   Vigor refresh = max(BODY, 1)     + bonuses.vigorRefresh
+   Vigor refresh = 3 + floor(BODY/2) + bonuses.vigorRefresh
    Max Vigor     = 7 + floor(CR/7)  + bonuses.vigorCap
    Mastery slots = {body: BODY, mind: MIND, soul: SOUL,
                     wildcard: 1 + floor(CR/5)} + bonuses
@@ -213,6 +213,12 @@ one exercises a different part of the pipeline:
 | Kira (Dwarf / Barbarian) | Conditional bonuses — Greataxe at Frenzy 3 must show **5d6 for 9/15/23/31**, chaining Frenzy stacks through Relentless into the ladder |
 | Maya (Human / Scholar) | Bonus mastery slots (Versatile, Starting Repertoire), zero-BODY edge cases, the Dagger rolling **2d6 keep lowest** |
 | Vera (Elf / Channeler) | Multi-slot masteries (Lux Resonance costs 2), SOUL 0 meaning zero wondrous slots, deep Strain track |
+
+> Since v0.7.0 three of the four builds differ from the v0.21 printing. The
+> Vigor formula was revised to `3 + BODY/2`, and Mira, Kira, and Maya each
+> traded Vigorous away for something the flat base made redundant — Combat
+> Reflexes, Taunt, and Iron Will respectively. Iron Will also raises Maya's Max
+> Strain to 12. `test/pregens.test.mjs` carries the current builds.
 
 If all four build on the sheet and every printed number matches without
 hand-editing, the pipeline is correct. Kira is the sharpest test — her damage
@@ -359,10 +365,17 @@ and why:
 - **Turn order.** Mantle uses side-alternating zipper initiative, so the system
   registers no initiative formula and defers to Lancer Initiative or the default
   tracker.
-- **Mastery bonuses as data.** Vigorous grants +1 Vigor refresh, and several
-  masteries grant similar flat bonuses; those are currently rules text a player
-  applies, not fields the derivation reads. The archetype bonus machinery would
-  extend to them directly.
+- **Most mastery effects.** A mastery whose whole effect is a number now carries
+  it as data and reaches the derivation — Vigorous's +1 Vigor refresh, Iron
+  Will's +2 Max Strain. The rest grant something the derivation cannot express
+  (a new maneuver, a pattern, a conditional die) and stay as rules text for the
+  player to apply.
+- **Frenzy's end-of-turn Strain.** Frenzy is modelled far enough to carry its
+  flat +1 Vigor refresh and +1 SPD into the derivation, and its per-stack +1d is
+  applied on the roll. The Strain it costs at end of turn is not taken
+  automatically, unlike Wracked's damage — it belongs to the Barbarian archetype
+  rather than to the general condition rules, and a Barbarian player is already
+  counting it.
 
 ---
 

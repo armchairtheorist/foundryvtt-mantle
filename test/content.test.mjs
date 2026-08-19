@@ -102,30 +102,83 @@ describe("archetype bonuses match the pre-generated characters", () => {
 });
 
 describe("end to end, content through to derived stats", () => {
+  const archetypes = buildArchetypes();
+  const masteries = buildMasteries();
+
+  /**
+   * Build the bonus totals for a character from catalog documents alone — no
+   * transcribed numbers anywhere in the chain.
+   *
+   * @param {Array<[string, number]>} build
+   * @param {string[]} equippedMasteries
+   * @param {string[]} armor
+   */
+  function fromCatalog(build, equippedMasteries = [], armor = []) {
+    return gatherBonuses({
+      archetypes: build.map(([name, rank]) => {
+        const archetype = archetypes.find((a) => a.name === name);
+        assert.ok(archetype, `${name} is in the archetypes pack`);
+        return { rank, features: archetype.system.rankFeatures };
+      }),
+      masteries: equippedMasteries.map((name) => {
+        const mastery = masteries.find((m) => m.name === name);
+        assert.ok(mastery, `${name} is in the masteries pack`);
+        return mastery.system.bonuses;
+      }),
+      armor: armor.map((name) => {
+        const piece = buildEquipment().find((i) => i.name === name);
+        assert.ok(piece, `${name} is in the equipment pack`);
+        return { guard: piece.system.guard };
+      })
+    });
+  }
+
   test("Mira's printed stat block reproduces from catalog content", () => {
-    const archetypeBonuses = combined([["Half-Elf", 1], ["Warrior", 2]]);
-    const chainShirt = buildEquipment().find((i) => i.name === "Chain Shirt");
-    const vigorous = buildMasteries().find((i) => i.name === "Vigorous");
-
-    assert.ok(chainShirt, "Chain Shirt is in the equipment pack");
-    assert.ok(vigorous, "Vigorous is in the masteries pack");
-
     const derived = deriveCharacter({
       attributes: { pow: 0, agi: 3, rea: 0, ins: 1, pre: 0, luck: 0 },
       characterRank: 3,
       ancestry: { spd: 5, sen: 10, size: "1M" },
-      bonuses: {
-        ...archetypeBonuses,
-        guard: archetypeBonuses.guard + chainShirt.system.guard,
-        vigorRefresh: 1 // Vigorous
-      }
+      bonuses: fromCatalog([["Half-Elf", 1], ["Warrior", 2]], [], ["Chain Shirt"])
     });
 
     assert.equal(derived.maxVitality, 21);
     assert.equal(derived.maxStrain, 5);
     assert.equal(derived.maxResolve, 6);
     assert.equal(derived.maxGuard, 4);
-    assert.equal(derived.vigorRefresh, 4);
+    assert.equal(derived.vigorRefresh, 4, "3 + BODY 3 / 2, with no mastery help");
+  });
+
+  /**
+   * The masteries whose whole effect is a number now carry it as data, so the
+   * sheet shows the total rather than making the player remember to add one to
+   * it. This checks the number the derivation reads is the number the catalog
+   * prints — a mastery that says "+1 Vigor refresh" and grants nothing is worse
+   * than one that says nothing at all.
+   */
+  test("a mastery's flat bonus reaches the derivation", () => {
+    const withVigorous = deriveCharacter({
+      attributes: { pow: 1, agi: 0, rea: 0, ins: 3, pre: 0, luck: 0 },
+      characterRank: 3,
+      bonuses: fromCatalog([["Elf", 1], ["Channeler", 2]], ["Vigorous"], ["Armored Cloak"])
+    });
+
+    // Vera: 3 + BODY 1 / 2 = 3, and Vigorous makes it 4.
+    assert.equal(withVigorous.vigorRefresh, 4);
+
+    const withIronWill = deriveCharacter({
+      attributes: { pow: 0, agi: 0, rea: 3, ins: 0, pre: 0, luck: 1 },
+      characterRank: 3,
+      bonuses: fromCatalog([["Human", 1], ["Scholar", 2]], ["Iron Will"], ["Armored Cloak"])
+    });
+
+    // Maya: MIND 3 + SOUL 1 + 3 = 7, +3 from archetypes, +2 from Iron Will.
+    assert.equal(withIronWill.maxStrain, 12);
+  });
+
+  test("Wild Swing costs 5 Vigor", () => {
+    const wildSwing = masteries.find((m) => m.name === "Wild Swing");
+    assert.ok(wildSwing);
+    assert.match(wildSwing.system.description, /Vigor 5/);
   });
 });
 

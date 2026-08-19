@@ -88,10 +88,18 @@ export const BONUS_KEYS = Object.freeze([
  *   What Active Effects have already written into `system.bonuses`.
  * @param {{rank: number, features: {rank: number, bonuses: Bonuses}[]}[]} [input.archetypes]
  *   Archetypes with all their rank features; only ranks reached are counted.
+ * @param {Bonuses[]} [input.masteries] - Bonuses from equipped masteries
  * @param {{guard: number}[]} [input.armor] - Equipped armor
+ * @param {Bonuses[]} [input.conditions] - Bonuses from conditions currently held
  * @returns {Bonuses}
  */
-export function gatherBonuses({ effects = {}, archetypes = [], armor = [] } = {}) {
+export function gatherBonuses({
+  effects = {},
+  archetypes = [],
+  masteries = [],
+  armor = [],
+  conditions = []
+} = {}) {
   /** @type {Record<string, number>} */
   const totals = {};
   for (const key of BONUS_KEYS) totals[key] = Number(effects[key]) || 0;
@@ -111,10 +119,24 @@ export function gatherBonuses({ effects = {}, archetypes = [], armor = [] } = {}
     }
   }
 
+  // Masteries with a flat numeric effect — Vigorous grants +1 Vigor refresh,
+  // Iron Will +2 Max Strain — contribute the same way, but only while equipped.
+  // A mastery sitting unslotted in the inventory does nothing.
+  for (const mastery of masteries) {
+    for (const [key, value] of Object.entries(mastery ?? {})) add(key, value);
+  }
+
   // Armor raises Max Guard while it is worn. Summed rather than maxed: the
   // rules allow only one armor at a time, but the sheet reports rather than
   // refuses, so an illegal loadout should read as obviously wrong.
   for (const piece of armor) add("guard", piece.guard);
+
+  // A few conditions move derived stats rather than only imposing dice
+  // modifiers — Frenzy carries a flat +1 Vigor refresh and +1 SPD for as long
+  // as it lasts, whatever it is stacked to.
+  for (const condition of conditions) {
+    for (const [key, value] of Object.entries(condition ?? {})) add(key, value);
+  }
 
   return totals;
 }
@@ -232,15 +254,18 @@ export function deriveResolve(cores, bonuses = {}) {
 }
 
 /**
- * Vigor regained at the start of each turn: BODY, but never less than 1, then
- * bonuses on top. The minimum applies before bonuses — a BODY 0 caster with the
- * Vigorous mastery refreshes 2, not 1.
+ * Vigor regained at the start of each turn: a flat 3, plus half BODY.
+ *
+ * BODY contributes nothing below 2 and there is no floor on its half — the
+ * floor is the flat 3 that every character gets. That is the whole point of the
+ * revision: the old BODY-with-a-minimum-of-1 gave a BODY 0 caster the same
+ * refresh as a BODY 1 fighter and scaled too steeply after that.
  *
  * @param {Cores} cores
  * @param {Bonuses} [bonuses]
  */
 export function deriveVigorRefresh(cores, bonuses = {}) {
-  return Math.max(cores.body, 1) + (bonuses.vigorRefresh ?? 0);
+  return MANTLE.baseline.vigorRefresh + floor(cores.body / 2) + (bonuses.vigorRefresh ?? 0);
 }
 
 /**
@@ -288,17 +313,31 @@ export function deriveLanguages(attributes, bonuses = {}) {
 }
 
 /**
- * A creature is in Crisis if it has Faltering or Unraveling, or 3+ combined
- * Wounds and Burdens. Several abilities key off this state.
+ * A creature is in Crisis if it has Faltering or Unraveling, or if either harm
+ * track has run out of slots. Several abilities key off this state.
+ *
+ * The tracks are checked separately rather than summed. A character three
+ * Wounds deep with an empty Burden track is one hit from Defeated, and that is
+ * the situation Crisis is meant to name — summing the two would rate them the
+ * same as someone carrying one of each and in no particular danger.
  *
  * @param {object} state
  * @param {number} state.wounds - Wounds currently taken
  * @param {number} state.burdens - Burdens currently taken
+ * @param {number} [state.woundSlots]
+ * @param {number} [state.burdenSlots]
  * @param {boolean} [state.faltering]
  * @param {boolean} [state.unraveling]
  */
-export function isInCrisis({ wounds, burdens, faltering = false, unraveling = false }) {
-  return faltering || unraveling || wounds + burdens >= 3;
+export function isInCrisis({
+  wounds,
+  burdens,
+  woundSlots = 0,
+  burdenSlots = 0,
+  faltering = false,
+  unraveling = false
+}) {
+  return faltering || unraveling || wounds >= woundSlots || burdens >= burdenSlots;
 }
 
 /**

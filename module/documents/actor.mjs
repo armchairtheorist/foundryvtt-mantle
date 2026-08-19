@@ -78,6 +78,18 @@ export default class MantleActor extends Actor {
     return this.weapons.filter((weapon) => weapon.system.canDeflect);
   }
 
+  /**
+   * Equipped Reflexive melee weapons, which are what enable Forestall.
+   *
+   * The Combat Reflexes mastery gives every equipped melee weapon the tag, so
+   * this is usually all of them or none of them.
+   */
+  get reflexiveWeapons() {
+    return this.weapons.filter(
+      (weapon) => weapon.system.isMelee && toArray(weapon.system.tags).includes("reflexive")
+    );
+  }
+
   /* -------------------------------------------- */
 
   /** Every condition this actor carries, as id to stacks. */
@@ -340,6 +352,27 @@ export default class MantleActor extends Actor {
       title: game.i18n.localize(reaction.label),
       subtitle: weapon.name
     });
+  }
+
+  /**
+   * Forestall: a Basic Attack against someone already in reach who tries to
+   * move away, for 2 Vigor.
+   *
+   * A reactive *attack* rather than a defense, so it resolves as a normal
+   * weapon attack — the card that comes out is an attack card, with a ladder
+   * and an Apply button.
+   *
+   * @param {Item} weapon - An equipped Reflexive melee weapon
+   * @returns {Promise<ChatMessage|null|void>}
+   */
+  async rollForestall(weapon) {
+    if (!weapon || !this.reflexiveWeapons.includes(weapon)) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Reaction.noReflexiveWeapon"));
+      return null;
+    }
+
+    if (!(await this.#spendVigor(MANTLE.reactions.forestall.vigorCost))) return null;
+    return this.attackWith(weapon);
   }
 
   /* -------------------------------------------- */

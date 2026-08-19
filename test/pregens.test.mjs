@@ -22,6 +22,8 @@ import {
   checkEquilibrium
 } from "../module/data/derive.mjs";
 import { build as buildPregens } from "../src/content/pregens.mjs";
+import { build as buildMasteries } from "../src/content/masteries.mjs";
+import { build as buildEquipment } from "../src/content/equipment.mjs";
 
 /**
  * Assert every key of `expected` against the derived result, naming the stat in
@@ -42,12 +44,11 @@ describe("Mira — Half-Elf R1 / Warrior R2", () => {
   // Warrior R1:  +1 Max Vitality, +1 Max Guard
   // Warrior R2:  +1 Max Vitality, +1 Max Guard
   // Chain Shirt: +2 Max Guard
-  // Vigorous:    +1 Vigor refresh
   const mira = deriveCharacter({
     attributes: { pow: 0, agi: 3, rea: 0, ins: 1, pre: 0, luck: 0 },
     characterRank: 3,
     ancestry: { spd: 5, sen: 10, size: "1M" },
-    bonuses: { vitality: 3, strain: 1, guard: 4, vigorRefresh: 1 }
+    bonuses: { vitality: 3, strain: 1, guard: 4 }
   });
 
   test("cores", () => {
@@ -60,6 +61,8 @@ describe("Mira — Half-Elf R1 / Warrior R2", () => {
       { maxVitality: 21, maxStrain: 5, maxResolve: 6, maxGuard: 4, spd: 5, sen: 10, languagesKnown: 1 },
       "Mira"
     );
+    // 3 + BODY 3 / 2 = 4, with nothing on top: Combat Reflexes replaced her
+    // Vigorous, and the new formula reaches the same number without it.
     expectStats(mira, { maxVigor: 7, vigorRefresh: 4 }, "Mira vigor");
   });
 
@@ -79,7 +82,7 @@ describe("Kira — Dwarf R1 / Barbarian R2", () => {
     attributes: { pow: 2, agi: 0, rea: 0, ins: 1, pre: 0, luck: 1 },
     characterRank: 3,
     ancestry: { spd: 4, sen: 12, size: "1M" },
-    bonuses: { vitality: 6, guard: 3, vigorRefresh: 1 }
+    bonuses: { vitality: 6, guard: 3 }
   });
 
   test("cores", () => {
@@ -92,7 +95,7 @@ describe("Kira — Dwarf R1 / Barbarian R2", () => {
       { maxVitality: 21, maxStrain: 5, maxResolve: 7, maxGuard: 3, spd: 4, sen: 12, languagesKnown: 1 },
       "Kira"
     );
-    expectStats(kira, { maxVigor: 7, vigorRefresh: 3 }, "Kira vigor");
+    expectStats(kira, { maxVigor: 7, vigorRefresh: 4 }, "Kira vigor"); // 3 + BODY 2 / 2
   });
 
   test("slots — SOUL 1 grants one wondrous item slot", () => {
@@ -106,12 +109,12 @@ describe("Maya — Human R1 / Scholar R2", () => {
   // Scholar R1: +1 Max Strain
   // Scholar R2: +1 Max Strain
   // Armored Cloak: +2 Max Guard
-  // Vigorous:      +1 Vigor refresh
+  // Iron Will:     +2 Max Strain
   const maya = deriveCharacter({
     attributes: { pow: 0, agi: 0, rea: 3, ins: 0, pre: 0, luck: 1 },
     characterRank: 3,
     ancestry: { spd: 5, sen: 10, size: "1M" },
-    bonuses: { vitality: 1, strain: 3, guard: 2, vigorRefresh: 1, masteryWildcard: 1 }
+    bonuses: { vitality: 1, strain: 5, guard: 2, masteryWildcard: 1 }
   });
 
   test("cores", () => {
@@ -121,15 +124,16 @@ describe("Maya — Human R1 / Scholar R2", () => {
   test("derived stats match the printed stat block", () => {
     expectStats(
       maya,
-      { maxVitality: 10, maxStrain: 10, maxResolve: 7, maxGuard: 2, languagesKnown: 4 },
+      { maxVitality: 10, maxStrain: 12, maxResolve: 7, maxGuard: 2, languagesKnown: 4 },
       "Maya"
     );
   });
 
-  test("BODY 0 still refreshes at least 1 Vigor before bonuses", () => {
-    // max(BODY 0, 1) = 1, then Vigorous adds 1. Applying the floor after the
-    // bonus would give 1 and quietly rob her of a Vigor every turn.
-    expectStats(maya, { maxVigor: 7, vigorRefresh: 2 }, "Maya vigor");
+  test("BODY 0 contributes nothing, and the flat 3 is the floor", () => {
+    // The point of the revised formula: the floor belongs to the flat part, not
+    // to BODY's half. A BODY 0 caster refreshes 3, the same as a BODY 1 fighter,
+    // and BODY only starts paying at 2.
+    expectStats(maya, { maxVigor: 7, vigorRefresh: 3 }, "Maya vigor");
   });
 
   test("Versatile grants a second wildcard mastery slot", () => {
@@ -160,7 +164,8 @@ describe("Vera — Elf R1 / Channeler R2", () => {
       { maxVitality: 12, maxStrain: 8, maxResolve: 8, maxGuard: 2, spd: 6, sen: 15, languagesKnown: 1 },
       "Vera"
     );
-    expectStats(vera, { maxVigor: 7, vigorRefresh: 2 }, "Vera vigor");
+    // 3 + BODY 1 / 2 = 3, and Vigorous — which she keeps — makes it 4.
+    expectStats(vera, { maxVigor: 7, vigorRefresh: 4 }, "Vera vigor");
   });
 
   test("SOUL 0 means no wondrous item slots", () => {
@@ -227,15 +232,32 @@ describe("equilibrium rule", () => {
 });
 
 describe("states", () => {
-  test("Crisis triggers on 3+ combined Wounds and Burdens", () => {
-    assert.equal(isInCrisis({ wounds: 1, burdens: 1 }), false);
-    assert.equal(isInCrisis({ wounds: 2, burdens: 1 }), true);
-    assert.equal(isInCrisis({ wounds: 3, burdens: 0 }), true);
+  const slots = { woundSlots: 3, burdenSlots: 3 };
+
+  test("Crisis triggers when either harm track runs out of slots", () => {
+    assert.equal(isInCrisis({ wounds: 2, burdens: 2, ...slots }), false);
+    assert.equal(isInCrisis({ wounds: 3, burdens: 0, ...slots }), true);
+    assert.equal(isInCrisis({ wounds: 0, burdens: 3, ...slots }), true);
+  });
+
+  test("the two tracks are checked separately, not summed", () => {
+    // Two Wounds and two Burdens is four pieces of harm and no Crisis; three
+    // Wounds alone is three and Crisis. That is the point of the revision — the
+    // character one hit from Defeated is the one the state should name, not the
+    // one carrying a bit of everything.
+    assert.equal(isInCrisis({ wounds: 2, burdens: 2, ...slots }), false);
+    assert.equal(isInCrisis({ wounds: 3, burdens: 0, ...slots }), true);
+  });
+
+  test("extra slots postpone Crisis", () => {
+    // The Ironman mastery grants a fourth Wound slot, and a character holding
+    // three Wounds against four slots is not yet in Crisis.
+    assert.equal(isInCrisis({ wounds: 3, burdens: 0, woundSlots: 4, burdenSlots: 3 }), false);
   });
 
   test("Crisis triggers on Faltering or Unraveling regardless of count", () => {
-    assert.equal(isInCrisis({ wounds: 0, burdens: 0, faltering: true }), true);
-    assert.equal(isInCrisis({ wounds: 0, burdens: 0, unraveling: true }), true);
+    assert.equal(isInCrisis({ wounds: 0, burdens: 0, ...slots, faltering: true }), true);
+    assert.equal(isInCrisis({ wounds: 0, burdens: 0, ...slots, unraveling: true }), true);
   });
 
   test("Stressed is Strain at half Max Strain, rounded down", () => {
@@ -316,6 +338,9 @@ describe("the pregens ship as ready-to-play actors", () => {
           rank: a.system.rank,
           features: a.system.rankFeatures
         })),
+        masteries: actor.items
+          .filter((/** @type {any} */ i) => i.type === "mastery" && i.system.equipped)
+          .map((/** @type {any} */ i) => i.system.bonuses),
         armor: actor.items
           .filter((/** @type {any} */ i) => i.type === "armor" && i.system.equipped)
           .map((/** @type {any} */ i) => ({ guard: i.system.guard }))
@@ -337,10 +362,12 @@ describe("the pregens ship as ready-to-play actors", () => {
    * archetype rank, or shipped without its armor.
    */
   test("each one reproduces its printed stat block from its own items", () => {
+    // Maya's Max Strain is 12 rather than the catalog's printed 10: she traded
+    // Vigorous for Iron Will, which is +2 Max Strain.
     const printed = {
       Mira: { maxVitality: 21, maxStrain: 5, maxResolve: 6, maxGuard: 4, spd: 5, sen: 10 },
       Kira: { maxVitality: 21, maxStrain: 5, maxResolve: 7, maxGuard: 3, spd: 4, sen: 12 },
-      Maya: { maxVitality: 10, maxStrain: 10, maxResolve: 7, maxGuard: 2, spd: 5, sen: 10 },
+      Maya: { maxVitality: 10, maxStrain: 12, maxResolve: 7, maxGuard: 2, spd: 5, sen: 10 },
       Vera: { maxVitality: 12, maxStrain: 8, maxResolve: 8, maxGuard: 2, spd: 6, sen: 15 }
     };
 
@@ -384,6 +411,55 @@ describe("the pregens ship as ready-to-play actors", () => {
         );
       }
     }
+  });
+
+  test("each one refreshes the Vigor its stat block says", () => {
+    // The four values the revised formula has to produce, from the four builds
+    // that exercise every part of it: BODY 3 and BODY 2 reaching 4 unaided,
+    // BODY 0 sitting on the flat floor, and BODY 1 reaching 4 only because
+    // Vera keeps Vigorous.
+    const expected = { Mira: 4, Kira: 4, Maya: 3, Vera: 4 };
+
+    for (const [name, refresh] of Object.entries(expected)) {
+      assert.equal(derive(name).vigorRefresh, refresh, `${name}: vigor refresh`);
+    }
+  });
+
+  test("only Vera still carries Vigorous", () => {
+    // The other three traded it away in the same revision that raised the base:
+    // Mira for Combat Reflexes, Kira for Taunt, and Maya for Iron Will.
+    const carriers = pregens
+      .filter((actor) =>
+        actor.items.some((/** @type {any} */ i) => i.name === "Vigorous" && i.system.equipped)
+      )
+      .map((actor) => actor.name);
+
+    assert.deepEqual(carriers, ["Vera"]);
+  });
+
+  test("Vigorous is still in the masteries compendium as an optional pick", () => {
+    // Dropped from three builds, not from the game.
+    const vigorous = buildMasteries().find((m) => m.name === "Vigorous");
+    assert.ok(vigorous, "Vigorous is still in the pack");
+    assert.equal(vigorous.system.bonuses.vigorRefresh, 1, "effect unchanged");
+  });
+
+  test("Mira's Rapier is Reflexive, so Forestall is available to her", () => {
+    // Combat Reflexes gives every equipped melee weapon the tag. The catalog
+    // Rapier is left as printed; only her copy carries it.
+    const mira = byName.get("Mira");
+    assert.ok(mira);
+
+    const rapier = mira.items.find((/** @type {any} */ i) => i.name === "Rapier");
+    assert.ok(rapier);
+    assert.ok(rapier.system.tags.includes("reflexive"), rapier.system.tags.join(", "));
+
+    const catalogRapier = buildEquipment().find((i) => i.name === "Rapier");
+    assert.ok(catalogRapier);
+    assert.ok(
+      !catalogRapier.system.tags.includes("reflexive"),
+      "the catalog Rapier is untouched"
+    );
   });
 
   test("each caster carries the Arts and Resonances their masteries grant", () => {

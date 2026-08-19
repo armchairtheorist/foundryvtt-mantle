@@ -25,6 +25,7 @@ const ICONS = {
   defeated: { glyph: "DF", tint: "#1c1c1c" },
   exhausted: { glyph: "EX", tint: "#9a6b1f" },
   faltering: { glyph: "FA", tint: "#1c1c1c" },
+  frenzy: { glyph: "FZ", tint: "#8c2f2f" },
   frightened: { glyph: "FR", tint: "#5b2a72" },
   hindered: { glyph: "HI", tint: "#9a6b1f" },
   impaired: { glyph: "IM", tint: "#9a6b1f" },

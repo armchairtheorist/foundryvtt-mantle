@@ -80,7 +80,14 @@ MANTLE.baseline = {
   consumablePoints: 2,
   maxGuard: 0,
   maxVigor: 7,
-  wildcardMasterySlots: 1
+  wildcardMasterySlots: 1,
+
+  /**
+   * Vigor refresh is a flat 3 plus half BODY. The flat part is the floor for
+   * everyone — BODY contributes nothing below 2, and its half has no minimum of
+   * its own.
+   */
+  vigorRefresh: 3
 };
 
 /** Advancement cadence, from the Character Advancement table. */
@@ -332,7 +339,15 @@ MANTLE.unarmedAttack = {
  */
 MANTLE.reactions = {
   dodge: { label: "MANTLE.Reaction.dodge", attribute: "agi", vigorCost: 2 },
-  deflect: { label: "MANTLE.Reaction.deflect", vigorCost: 1 }
+  deflect: { label: "MANTLE.Reaction.deflect", vigorCost: 1 },
+
+  /**
+   * Forestall is a reactive *attack* rather than a defense: it makes a Basic
+   * Attack with an equipped Reflexive melee weapon when a combatant already in
+   * reach tries to move away. It is available to anyone holding such a weapon,
+   * which is what the Combat Reflexes mastery is for.
+   */
+  forestall: { label: "MANTLE.Reaction.forestall", vigorCost: 2 }
 };
 
 /* -------------------------------------------- */
@@ -433,6 +448,7 @@ MANTLE.conditions = {
   defeated: { label: "MANTLE.Condition.defeated", stackable: false, clear: "persistent" },
   exhausted: { label: "MANTLE.Condition.exhausted", stackable: false, clear: "roll", rollAttributes: ["pow"] },
   faltering: { label: "MANTLE.Condition.faltering", stackable: true, cap: Infinity, clear: "persistent" },
+  frenzy: { label: "MANTLE.Condition.frenzy", stackable: true, clear: "persistent" },
   frightened: { label: "MANTLE.Condition.frightened", stackable: false, clear: "roll", rollAttributes: ["pre"] },
   hindered: { label: "MANTLE.Condition.hindered", stackable: true, clear: "roll", rollAttributes: ["pow", "agi"] },
   impaired: { label: "MANTLE.Condition.impaired", stackable: true, clear: "auto" },
@@ -444,6 +460,18 @@ MANTLE.conditions = {
   surprised: { label: "MANTLE.Condition.surprised", stackable: false, clear: "auto" },
   unraveling: { label: "MANTLE.Condition.unraveling", stackable: true, cap: Infinity, clear: "persistent" },
   wracked: { label: "MANTLE.Condition.wracked", stackable: true, clear: "auto", typed: true }
+};
+
+/**
+ * Conditions that move a derived stat rather than only imposing dice modifiers.
+ *
+ * Kept separate from the condition table because these feed the derivation
+ * pipeline, and the pipeline takes flat bonuses — not stack counts. Frenzy is
+ * the only one so far: its riders are flat regardless of how many stacks are
+ * held, while its per-stack +1d on melee attacks is applied on the roll.
+ */
+MANTLE.conditionBonuses = {
+  frenzy: { vigorRefresh: 1, spd: 1 }
 };
 
 /* -------------------------------------------- */

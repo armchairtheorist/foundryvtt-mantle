@@ -117,6 +117,16 @@
       </button>
     {{/if}}
 
+    {{!-- Forestall is a reactive attack rather than a defense, and needs an
+          equipped Reflexive melee weapon — which is what Combat Reflexes is
+          for. --}}
+    {{#if canForestall}}
+      <button type="button" class="reaction forestall" data-action="rollForestall"
+              data-tooltip="{{localize 'MANTLE.Reaction.forestallHint'}}">
+        <i class="fa-solid fa-hand"></i> {{localize "MANTLE.Reaction.forestall"}}
+      </button>
+    {{/if}}
+
     <button type="button" class="refresh-turn" data-action="refreshTurn"
             data-tooltip="{{localize 'MANTLE.Sheet.refreshTurnHint'}}">
       <i class="fa-solid fa-rotate"></i> {{localize "MANTLE.Sheet.refreshTurn"}}

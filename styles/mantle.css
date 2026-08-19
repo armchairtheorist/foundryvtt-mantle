@@ -1226,7 +1226,8 @@
   color: var(--mantle-guard);
 }
 
-.mantle .entry .control.deflect {
+.mantle .entry .control.deflect,
+.mantle .entry .control.forestall {
   color: var(--mantle-guard);
 }
 
