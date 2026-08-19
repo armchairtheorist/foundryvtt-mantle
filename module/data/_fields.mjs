@@ -110,13 +110,34 @@ function localizeChoices(table) {
 }
 
 /**
- * A depletable resource with a current value. Maxima are derived rather than
- * stored, so that changing a mastery immediately moves the ceiling.
+ * A depletable resource: a current value and a maximum.
+ *
+ * The maximum is *declared* here but never authored — every `prepareDerivedData`
+ * overwrites it from the formulas, so changing a mastery still moves the ceiling
+ * immediately. It has to be in the schema all the same, because that is where
+ * Foundry looks: `TokenDocument.getTrackedAttributes` walks the data model for
+ * SchemaFields holding both `value` and `max`, and offers only those as token
+ * bars. A resource with a derived-only maximum is offered as a bare number, and
+ * a number cannot be drawn as a bar over a token.
  *
  * @param {number} [initial]
  */
 export function resource(initial = 0) {
-  return new fields.SchemaField({ value: count(initial) });
+  return new fields.SchemaField({ value: count(initial), max: count(0) });
+}
+
+/**
+ * A track measured by how full it is rather than by what is left — Wounds and
+ * Burdens, where `value` is how many have been taken and `max` is the slots
+ * available.
+ *
+ * Both halves are derived: the count comes from the length of the Wound or
+ * Burden array, and the ceiling from the slot budget. The field exists purely so
+ * the track can be shown as a token bar, and `MantleActor#modifyTokenAttribute`
+ * refuses writes to it rather than letting an edit vanish.
+ */
+export function track() {
+  return new fields.SchemaField({ value: count(0), max: count(0) });
 }
 
 /**

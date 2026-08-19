@@ -16,7 +16,7 @@ import {
   isStressed,
   BONUS_KEYS
 } from "./derive.mjs";
-import { fields, count, text, resource, bonuses } from "./_fields.mjs";
+import { fields, count, text, resource, track, bonuses } from "./_fields.mjs";
 
 export default class CharacterData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
@@ -55,6 +55,15 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
           affliction: text()
         })
       ),
+
+      /**
+       * The Wound and Burden tracks as bar-shaped fields, so a GM can put them
+       * over a token. Both halves are filled in by `prepareDerivedData` from the
+       * arrays above and the slot budget — these are a second view of the same
+       * data, never a second copy of it.
+       */
+      woundSlots: track(),
+      burdenSlots: track(),
 
       /** Trained narrative skills, by skill id. Training is binary. */
       skills: new fields.SetField(new fields.StringField({ blank: false })),
@@ -156,6 +165,14 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
     this.vigor.refresh = derived.vigorRefresh;
     this.resolve.max = derived.maxResolve;
     this.consumables.max = derived.slots.consumable;
+
+    // The harm tracks fill up rather than drain, so `value` is how many have
+    // been taken and `max` is the budget. Same numbers the sheet reads out of
+    // `slots`, exposed in the shape a token bar needs.
+    this.woundSlots.value = this.wounds.length;
+    this.woundSlots.max = derived.slots.wound;
+    this.burdenSlots.value = this.burdens.length;
+    this.burdenSlots.max = derived.slots.burden;
 
     // Guard may be pushed above its maximum — Over-Guard — and when it is, the
     // start-of-turn refresh is skipped rather than pulling it back down.

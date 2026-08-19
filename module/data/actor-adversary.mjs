@@ -20,7 +20,7 @@
 
 import { MANTLE } from "../config.mjs";
 import { scaleAdversary } from "../rules/adversary.mjs";
-import { fields, count, text, choice, options, ladder } from "./_fields.mjs";
+import { fields, count, text, choice, options, ladder, resource, track } from "./_fields.mjs";
 
 /**
  * Templates a GM may layer onto a Regular baseline. Blank means "run the stat
@@ -58,15 +58,20 @@ export default class AdversaryData extends foundry.abstract.TypeDataModel {
         Object.fromEntries(Object.keys(MANTLE.attributes).map((key) => [key, count(0)]))
       ),
 
-      // Authored maxima, unlike characters where these are formulas.
-      vitality: new fields.SchemaField({ value: count(), max: count(20) }),
-      strain: new fields.SchemaField({ value: count(), max: count(5) }),
-      guard: new fields.SchemaField({ value: count(), max: count(0) }),
+      // Authored maxima, unlike characters where these are formulas — though
+      // the class template and tier of play still adjust them in derived data.
+      vitality: resource(),
+      strain: resource(),
+      guard: resource(),
 
-      // Authored figures. The effective slots come from the challenge class,
-      // which is what the sheet and the harm rules actually read.
-      woundSlots: count(0),
-      burdenSlots: count(0),
+      /**
+       * The Wound and Burden tracks. `max` is authored on the stat block and
+       * recomputed from the effective challenge class; `value` is how many have
+       * been taken, and comes from the arrays below. Shaped this way so both can
+       * be shown as token bars, the same as on a character.
+       */
+      woundSlots: track(),
+      burdenSlots: track(),
       wounds: new fields.ArrayField(new fields.SchemaField({ effect: text() })),
       burdens: new fields.ArrayField(new fields.SchemaField({ effect: text() })),
 
@@ -147,8 +152,10 @@ export default class AdversaryData extends foundry.abstract.TypeDataModel {
     // Slot counts follow the class rather than the printed figure. The catalog
     // prints them too, and they always agree — but a templated creature has to
     // pick up the slots its new class grants.
-    this.effectiveWoundSlots = scaled.woundSlots;
-    this.effectiveBurdenSlots = scaled.burdenSlots;
+    this.woundSlots.max = scaled.woundSlots;
+    this.woundSlots.value = this.wounds.length;
+    this.burdenSlots.max = scaled.burdenSlots;
+    this.burdenSlots.value = this.burdens.length;
 
     this.turnsPerRound = scaled.turnsPerRound;
     this.extraManeuvers = scaled.extraManeuvers;

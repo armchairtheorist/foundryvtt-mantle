@@ -153,8 +153,8 @@ describe("the enemy catalog", () => {
   test("printed Wound slots agree with the challenge class", () => {
     for (const enemy of enemies) {
       const expected = authoredHarmSlots(enemy.system.challengeClass);
-      assert.equal(enemy.system.woundSlots, expected.wounds, `${enemy.name}: wounds`);
-      assert.equal(enemy.system.burdenSlots, expected.burdens, `${enemy.name}: burdens`);
+      assert.equal(enemy.system.woundSlots.max, expected.wounds, `${enemy.name}: wounds`);
+      assert.equal(enemy.system.burdenSlots.max, expected.burdens, `${enemy.name}: burdens`);
     }
   });
 

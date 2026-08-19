@@ -45,6 +45,32 @@ export default class MantleActor extends Actor {
 
   /* -------------------------------------------- */
 
+  /**
+   * Guard the derived-only token bars against edits.
+   *
+   * Foundry lets a GM type into either bar on the token HUD, which writes
+   * straight through to the actor. That is right for Vitality and Guard, but the
+   * Wound and Burden tracks are computed from their arrays — a number typed
+   * there would be overwritten by the next data preparation and simply vanish.
+   * Refusing with a message beats accepting an edit that does nothing.
+   *
+   * @override
+   * @param {string} attribute
+   * @param {number} value
+   * @param {boolean} isDelta
+   * @param {boolean} isBar
+   */
+  async modifyTokenAttribute(attribute, value, isDelta, isBar) {
+    if (["woundSlots", "burdenSlots"].includes(attribute)) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Harm.trackIsDerived"));
+      return this;
+    }
+
+    return super.modifyTokenAttribute(attribute, value, isDelta, isBar);
+  }
+
+  /* -------------------------------------------- */
+
   /** Convenience: the ancestry archetype, which sets SPD, SEN, and SIZE. */
   get ancestry() {
     return this.items.find((i) => i.type === "archetype" && i.system.kind === "ancestry") ?? null;
@@ -530,7 +556,7 @@ export default class MantleActor extends Actor {
         amount,
         strain: system.strain.value,
         maxStrain: system.strain.max,
-        burdenSlots: system.slots?.burden ?? system.burdenSlots ?? 0,
+        burdenSlots: system.slots.burden,
         burdensTaken: system.burdens.length,
         affinity
       });
@@ -544,7 +570,7 @@ export default class MantleActor extends Actor {
       guard: system.guard.value,
       vitality: system.vitality.value,
       maxVitality: system.vitality.max,
-      woundSlots: system.slots?.wound ?? system.woundSlots ?? 0,
+      woundSlots: system.slots.wound,
       woundsTaken: system.wounds.length,
       penetrating,
       untyped,

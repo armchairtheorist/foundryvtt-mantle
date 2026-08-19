@@ -564,8 +564,8 @@ export function build() {
         strain: { value: 0, max: enemy.strain },
         guard: { value: enemy.guard, max: enemy.guard },
 
-        woundSlots: slots,
-        burdenSlots: slots,
+        woundSlots: { value: 0, max: slots },
+        burdenSlots: { value: 0, max: slots },
         wounds: [],
         burdens: [],
 

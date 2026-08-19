@@ -90,7 +90,7 @@
       <div class="harm-track wounds">
         <h3>
           {{localize "MANTLE.Sheet.wounds"}}
-          <span class="slots">{{system.wounds.length}} / {{system.slots.wound}}</span>
+          <span class="slots">{{system.woundSlots.value}} / {{system.woundSlots.max}}</span>
           <a class="control add" data-action="takeWound"
              data-tooltip="{{localize 'MANTLE.Harm.takeWoundHint'}}"><i class="fa-solid fa-plus"></i></a>
         </h3>
@@ -109,7 +109,7 @@
       <div class="harm-track burdens">
         <h3>
           {{localize "MANTLE.Sheet.burdens"}}
-          <span class="slots">{{system.burdens.length}} / {{system.slots.burden}}</span>
+          <span class="slots">{{system.burdenSlots.value}} / {{system.burdenSlots.max}}</span>
           <a class="control add" data-action="takeBurden"
              data-tooltip="{{localize 'MANTLE.Harm.takeBurdenHint'}}"><i class="fa-solid fa-plus"></i></a>
         </h3>

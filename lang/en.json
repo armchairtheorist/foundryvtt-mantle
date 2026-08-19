@@ -242,6 +242,7 @@
   "MANTLE.Harm.noWoundSlots": "No Wound slot remaining — the character is Defeated.",
   "MANTLE.Harm.takeBurdenHint": "Take a Burden — tests your luck for the severity.",
   "MANTLE.Harm.takeWoundHint": "Take a Wound — tests your luck for the severity.",
+  "MANTLE.Harm.trackIsDerived": "Wounds and Burdens are counted from the sheet, not set on the token. Use the track's + and × controls.",
   "MANTLE.Hint.archetypeLimitBreak": "Archetype Limit Breaks unlock when the archetype is realized, and carry no attribute prerequisite.",
   "MANTLE.Hint.artLadders": "The Resonance decides which ladder a combination resolves on, and supplies its tags and conditions.",
   "MANTLE.Hint.intrinsic": "An intrinsic weapon is part of the body: always equipped, and it costs no gear slot.",

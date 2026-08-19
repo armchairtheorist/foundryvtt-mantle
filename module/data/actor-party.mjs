@@ -15,12 +15,12 @@
  * party members, so the model tracks its own membership.
  */
 
-import { fields, count } from "./_fields.mjs";
+import { fields, count, resource } from "./_fields.mjs";
 
 export default class PartyData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      valor: new fields.SchemaField({ value: count(0) }),
+      valor: resource(0),
 
       /** Player characters counted toward Max Valor. NPC allies do not count. */
       members: new fields.SetField(new fields.DocumentUUIDField({ type: "Actor" })),

@@ -41,7 +41,7 @@ const REQUIRED = {
   resonance: ["arts"],
   feature: ["activation"],
   limitbreak: ["category"],
-  adversary: ["challengeClass", "vitality"]
+  adversary: ["challengeClass", "vitality", "woundSlots", "burdenSlots"]
 };
 
 const problems = [];
