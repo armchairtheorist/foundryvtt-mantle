@@ -32,7 +32,17 @@ const WEAPONS = [
   { name: "Unarmed Attack", weight: "light", attr: "either", types: ["crushing"], melee: 1, damage: [1, 3, 6, 9], intrinsic: true },
 
   // Light
-  { name: "Dagger", weight: "light", attr: "either", types: ["slashing", "piercing"], dual: true, melee: 1, range: 5, damage: [1, 4, 8, 12] },
+  {
+    name: "Dagger",
+    weight: "light",
+    attr: "either",
+    types: ["slashing", "piercing"],
+    dual: true,
+    melee: 1,
+    range: 5,
+    damage: [1, 4, 8, 12],
+    special: "When used as a ranged weapon, the damage type is always Piercing."
+  },
   { name: "Stiletto", weight: "light", attr: "either", types: ["piercing"], melee: 1, tags: ["penetrating"], damage: [1, 3, 6, 9] },
   { name: "Rapier", weight: "light", attr: "agi", types: ["slashing", "piercing"], dual: true, melee: 1, tags: ["deflect"], damage: [1, 5, 10, 15] },
   { name: "Sling", weight: "light", attr: "either", types: ["crushing"], melee: null, range: 10, damage: [1, 4, 8, 12] },

@@ -29,13 +29,15 @@ const ICONS = {
   frightened: { glyph: "FR", tint: "#5b2a72" },
   hindered: { glyph: "HI", tint: "#9a6b1f" },
   impaired: { glyph: "IM", tint: "#9a6b1f" },
-  invisible: { glyph: "IN", tint: "#2f5b8c" },
+  hidden: { glyph: "HD", tint: "#2f5b8c" },
+  obscured: { glyph: "OB", tint: "#2f5b8c" },
   lost: { glyph: "LO", tint: "#1c1c1c" },
   provoked: { glyph: "PR", tint: "#8c2f2f" },
   shrouded: { glyph: "SH", tint: "#2f5b8c" },
   slowed: { glyph: "SL", tint: "#2f5b8c" },
   surprised: { glyph: "SU", tint: "#2f5b8c" },
   unraveling: { glyph: "UN", tint: "#1c1c1c" },
+  vulnerable: { glyph: "VU", tint: "#8c2f2f" },
   wracked: { glyph: "WR", tint: "#8c2f2f" }
 };
 

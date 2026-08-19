@@ -121,11 +121,22 @@ function registerSheets() {
  * number.
  */
 function registerConditions() {
-  CONFIG.statusEffects = Object.entries(MANTLE.conditions).map(([id, condition]) => ({
-    id,
-    name: condition.label,
-    img: `systems/mantle/assets/conditions/${id}.svg`
-  }));
+  CONFIG.statusEffects = [
+    ...Object.entries(MANTLE.conditions).map(([id, condition]) => ({
+      id,
+      name: condition.label,
+      img: `systems/mantle/assets/conditions/${id}.svg`
+    })),
+
+    // Hidden and Obscured are visibility states rather than conditions — they
+    // do not stack and nothing clears them — but a GM still needs to mark which
+    // token is which, so they get icons without joining the condition table.
+    ...Object.entries(MANTLE.visibilityMarkers).map(([id, label]) => ({
+      id,
+      name: label,
+      img: `systems/mantle/assets/conditions/${id}.svg`
+    }))
+  ];
 
   // Stacking rules and caps stay in CONFIG.MANTLE.conditions rather than being
   // copied onto the status effects. One source of truth, and the sheet and the

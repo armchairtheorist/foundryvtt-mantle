@@ -575,7 +575,6 @@ MANTLE.conditions = {
   frightened: { label: "MANTLE.Condition.frightened", stackable: false, clear: "roll", rollAttributes: ["pre"] },
   hindered: { label: "MANTLE.Condition.hindered", stackable: true, clear: "roll", rollAttributes: ["pow", "agi"] },
   impaired: { label: "MANTLE.Condition.impaired", stackable: true, clear: "auto" },
-  invisible: { label: "MANTLE.Condition.invisible", stackable: false, clear: "persistent" },
   lost: { label: "MANTLE.Condition.lost", stackable: false, clear: "persistent" },
   provoked: { label: "MANTLE.Condition.provoked", stackable: false, clear: "auto" },
   shrouded: { label: "MANTLE.Condition.shrouded", stackable: false, clear: "roll", rollAttributes: ["ins"] },
@@ -584,6 +583,21 @@ MANTLE.conditions = {
   unraveling: { label: "MANTLE.Condition.unraveling", stackable: true, cap: Infinity, clear: "persistent" },
   vulnerable: { label: "MANTLE.Condition.vulnerable", stackable: true, clear: "persistent" },
   wracked: { label: "MANTLE.Condition.wracked", stackable: true, clear: "auto", typed: true }
+};
+
+/**
+ * Visibility states, as token markers.
+ *
+ * Hidden and Obscured are *states* rather than conditions: the rules list them
+ * under visibility, they do not stack, and nothing clears them at end of turn.
+ * They are registered as status effects all the same, because a GM still needs
+ * to mark which token is which — but they are deliberately not in the condition
+ * table, and so never appear in the condition bar with stack controls that
+ * would mean nothing.
+ */
+MANTLE.visibilityMarkers = {
+  hidden: "MANTLE.Visibility.hidden",
+  obscured: "MANTLE.Visibility.obscured"
 };
 
 /**
