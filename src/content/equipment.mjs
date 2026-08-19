@@ -21,6 +21,7 @@ const PACK = "equipment";
  * @property {number[]} damage - The 0s, 1s, 2s, and 3+ bands
  * @property {string} [special]
  * @property {boolean} [intrinsic] - Part of the body: always equipped, no gear slot
+ * @property {boolean} [dual] - Deals Slashing *or* Piercing, chosen per attack
  */
 
 /** @type {WeaponRow[]} */
@@ -31,16 +32,16 @@ const WEAPONS = [
   { name: "Unarmed Attack", weight: "light", attr: "either", types: ["crushing"], melee: 1, damage: [1, 3, 6, 9], intrinsic: true },
 
   // Light
-  { name: "Dagger", weight: "light", attr: "either", types: ["piercing"], melee: 1, range: 5, damage: [1, 4, 8, 12] },
+  { name: "Dagger", weight: "light", attr: "either", types: ["slashing", "piercing"], dual: true, melee: 1, range: 5, damage: [1, 4, 8, 12] },
   { name: "Stiletto", weight: "light", attr: "either", types: ["piercing"], melee: 1, tags: ["penetrating"], damage: [1, 3, 6, 9] },
-  { name: "Rapier", weight: "light", attr: "agi", types: ["piercing"], melee: 1, tags: ["deflect"], damage: [1, 5, 10, 15] },
+  { name: "Rapier", weight: "light", attr: "agi", types: ["slashing", "piercing"], dual: true, melee: 1, tags: ["deflect"], damage: [1, 5, 10, 15] },
   { name: "Sling", weight: "light", attr: "either", types: ["crushing"], melee: null, range: 10, damage: [1, 4, 8, 12] },
   { name: "Chakram", weight: "light", attr: "agi", types: ["slashing"], melee: null, range: 10, tags: ["seeking"], damage: [1, 4, 8, 12] },
   { name: "Whip", weight: "light", attr: "agi", types: ["slashing"], melee: 2, tags: ["reflexive"], damage: [1, 4, 8, 12] },
   { name: "Buckler", weight: "light", attr: "either", types: ["crushing"], melee: 1, tags: ["shield"], damage: [1, 3, 6, 9] },
 
   // Medium
-  { name: "Longsword", weight: "medium", attr: "pow", types: ["slashing"], melee: 1, tags: ["deflect"], damage: [2, 6, 11, 17] },
+  { name: "Longsword", weight: "medium", attr: "pow", types: ["slashing", "piercing"], dual: true, melee: 1, tags: ["deflect"], damage: [2, 6, 11, 17] },
   { name: "Mace", weight: "medium", attr: "pow", types: ["crushing"], melee: 1, damage: [2, 7, 13, 20] },
   { name: "Warpick", weight: "medium", attr: "pow", types: ["piercing"], melee: 1, tags: ["penetrating"], damage: [2, 6, 10, 15] },
   { name: "Spear", weight: "medium", attr: "pow", types: ["piercing"], melee: 2, tags: ["reflexive"], damage: [2, 6, 11, 17] },
@@ -51,8 +52,8 @@ const WEAPONS = [
   // Heavy
   { name: "Greataxe", weight: "heavy", attr: "pow", types: ["slashing"], melee: 1, damage: [3, 9, 17, 25] },
   { name: "Warhammer", weight: "heavy", attr: "pow", types: ["crushing"], melee: 1, damage: [3, 9, 17, 25] },
-  { name: "Greatsword", weight: "heavy", attr: "pow", types: ["slashing"], melee: 1, tags: ["deflect"], damage: [3, 8, 15, 22] },
-  { name: "Halberd", weight: "heavy", attr: "pow", types: ["slashing", "piercing"], melee: 2, damage: [3, 8, 15, 22] },
+  { name: "Greatsword", weight: "heavy", attr: "pow", types: ["slashing", "piercing"], dual: true, melee: 1, tags: ["deflect"], damage: [3, 8, 15, 22] },
+  { name: "Halberd", weight: "heavy", attr: "pow", types: ["slashing", "piercing"], dual: true, melee: 2, damage: [3, 8, 15, 22] },
   {
     name: "Longbow",
     weight: "heavy",
@@ -165,6 +166,7 @@ export function build() {
           source: "Equipment Catalog",
           equipped: Boolean(w.intrinsic),
           intrinsic: Boolean(w.intrinsic),
+          dualType: Boolean(w.dual),
           weightClass: w.weight,
           attribute: w.attr,
           damageTypes: w.types,

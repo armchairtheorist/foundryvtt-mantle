@@ -1,0 +1,38 @@
+{{!--
+  The maneuver bar, shared by the character and adversary sheets.
+
+  Every combatant has all of these. Pressing one takes the Vigor off and does
+  whatever part the system can resolve; where you moved and what you hid behind
+  stay with the table.
+--}}
+<div class="section maneuvers-bar">
+  <h3>{{localize "MANTLE.Maneuver.title"}}</h3>
+
+  <div class="maneuver-grid">
+    {{#each maneuvers as |maneuver|}}
+      <button type="button" class="maneuver {{#unless maneuver.affordable}}unaffordable{{/unless}}"
+              data-action="useManeuver" data-maneuver="{{maneuver.id}}">
+        <span class="what">{{localize maneuver.label}}</span>
+        <span class="cost">
+          {{#if maneuver.fullTurn}}<i class="fa-solid fa-hourglass" data-tooltip="{{localize 'MANTLE.Maneuver.fullTurn'}}"></i>{{/if}}
+          {{#if maneuver.vigor}}{{maneuver.vigor}}{{/if}}
+          {{#if maneuver.resolve}}<i class="fa-solid fa-heart"></i>{{maneuver.resolve}}{{/if}}
+        </span>
+      </button>
+    {{/each}}
+  </div>
+
+  <p class="hint">{{localize "MANTLE.Maneuver.hint"}}</p>
+
+  {{#if reactions.length}}
+    <div class="maneuver-grid reactions">
+      {{#each reactions as |reaction|}}
+        <button type="button" class="maneuver reaction {{#unless reaction.affordable}}unaffordable{{/unless}}"
+                data-action="useReaction" data-reaction="{{reaction.id}}">
+          <span class="what">{{localize reaction.label}}</span>
+          <span class="cost">{{#if reaction.vigor}}{{reaction.vigor}}{{else}}—{{/if}}</span>
+        </button>
+      {{/each}}
+    </div>
+  {{/if}}
+</div>

@@ -24,7 +24,8 @@ export const SETS = {
 const S = SETS;
 
 /**
- * @typedef {{prereq?: string, sets?: string[], bonuses?: Record<string, number>}} MasteryExtras
+ * @typedef {{prereq?: string, sets?: string[], bonuses?: Record<string, number>,
+ *   resistances?: string[], weaknesses?: string[]}} MasteryExtras
  * @type {Record<string, Array<[string, "body"|"mind"|"soul", number, string, MasteryExtras?]>>}
  */
 const MASTERIES = {
@@ -34,7 +35,7 @@ const MASTERIES = {
     ["Cauterize", "soul", 1, "Gain the Cauterize maneuver (Vigor 2): Remove one Wound from yourself by spending Resolve equal to the Wound's severity. You gain Wracked 3 (Fire)."],
     ["Composure", "mind", 1, "+2 Resolve."],
     ["Cosmopolitan", "soul", 1, "You learn 2 additional languages. Social action rolls involving any humanoid culture gain +1d."],
-    ["Fireman", "body", 1, "Gain Resistance (Fire)."],
+    ["Fireman", "body", 1, "Gain Resistance (Fire).", { resistances: ["fire"] }],
     ["Fleeting Spirit", "soul", 1, "If you are the first combatant to act in a round (before any allies or enemies), you gain +2d to the first attack you make on your turn.", { sets: [S.shukuchi] }],
     ["Fortune's Blessing", "soul", 2, "At the start of each Downtime, gain blessings equal to your LUCK score (unspent blessings are lost and replaced). When you receive an undesirable luck roll result, spend a blessing to reroll. You must use the new result.", { prereq: "LUCK 1", sets: [S.overflowingFortune] }],
     ["Fortune's Escape", "soul", 1, "You can spend a blessing to negate one consequence of a failure the GM agrees is plausibly luck-related. Cannot undo a Wound, a Burden, or the Defeated or Lost condition.", { prereq: "Fortune's Blessing", sets: [S.overflowingFortune] }],
@@ -114,7 +115,7 @@ const MASTERIES = {
   human: [
     ["Aggression", "soul", 1, "Gain +1 BODY mastery slot.", { sets: [S.peakHuman, S.humanExcellence] }],
     ["Brazenface", "body", 1, "Gain +1 MIND mastery slot.", { sets: [S.humanExcellence, S.enlightenment] }],
-    ["Iron Will", "soul", 1, "+2 Max Strain. Gain the Iron Will reaction (Vigor 1). Trigger: another creature targets you with a Strain attack. Effect: halve the Strain damage (minimum 0).", { bonuses: { strain: 2 } }],
+    ["Iron Will", "soul", 1, "+2 Max Strain. Gain the Iron Will reaction (Vigor 1). Trigger: when you are about to take Strain from an incoming attack. Effect: halve the Strain you take (minimum 0). This is its own halving, not resistance — resistance never reduces Strain, and Iron Will is deliberately the one thing that does.", { bonuses: { strain: 2 } }],
     ["Mind Over Matter", "mind", 1, "Gain +1 BODY mastery slot.", { sets: [S.peakHuman, S.humanExcellence] }],
     ["Open Mind", "mind", 1, "Gain +1 SOUL mastery slot.", { sets: [S.peakHuman, S.enlightenment] }],
     ["Self-Examination", "body", 1, "Gain +1 SOUL mastery slot.", { sets: [S.peakHuman, S.enlightenment] }],
@@ -138,7 +139,7 @@ const MASTERIES = {
     ["Dwarven Doughtiness", "soul", 1, "At the end of your turn, automatically clear the Frightened condition if you have it."],
     ["Dwarven Hoard", "body", 1, "+1 gear slot."],
     ["Grudge-Keeper", "mind", 1, "When a creature damages you, you may declare it your Grudge: gain +1d on attacks and opposing rolls against that creature for the rest of the encounter. Only one Grudge at a time; declaring a new one ends the previous."],
-    ["Stoneskin", "body", 1, "Gain Resistance (Crushing)."]
+    ["Stoneskin", "body", 1, "Gain Resistance (Crushing).", { resistances: ["crushing"] }]
   ]
 };
 
@@ -164,6 +165,8 @@ export function build() {
             slotBoard: "",
             prerequisite: extras.prereq ?? "",
             bonuses: extras.bonuses ?? {},
+            resistances: extras.resistances ?? [],
+            weaknesses: extras.weaknesses ?? [],
             sets: extras.sets ?? []
           }
         })

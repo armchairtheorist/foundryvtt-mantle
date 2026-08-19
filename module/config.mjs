@@ -283,6 +283,27 @@ MANTLE.damageTypes = {
 MANTLE.defaultDamageType = "crushing";
 
 /**
+ * Shorthands that stand for several damage types at once.
+ *
+ * "Resistance (Physical)" is one trait covering Slashing, Piercing, and
+ * Crushing together. Expanding it here rather than writing the three out on
+ * every stat block keeps the shorthand the catalog uses and the thing the
+ * affinity engine compares against as the same idea.
+ */
+MANTLE.damageTypeGroups = {
+  physical: ["slashing", "piercing", "crushing"]
+};
+
+/**
+ * What a resistance or weakness may name: any single damage type, or one of the
+ * group shorthands.
+ */
+MANTLE.affinityChoices = {
+  physical: "MANTLE.Damage.physical",
+  ...MANTLE.damageTypes
+};
+
+/**
  * Weapon and attack tags that carry mechanical weight. Melee N and Range N are
  * stored as numbers on the item rather than as tags, since they take a value.
  */
@@ -347,8 +368,110 @@ MANTLE.reactions = {
    * reach tries to move away. It is available to anyone holding such a weapon,
    * which is what the Combat Reflexes mastery is for.
    */
-  forestall: { label: "MANTLE.Reaction.forestall", vigorCost: 2 }
+  forestall: { label: "MANTLE.Reaction.forestall", vigorCost: 2, weapon: "reflexive" },
+
+  /** A reactive attack with any equipped melee weapon. */
+  intercept: { label: "MANTLE.Reaction.intercept", vigorCost: 2, weapon: "melee" },
+
+  /** As Intercept, but granted by the Warrior archetype rather than universal. */
+  counterattack: { label: "MANTLE.Reaction.counterattack", vigorCost: 2, weapon: "melee" },
+
+  /**
+   * Brace costs nothing but ends your turn's options: you gain resistance to
+   * the incoming attack and become Broken, which locks out every further
+   * maneuver and reaction until it clears. A last resort, priced as one.
+   */
+  brace: { label: "MANTLE.Reaction.brace", vigorCost: 0, appliesSelf: "broken" }
 };
+
+/* -------------------------------------------- */
+/*  Maneuvers                                    */
+/* -------------------------------------------- */
+
+/**
+ * The basic maneuvers every combatant can take, from the Quick Start's table.
+ *
+ * Universal, so they live here rather than as items a character has to be
+ * given — the same reasoning as the Unarmed Attack. The compendium ships a
+ * readable copy of this table built from it, so the two cannot disagree.
+ *
+ * `kind` says what pressing the button actually does. Anything the system
+ * cannot resolve on its own — where you moved, whether the fiction allows
+ * hiding — is posted as a card for the table to adjudicate, which is the same
+ * assisted model the rest of the system uses.
+ */
+// `enemy` marks the ones an adversary may take. Enemies run a leaner action
+// economy — one Move plus one extra maneuver, chosen from Move, Shift, Basic
+// Attack, Shove, and whatever the stat block defines — and Feint is universal
+// by design ruling, so it joins them.
+MANTLE.maneuvers = {
+  move: { label: "MANTLE.Maneuver.move", vigor: 1, kind: "simple", firstFree: true, enemy: true },
+  shift: { label: "MANTLE.Maneuver.shift", vigor: 1, kind: "simple", enemy: true },
+
+  // Each rolls an attack that deals no damage and lands an effect scaled to net
+  // successes, capped at 3. Shove and Grab use the Unarmed Attack specifically;
+  // Feint uses any equipped melee weapon, and the Unarmed Attack qualifies.
+  shove: {
+    label: "MANTLE.Maneuver.shove",
+    vigor: 2,
+    kind: "attack",
+    weapon: "unarmed",
+    effect: "MANTLE.Maneuver.shoveEffect",
+    max: 3,
+    enemy: true
+  },
+  grab: {
+    label: "MANTLE.Maneuver.grab",
+    vigor: 2,
+    kind: "attack",
+    weapon: "unarmed",
+    applies: "hindered",
+    max: 3,
+    enemy: true
+  },
+  feint: {
+    label: "MANTLE.Maneuver.feint",
+    vigor: 2,
+    kind: "attack",
+    weapon: "melee",
+    applies: "vulnerable",
+    max: 3,
+    enemy: true
+  },
+
+  useConsumable: { label: "MANTLE.Maneuver.useConsumable", vigor: 1, kind: "consumable" },
+  hide: { label: "MANTLE.Maneuver.hide", vigor: 1, kind: "simple" },
+  shakeItOff: {
+    label: "MANTLE.Maneuver.shakeItOff",
+    vigor: 2,
+    kind: "clearCondition",
+    clears: ["hindered", "exhausted"]
+  },
+
+  // The three full-turn maneuvers. Taking one costs no Vigor but locks out
+  // everything else until your next turn, which the card says rather than the
+  // system enforcing.
+  catchYourBreath: {
+    label: "MANTLE.Maneuver.catchYourBreath",
+    vigor: 0,
+    resolve: 1,
+    kind: "heal",
+    fullTurn: true
+  },
+  steadyYourself: {
+    label: "MANTLE.Maneuver.steadyYourself",
+    vigor: 0,
+    kind: "clearStrain",
+    fullTurn: true
+  },
+  limitBreak: { label: "MANTLE.Maneuver.limitBreak", vigor: 0, kind: "simple", fullTurn: true },
+
+  /** Once per turn, and impossible at MIND 0: 2 Strain buys 1 Vigor. */
+  surge: { label: "MANTLE.Maneuver.surge", vigor: 0, kind: "surge", oncePerTurn: true }
+};
+
+/** Surge trades Strain for Vigor at this rate. */
+MANTLE.surgeStrainPerVigor = 2;
 
 /* -------------------------------------------- */
 /*  Spellcasting                                 */
@@ -459,6 +582,7 @@ MANTLE.conditions = {
   slowed: { label: "MANTLE.Condition.slowed", stackable: false, clear: "roll", rollAttributes: ["agi"] },
   surprised: { label: "MANTLE.Condition.surprised", stackable: false, clear: "auto" },
   unraveling: { label: "MANTLE.Condition.unraveling", stackable: true, cap: Infinity, clear: "persistent" },
+  vulnerable: { label: "MANTLE.Condition.vulnerable", stackable: true, clear: "persistent" },
   wracked: { label: "MANTLE.Condition.wracked", stackable: true, clear: "auto", typed: true }
 };
 

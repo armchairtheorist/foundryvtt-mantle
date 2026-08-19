@@ -62,10 +62,6 @@ const PREGENS = [
       wildcard: ["Visualization"]
     },
     gear: ["Rapier", "Shortbow", "Chain Shirt"],
-    // Combat Reflexes gives every equipped melee weapon the Reflexive tag,
-    // which is what unlocks the Forestall reaction. The catalog Rapier is left
-    // as printed; only Mira's copy carries the tag.
-    gearOverrides: { Rapier: { tags: ["deflect", "reflexive"] } },
     limitBreaks: ["Deadeye Requiem"],
     skills: ["climbing", "stealth", "tracking", "bestiary", "seduction", "navigation"],
     playstyle:

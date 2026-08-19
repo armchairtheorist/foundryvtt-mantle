@@ -85,6 +85,20 @@
     {{/if}}
   {{/if}}
 
+  {{!-- Shove, Grab, and Feint deal no damage. What they land scales with net
+        successes, so it is shown here and applied from the same button — after
+        the stepper has absorbed whatever the defender rolled. --}}
+  {{#if maneuver}}
+    <div class="maneuver-effect {{#unless resolved.effective}}nothing{{/unless}}">
+      <span class="what">{{maneuverEffect}}</span>
+      {{#if resolved.effective}}
+        <button type="button" data-apply data-tooltip="{{localize 'MANTLE.Card.applyHint'}}">
+          <i class="fa-solid fa-crosshairs"></i> {{localize "MANTLE.Card.apply"}}
+        </button>
+      {{/if}}
+    </div>
+  {{/if}}
+
   {{!-- The ladder, with the achieved band lit. Showing every band, not just the
         one hit, keeps the stakes of a re-roll or a Heroic Feat visible. --}}
   {{#if ladder}}

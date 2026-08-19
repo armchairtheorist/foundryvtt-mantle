@@ -1691,3 +1691,77 @@
     }
   }
 }
+
+/* -------------------------------------------- */
+/*  Maneuvers                                    */
+/* -------------------------------------------- */
+
+/* Every combatant has all of these, so the bar is dense by necessity — twelve
+   maneuvers and up to six reactions. Each button carries its cost, because the
+   cost is the decision. */
+.mantle .maneuvers-bar {
+  .maneuver-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 4px;
+  }
+
+  .maneuver-grid.reactions {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--mantle-border);
+  }
+
+  button.maneuver {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+    font-size: 0.8em;
+    padding: 2px 6px;
+    line-height: 1.7;
+
+    .cost {
+      font-weight: 700;
+      color: var(--mantle-vigor);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Priced out rather than hidden. Knowing a maneuver exists and costs more
+       Vigor than you have is information; a button that vanishes is not. */
+    &.unaffordable {
+      opacity: 0.45;
+    }
+
+    &.reaction .cost {
+      color: var(--mantle-guard);
+    }
+  }
+}
+
+/* Shove, Grab, and Feint deal no damage, so the card shows what they land
+   instead of a ladder. */
+.mantle .maneuver-effect {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--mantle-border);
+  border-radius: 4px;
+  background: var(--mantle-panel);
+
+  .what {
+    font-weight: 700;
+  }
+
+  &.nothing {
+    border-style: dashed;
+
+    .what {
+      font-weight: 400;
+      color: var(--mantle-muted);
+    }
+  }
+}

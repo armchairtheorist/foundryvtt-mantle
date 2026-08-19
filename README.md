@@ -65,6 +65,7 @@ Everything the table needs is in the **Mantle** compendium folder.
 | Equipment | Weapons, armor, spell foci, wondrous items, and consumables |
 | Arts & Resonances | The spellcasting half — four Arts, five Resonances |
 | Limit Breaks | Six General and one Archetype Limit Break |
+| Maneuvers & Reactions | The basic maneuvers and reactions every combatant has, as reference |
 
 A few things worth knowing before the first session:
 
@@ -83,6 +84,13 @@ A few things worth knowing before the first session:
 - **End of turn is a button.** It resolves Wracked damage, auto-clears,
   roll-to-clears, and the Faltering and Unraveling checks, and posts what
   happened to chat.
+- **The basic maneuvers are buttons too**, on both sheets. Pressing one takes
+  the Vigor off and resolves whatever has a number attached; where you moved and
+  what you hid behind stay with the table. Enemies get the shorter list their
+  action economy allows and pay no Vigor for it.
+- **Feint, Shove, and Grab are attacks.** They roll like one, the defender may
+  answer with a reactive defense, and what they land is applied from the card
+  *after* the net-success stepper — so a fully dodged Feint applies nothing.
 
 ## Developing
 

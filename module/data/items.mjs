@@ -12,7 +12,7 @@
  */
 
 import { MANTLE } from "../config.mjs";
-import { fields, count, modifier, text, choice, options, ladder, bonuses } from "./_fields.mjs";
+import { fields, count, modifier, text, choice, options, ladder, bonuses, affinities } from "./_fields.mjs";
 
 const TypeDataModel = foundry.abstract.TypeDataModel;
 
@@ -185,6 +185,15 @@ export class MasteryData extends TypeDataModel {
       bonuses: bonuses(),
 
       /**
+       * Damage affinities this mastery grants while equipped — Fireman's
+       * Resistance (Fire), Stoneskin's Resistance (Crushing). Same reasoning as
+       * the numeric bonuses: an effect that is only a rules lookup belongs in
+       * the pipeline rather than in prose the player has to remember.
+       */
+      resistances: affinities(),
+      weaknesses: affinities(),
+
+      /**
        * Mastery sets this belongs to. A set, not a single name: the catalog puts
        * Aggression in both Peak Human Condition and Human Excellence, and
        * equipping every member of any one set grants that set's bonus.
@@ -224,6 +233,14 @@ export class WeaponData extends TypeDataModel {
        * Unarmed Attack is the only one in the catalog.
        */
       intrinsic: new fields.BooleanField({ initial: false }),
+
+      /**
+       * A dual-type weapon deals Slashing *or* Piercing on any given swing,
+       * chosen by the wielder — not both at once. The distinction matters
+       * because it is what the target's resistances answer to: a blade that
+       * dealt both would beat Resistance (Slashing) for free.
+       */
+      dualType: new fields.BooleanField({ initial: false }),
 
       weightClass: choice(MANTLE.weightClasses, "light"),
 

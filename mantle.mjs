@@ -72,7 +72,8 @@ Hooks.once("init", () => {
  */
 function registerPartials() {
   foundry.applications.handlebars.loadTemplates([
-    "systems/mantle/templates/parts/conditions.hbs"
+    "systems/mantle/templates/parts/conditions.hbs",
+    "systems/mantle/templates/parts/maneuvers.hbs"
   ]);
 }
 

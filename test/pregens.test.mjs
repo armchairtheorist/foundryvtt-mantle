@@ -444,21 +444,26 @@ describe("the pregens ship as ready-to-play actors", () => {
     assert.equal(vigorous.system.bonuses.vigorRefresh, 1, "effect unchanged");
   });
 
-  test("Mira's Rapier is Reflexive, so Forestall is available to her", () => {
-    // Combat Reflexes gives every equipped melee weapon the tag. The catalog
-    // Rapier is left as printed; only her copy carries it.
+  test("Mira carries Combat Reflexes, which is what enables Forestall", () => {
+    // The tag is granted at derivation time to every equipped melee weapon —
+    // her Rapier and her Unarmed Attack alike — rather than baked into her copy
+    // of the Rapier. Baking it in gave the Rapier the tag and left the fist
+    // without it, and survived unequipping the mastery.
     const mira = byName.get("Mira");
     assert.ok(mira);
 
-    const rapier = mira.items.find((/** @type {any} */ i) => i.name === "Rapier");
-    assert.ok(rapier);
-    assert.ok(rapier.system.tags.includes("reflexive"), rapier.system.tags.join(", "));
+    const masteries = mira.items
+      .filter((/** @type {any} */ i) => i.type === "mastery" && i.system.equipped)
+      .map((/** @type {any} */ i) => i.name);
+    assert.ok(masteries.includes("Combat Reflexes"), masteries.join(", "));
 
+    const rapier = mira.items.find((/** @type {any} */ i) => i.name === "Rapier");
     const catalogRapier = buildEquipment().find((i) => i.name === "Rapier");
-    assert.ok(catalogRapier);
-    assert.ok(
-      !catalogRapier.system.tags.includes("reflexive"),
-      "the catalog Rapier is untouched"
+    assert.ok(rapier && catalogRapier);
+    assert.deepEqual(
+      rapier.system.tags,
+      catalogRapier.system.tags,
+      "her Rapier is the catalog Rapier, unmodified"
     );
   });
 

@@ -141,6 +141,17 @@ export function track() {
 }
 
 /**
+ * Damage types a creature resists or is vulnerable to.
+ *
+ * Entries are damage types or one of the group shorthands — "physical" stands
+ * for Slashing, Piercing, and Crushing together, so a stat block can carry the
+ * one trait the catalog prints rather than three.
+ */
+export function affinities() {
+  return new fields.SetField(new fields.StringField({ blank: false }));
+}
+
+/**
  * The four-band effect ladder every attack, spell, and maneuver resolves on.
  * Values are free text so a ladder can read "12 damage" or "Wracked 2 (Fire)"
  * or "Target recovers Vitality to full" without a separate schema for each.

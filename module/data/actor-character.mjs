@@ -16,7 +16,7 @@ import {
   isStressed,
   BONUS_KEYS
 } from "./derive.mjs";
-import { fields, count, text, resource, track, bonuses } from "./_fields.mjs";
+import { fields, count, text, resource, track, bonuses, affinities } from "./_fields.mjs";
 
 export default class CharacterData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
@@ -69,6 +69,13 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
       skills: new fields.SetField(new fields.StringField({ blank: false })),
 
       languages: new fields.SetField(new fields.StringField({ blank: false })),
+
+      /**
+       * Damage affinities. Characters gain these from masteries and gear;
+       * adversaries carry them on the stat block, like Sorrowmaw's Hardened.
+       */
+      resistances: affinities(),
+      weaknesses: affinities(),
 
       bonuses: bonuses(),
 
@@ -199,6 +206,31 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
     );
     this.castingAttribute = caster?.system.casting.attribute ?? "";
     this.isCaster = Boolean(this.castingAttribute);
+
+    // Affinities the character holds outright, plus any their equipped
+    // masteries grant. Kept as a derived pair rather than merged into the
+    // stored sets, so removing a mastery removes its resistance again.
+    const equippedMasteries = this.parent.items.filter(
+      (i) => i.type === "mastery" && i.system.equipped
+    );
+
+    this.affinities = {
+      resistances: [
+        ...this.resistances,
+        ...equippedMasteries.flatMap((i) => Array.from(i.system.resistances ?? []))
+      ],
+      weaknesses: [
+        ...this.weaknesses,
+        ...equippedMasteries.flatMap((i) => Array.from(i.system.weaknesses ?? []))
+      ]
+    };
+
+    /**
+     * Combat Reflexes gives *every* equipped melee weapon the Reflexive tag,
+     * the intrinsic Unarmed Attack included. Derived here rather than written
+     * onto each weapon, so unequipping the mastery takes the tag back.
+     */
+    this.combatReflexes = equippedMasteries.some((i) => i.name === "Combat Reflexes");
 
     // Casting without a focus costs a die, unless Inner Focus covers it.
     this.hasFocus = this.parent.items.some((i) => i.type === "focus" && i.system.equipped);

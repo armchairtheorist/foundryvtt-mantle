@@ -48,6 +48,8 @@ const PACK = "adversaries";
  * @property {Array<[string, string]>} [abilities]
  * @property {string} tactics
  * @property {string} [description]
+ * @property {string[]} [resistances] - Damage types the creature resists
+ * @property {string[]} [weaknesses]
  */
 
 /**
@@ -454,6 +456,8 @@ const ENEMIES = [
     size: "3",
     description:
       "It remembers every death it has ever caused. It treasures them. When Sorrowmaw descends, the air itself weeps.",
+    // Hardened (challenge class ability): resistance (Slashing).
+    resistances: ["slashing"],
     maneuvers: [
       { name: "Grave-Chill Bite", pool: 6, tags: ["piercing", "melee 2"], damage: [4, 11, 20, 30] },
       {
@@ -568,6 +572,9 @@ export function build() {
         burdenSlots: { value: 0, max: slots },
         wounds: [],
         burdens: [],
+
+        resistances: enemy.resistances ?? [],
+        weaknesses: enemy.weaknesses ?? [],
 
         spd: enemy.spd,
         sen: enemy.sen,

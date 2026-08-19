@@ -365,11 +365,14 @@ and why:
 - **Turn order.** Mantle uses side-alternating zipper initiative, so the system
   registers no initiative formula and defers to Lancer Initiative or the default
   tracker.
-- **Most mastery effects.** A mastery whose whole effect is a number now carries
-  it as data and reaches the derivation — Vigorous's +1 Vigor refresh, Iron
-  Will's +2 Max Strain. The rest grant something the derivation cannot express
-  (a new maneuver, a pattern, a conditional die) and stay as rules text for the
-  player to apply.
+- **Most mastery effects.** A mastery whose whole effect is a number or a damage
+  affinity now carries it as data and reaches the derivation — Vigorous's +1
+  Vigor refresh, Iron Will's +2 Max Strain, Fireman's Resistance (Fire). The
+  rest grant something the derivation cannot express (a pattern, a conditional
+  die) and stay as rules text for the player to apply.
+- **Limit Breaks, features, consumables, and wondrous items** are still listed
+  on the sheet without buttons. The *basic* maneuvers and reactions now have
+  them; these four do not.
 - **Frenzy's end-of-turn Strain.** Frenzy is modelled far enough to carry its
   flat +1 Vigor refresh and +1 SPD into the derivation, and its per-stack +1d is
   applied on the roll. The Strain it costs at end of turn is not taken

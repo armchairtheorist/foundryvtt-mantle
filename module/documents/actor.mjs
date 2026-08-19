@@ -25,6 +25,13 @@ import {
   setCondition
 } from "./conditions.mjs";
 import {
+  catchYourBreathHeal,
+  steadyYourselfClear,
+  surgeLimit,
+  surgeStrainCost,
+  vulnerableBonus
+} from "../rules/maneuvers.mjs";
+import {
   applyDamage,
   applyStrain,
   damageAffinity,
@@ -105,15 +112,25 @@ export default class MantleActor extends Actor {
   }
 
   /**
+   * Equipped melee weapons that can be used for a reactive attack — Forestall,
+   * Intercept, or Counterattack.
+   *
+   * @returns {any[]}
+   */
+  get meleeWeapons() {
+    return [...this.weapons, this.unarmedAttack].filter((weapon) => isMelee(weapon.system));
+  }
+
+  /**
    * Equipped Reflexive melee weapons, which are what enable Forestall.
    *
-   * The Combat Reflexes mastery gives every equipped melee weapon the tag, so
-   * this is usually all of them or none of them.
+   * Combat Reflexes gives *every* equipped melee weapon the tag, the intrinsic
+   * Unarmed Attack included — so with the mastery this is all of them, and
+   * without it only the weapons that carry the tag themselves.
    */
   get reflexiveWeapons() {
-    return this.weapons.filter(
-      (weapon) => weapon.system.isMelee && toArray(weapon.system.tags).includes("reflexive")
-    );
+    if (this.system.combatReflexes === true) return this.meleeWeapons;
+    return this.meleeWeapons.filter((weapon) => toArray(weapon.system.tags).includes("reflexive"));
   }
 
   /* -------------------------------------------- */
@@ -179,6 +196,8 @@ export default class MantleActor extends Actor {
    * @param {number} [options.bonusDamage]
    * @param {string[]} [options.damageTypes] - Carried to the card so Apply can resolve affinity
    * @param {boolean} [options.penetrating]
+   * @param {object} [options.maneuver] - Set when the roll lands an effect
+   *   rather than damage, so the card offers the right Apply button
    * @returns {Promise<ChatMessage>}
    */
   async rollAction({
@@ -190,13 +209,14 @@ export default class MantleActor extends Actor {
     ladderKind = "vitality",
     bonusDamage = 0,
     damageTypes = [],
-    penetrating = false
+    penetrating = false,
+    maneuver = null
   }) {
     const base = this.system.attributes?.[attribute] ?? 0;
     const pool = buildPool(base, modifiers);
 
     const roll = MantleRoll.fromPool(pool, {
-      ladder, ladderKind, bonusDamage, damageTypes, penetrating
+      ladder, ladderKind, bonusDamage, damageTypes, penetrating, maneuver
     });
     await roll.evaluate();
 
@@ -244,18 +264,108 @@ export default class MantleActor extends Actor {
     const attribute = this.#chooseAttribute(weapon.system.attribute);
     const tags = toArray(weapon.system.tags);
 
+    // A dual-type weapon is Slashing *or* Piercing on any given swing, and
+    // which one it was decides what the target's resistances answer to.
+    const damageTypes = await this.#resolveDamageTypes(weapon);
+    if (!damageTypes) return;
+
     const modifiers = standardModifiers({ ...options, trained: false });
+
+    // Vulnerable hands the attacker a die per stack, and is spent by the
+    // attack that used it whatever the attack goes on to roll.
+    const vulnerable = await this.#consumeVulnerable();
+    if (vulnerable) {
+      modifiers.push({ label: "MANTLE.Condition.vulnerable", value: vulnerable });
+    }
 
     return this.rollAction({
       attribute,
-      title: weapon.name,
-      subtitle: game.i18n.localize(MANTLE.attributes[attribute].abbr),
+      title: options.title ?? weapon.name,
+      subtitle: options.subtitle ?? game.i18n.localize(MANTLE.attributes[attribute].abbr),
       modifiers,
-      ladder: weapon.system.damage,
+      ladder: options.maneuver ? null : weapon.system.damage,
       ladderKind: "vitality",
-      damageTypes: toArray(weapon.system.damageTypes),
-      penetrating: tags.includes("penetrating")
+      damageTypes,
+      penetrating: tags.includes("penetrating"),
+      maneuver: options.maneuver ?? null
     });
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Which damage types this swing actually deals.
+   *
+   * A dual-type weapon carries Slashing and Piercing as a *choice* rather than
+   * as both at once, so the wielder is asked. Anything else the weapon deals —
+   * Fire on an enchanted blade — rides along with whichever was picked. The
+   * answer is remembered on the weapon, because a player who fights a
+   * Slashing-resistant enemy tends to keep making the same choice.
+   *
+   * @param {{name: string, system: object}} weapon
+   * @returns {Promise<string[]|null>} Null if the prompt was dismissed
+   */
+  async #resolveDamageTypes(weapon) {
+    const declared = toArray(weapon.system.damageTypes);
+    if (!weapon.system.dualType) return declared;
+
+    const choices = declared.filter((type) => ["slashing", "piercing"].includes(type));
+    const fixed = declared.filter((type) => !choices.includes(type));
+    if (choices.length < 2) return declared;
+
+    const last = weapon.getFlag?.("mantle", "lastDamageType");
+    const options = choices
+      .map((type) => {
+        const label = game.i18n.localize(MANTLE.damageTypes[type]);
+        const selected = type === last ? " selected" : "";
+        return `<option value="${type}"${selected}>${label}</option>`;
+      })
+      .join("");
+
+    const chosen = await foundry.applications.api.DialogV2.prompt({
+      window: { title: weapon.name },
+      classes: ["mantle"],
+      content: `<form><label class="row">${game.i18n.localize("MANTLE.Attack.damageType")}
+          <select name="type">${options}</select></label></form>`,
+      ok: {
+        label: game.i18n.localize("MANTLE.Action.roll"),
+        callback: (_event, button) => new FormData(button.form).get("type")
+      },
+      rejectClose: false
+    });
+
+    if (!chosen) return null;
+    await weapon.setFlag?.("mantle", "lastDamageType", chosen);
+    return [String(chosen), ...fixed];
+  }
+
+  /**
+   * Spend the target's Vulnerable stacks and report the dice they are worth.
+   *
+   * Only with exactly one target. A single roll shared across several targets
+   * cannot be +1d against one of them and not the others, and the effects that
+   * hit many creatures at once — Wild Swing, Crescent Onslaught — are written
+   * as separate rolls anyway. Saying so beats quietly picking a target.
+   *
+   * @returns {Promise<number>}
+   */
+  async #consumeVulnerable() {
+    const targets = Array.from(game.user?.targets ?? [])
+      .map((token) => token.actor)
+      .filter(Boolean);
+
+    const carrying = targets.filter((actor) => (actor.conditionStacks?.("vulnerable") ?? 0) > 0);
+    if (carrying.length === 0) return 0;
+
+    if (targets.length > 1) {
+      ui.notifications.info(game.i18n.localize("MANTLE.Condition.vulnerableMultiTarget"));
+      return 0;
+    }
+
+    const target = carrying[0];
+    const stacks = target.conditionStacks("vulnerable");
+    await target.clearCondition("vulnerable");
+    return vulnerableBonus(stacks);
   }
 
   /* -------------------------------------------- */
@@ -402,6 +512,361 @@ export default class MantleActor extends Actor {
   }
 
   /* -------------------------------------------- */
+  /*  Basic maneuvers                              */
+  /* -------------------------------------------- */
+
+  /**
+   * Take one of the basic maneuvers.
+   *
+   * Every combatant has all of these, so they come from CONFIG rather than from
+   * items — the same reasoning as the Unarmed Attack. What each one does when
+   * pressed depends on its kind: some roll an attack, some move a resource, and
+   * the rest post a card for the table to adjudicate, because where you moved
+   * and whether the fiction allows hiding are not the system's to decide.
+   *
+   * @param {string} id - A key of `CONFIG.MANTLE.maneuvers`
+   * @param {object} [options]
+   * @returns {Promise<ChatMessage|null|void>}
+   */
+  async useManeuver(id, options = {}) {
+    const maneuver = MANTLE.maneuvers[id];
+    if (!maneuver) return null;
+
+    switch (maneuver.kind) {
+      case "attack":
+        return this.#maneuverAttack(id, maneuver);
+      case "heal":
+        return this.#catchYourBreath(maneuver);
+      case "clearStrain":
+        return this.#steadyYourself(maneuver);
+      case "surge":
+        return this.#surge(maneuver);
+      case "clearCondition":
+        return this.#shakeItOff(maneuver);
+      case "consumable":
+        return this.#useConsumable(maneuver);
+      default:
+        return this.#announceManeuver(id, maneuver, options);
+    }
+  }
+
+  /**
+   * Shove, Grab, and Feint: an attack that deals no damage and lands an effect
+   * scaled to net successes instead.
+   *
+   * The card carries the effect rather than a damage ladder, so its Apply
+   * button reads the net successes *after* any opposition the defender rolled
+   * — which is the whole point of Feint being an attack rather than a check.
+   *
+   * @param {string} id
+   * @param {object} maneuver
+   * @returns {Promise<ChatMessage|null|void>}
+   */
+  async #maneuverAttack(id, maneuver) {
+    const weapon =
+      maneuver.weapon === "unarmed" ? this.unarmedAttack : await this.#pickMeleeWeapon(maneuver);
+    if (!weapon) return null;
+
+    if (!(await this.#spendVigor(maneuver.vigor))) return null;
+
+    return this.attackWith(weapon, {
+      title: game.i18n.localize(maneuver.label),
+      subtitle: weapon.name,
+      maneuver: {
+        id,
+        applies: maneuver.applies ?? null,
+        effect: maneuver.effect ?? null,
+        max: maneuver.max ?? 3
+      }
+    });
+  }
+
+  /**
+   * Catch Your Breath: 1 Resolve restores half your Max Vitality, and costs
+   * you every other maneuver this turn.
+   *
+   * @param {object} maneuver
+   */
+  async #catchYourBreath(maneuver) {
+    const system = this.system;
+    if ((system.resolve?.value ?? 0) < maneuver.resolve) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Maneuver.notEnoughResolve"));
+      return null;
+    }
+
+    const healed = catchYourBreathHeal(system.vitality.max);
+    await this.update({
+      "system.resolve.value": system.resolve.value - maneuver.resolve,
+      "system.vitality.value": Math.min(system.vitality.value + healed, system.vitality.max)
+    });
+
+    return this.#report(maneuver, game.i18n.format("MANTLE.Maneuver.caughtBreath", { healed }));
+  }
+
+  /**
+   * Steady Yourself: clear half your Max Strain, at the cost of the turn.
+   *
+   * @param {object} maneuver
+   */
+  async #steadyYourself(maneuver) {
+    const system = this.system;
+    const cleared = Math.min(steadyYourselfClear(system.strain.max), system.strain.value);
+
+    await this.update({ "system.strain.value": system.strain.value - cleared });
+    return this.#report(maneuver, game.i18n.format("MANTLE.Maneuver.steadied", { cleared }));
+  }
+
+  /**
+   * Surge: buy Vigor with Strain, two for one, up to MIND.
+   *
+   * A character with MIND 0 cannot Surge at all — refused rather than offered
+   * as a maneuver that would gain nothing.
+   *
+   * @param {object} maneuver
+   */
+  async #surge(maneuver) {
+    const system = this.system;
+    const limit = surgeLimit({
+      mind: system.cores?.mind ?? 0,
+      vigor: system.vigor.value,
+      maxVigor: system.vigor.max
+    });
+
+    if (!limit.available) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Maneuver.cannotSurge"));
+      return null;
+    }
+    if (limit.maxGain === 0) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Maneuver.vigorFull"));
+      return null;
+    }
+
+    const gained = await this.#promptAmount(
+      game.i18n.localize(maneuver.label),
+      game.i18n.format("MANTLE.Maneuver.surgePrompt", { max: limit.maxGain }),
+      limit.maxGain
+    );
+    if (!gained) return null;
+
+    const strain = surgeStrainCost(gained);
+    await this.update({
+      "system.vigor.value": system.vigor.value + gained,
+      "system.strain.value": system.strain.value + strain
+    });
+
+    return this.#report(maneuver, game.i18n.format("MANTLE.Maneuver.surged", { gained, strain }));
+  }
+
+  /**
+   * Shake It Off: clear one stack of Hindered or Exhausted.
+   *
+   * @param {object} maneuver
+   */
+  async #shakeItOff(maneuver) {
+    const held = maneuver.clears.filter((id) => this.conditionStacks(id) > 0);
+    if (held.length === 0) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Maneuver.nothingToShake"));
+      return null;
+    }
+
+    if (!(await this.#spendVigor(maneuver.vigor))) return null;
+
+    // With both present the player picks; with one, there is nothing to ask.
+    const chosen =
+      held.length === 1
+        ? held[0]
+        : await this.#pickOption(
+            game.i18n.localize(maneuver.label),
+            held.map((id) => ({ value: id, label: game.i18n.localize(MANTLE.conditions[id].label) }))
+          );
+    if (!chosen) return null;
+
+    await this.changeCondition(chosen, -1);
+    return this.#report(
+      maneuver,
+      game.i18n.format("MANTLE.Maneuver.shookOff", {
+        condition: game.i18n.localize(MANTLE.conditions[chosen].label)
+      })
+    );
+  }
+
+  /**
+   * Use Consumable: spend a consumable point.
+   *
+   * Which consumable, and what it does, stays with the player — the point is
+   * the part with a number attached.
+   *
+   * @param {object} maneuver
+   */
+  async #useConsumable(maneuver) {
+    const system = this.system;
+    if ((system.consumables?.value ?? 0) < 1) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Maneuver.noConsumablePoints"));
+      return null;
+    }
+
+    if (!(await this.#spendVigor(maneuver.vigor))) return null;
+
+    await this.update({ "system.consumables.value": system.consumables.value - 1 });
+    return this.#report(maneuver, game.i18n.localize("MANTLE.Maneuver.spentConsumable"));
+  }
+
+  /**
+   * A maneuver the system prices but does not resolve — Move, Shift, Hide, and
+   * Limit Break. The Vigor comes off and the table takes it from there.
+   *
+   * @param {string} id
+   * @param {object} maneuver
+   * @param {object} [options]
+   */
+  async #announceManeuver(id, maneuver, options = {}) {
+    // The first Move each turn is free, and only the player knows whether they
+    // have taken it — so it is asked rather than tracked.
+    const free = maneuver.firstFree && options.free === true;
+    if (!free && !(await this.#spendVigor(maneuver.vigor))) return null;
+
+    return this.#report(maneuver, free ? game.i18n.localize("MANTLE.Maneuver.freeMove") : "");
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Post what a maneuver did.
+   *
+   * @param {object} maneuver
+   * @param {string} [detail]
+   */
+  async #report(maneuver, detail = "") {
+    const notes = [detail, maneuver.fullTurn ? game.i18n.localize("MANTLE.Maneuver.fullTurn") : ""]
+      .filter(Boolean)
+      .join(" · ");
+
+    return ChatMessage.create({
+      content: `<div class="mantle mantle-harm-card">
+          <p><strong>${this.name}</strong> — ${game.i18n.localize(maneuver.label)}</p>
+          ${notes ? `<p class="notes">${notes}</p>` : ""}
+        </div>`,
+      speaker: ChatMessage.getSpeaker({ actor: this })
+    });
+  }
+
+  /**
+   * Ask for a whole number between 1 and a maximum.
+   *
+   * @param {string} title
+   * @param {string} prompt
+   * @param {number} max
+   * @returns {Promise<number>}
+   */
+  async #promptAmount(title, prompt, max) {
+    const value = await foundry.applications.api.DialogV2.prompt({
+      window: { title },
+      classes: ["mantle"],
+      content: `<form><label class="row">${prompt}
+          <input type="number" name="amount" value="${max}" min="1" max="${max}"></label></form>`,
+      ok: {
+        label: game.i18n.localize("MANTLE.Action.roll"),
+        callback: (_event, button) => new FormData(button.form).get("amount")
+      },
+      rejectClose: false
+    });
+
+    return Math.min(Math.max(0, Number(value) || 0), max);
+  }
+
+  /**
+   * Ask the player to pick one of several options.
+   *
+   * @param {string} title
+   * @param {{value: string, label: string}[]} choices
+   * @returns {Promise<string|null>}
+   */
+  async #pickOption(title, choices) {
+    const options = choices
+      .map((choice) => `<option value="${choice.value}">${choice.label}</option>`)
+      .join("");
+
+    const chosen = await foundry.applications.api.DialogV2.prompt({
+      window: { title },
+      classes: ["mantle"],
+      content: `<form><label class="row"><select name="choice">${options}</select></label></form>`,
+      ok: {
+        label: game.i18n.localize("MANTLE.Action.roll"),
+        callback: (_event, button) => new FormData(button.form).get("choice")
+      },
+      rejectClose: false
+    });
+
+    return chosen ? String(chosen) : null;
+  }
+
+  /**
+   * Pick the melee weapon a maneuver or reaction uses.
+   *
+   * @param {object} maneuver
+   * @returns {Promise<any|null>}
+   */
+  async #pickMeleeWeapon(maneuver) {
+    const available = maneuver.weapon === "reflexive" ? this.reflexiveWeapons : this.meleeWeapons;
+
+    if (available.length === 0) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Reaction.noMeleeWeapon"));
+      return null;
+    }
+    if (available.length === 1) return available[0];
+
+    const chosen = await this.#pickOption(
+      game.i18n.localize(maneuver.label),
+      available.map((weapon, index) => ({ value: String(index), label: weapon.name }))
+    );
+
+    return chosen === null ? null : available[Number(chosen)];
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Intercept or Counterattack: a reactive Basic Attack with a melee weapon.
+   *
+   * @param {"intercept"|"counterattack"} id
+   * @returns {Promise<ChatMessage|null|void>}
+   */
+  async rollReactiveAttack(id) {
+    const reaction = MANTLE.reactions[id];
+    if (!reaction) return null;
+
+    const weapon = await this.#pickMeleeWeapon(reaction);
+    if (!weapon) return null;
+
+    if (!(await this.#spendVigor(reaction.vigorCost))) return null;
+
+    return this.attackWith(weapon, {
+      title: game.i18n.localize(reaction.label),
+      subtitle: weapon.name
+    });
+  }
+
+  /**
+   * Brace: free, but it makes you Broken.
+   *
+   * The resistance it grants is against one incoming attack and is applied by
+   * hand — it is not a standing affinity, and Strain attacks are unaffected by
+   * resistance at all, which the card says so nobody spends a turn on it for
+   * nothing.
+   *
+   * @returns {Promise<ChatMessage|null>}
+   */
+  async rollBrace() {
+    const reaction = MANTLE.reactions.brace;
+    await this.changeCondition(reaction.appliesSelf, 1);
+
+    return this.#report(
+      { label: reaction.label },
+      game.i18n.localize("MANTLE.Reaction.braceEffect")
+    );
+  }
+
+  /* -------------------------------------------- */
 
   /**
    * Resolve a weapon's attribute. "either" means the wielder picks, and the
@@ -423,6 +888,11 @@ export default class MantleActor extends Actor {
    */
   async #spendVigor(cost) {
     if (!cost) return true;
+
+    // Enemies do not track Vigor at all, so nothing is deducted and nothing is
+    // refused. Charging them against a resource they have none of would make
+    // every maneuver on an adversary sheet fail.
+    if (this.type === "adversary") return true;
 
     const available = this.system.vigor?.value ?? 0;
     if (cost > available) {
@@ -517,14 +987,20 @@ export default class MantleActor extends Actor {
 
   /* -------------------------------------------- */
 
-  /** Damage types this actor resists, from its own data. */
+  /**
+   * Damage types this actor resists.
+   *
+   * Read from the derived pair rather than the stored set: a character's
+   * resistances are their own plus whatever their equipped masteries grant, and
+   * unequipping Fireman has to take Resistance (Fire) back with it.
+   */
   get resistances() {
-    return this.system.resistances ?? [];
+    return this.system.affinities?.resistances ?? [];
   }
 
   /** Damage types this actor is vulnerable to. */
   get weaknesses() {
-    return this.system.weaknesses ?? [];
+    return this.system.affinities?.weaknesses ?? [];
   }
 
   /* -------------------------------------------- */
@@ -551,18 +1027,20 @@ export default class MantleActor extends Actor {
       ? "normal"
       : damageAffinity(damageTypes, this.resistances, this.weaknesses);
 
+    // Strain is never halved or doubled by an affinity, so the one computed
+    // above is deliberately not passed on — and is reported as "normal" so the
+    // chat card does not announce a resistance that did nothing.
     if (strain) {
       const result = applyStrain({
         amount,
         strain: system.strain.value,
         maxStrain: system.strain.max,
         burdenSlots: system.slots.burden,
-        burdensTaken: system.burdens.length,
-        affinity
+        burdensTaken: system.burdens.length
       });
 
       await this.update({ "system.strain.value": result.strainAfter });
-      return { ...result, strain: true, affinity };
+      return { ...result, strain: true, affinity: "normal" };
     }
 
     const result = applyDamage({
@@ -775,4 +1253,17 @@ export default class MantleActor extends Actor {
 function toArray(value) {
   if (!value) return [];
   return Array.from(value);
+}
+
+/**
+ * Whether a weapon profile can reach into melee.
+ *
+ * Owned weapons carry a derived `isMelee`; the intrinsic Unarmed Attack from
+ * CONFIG carries only its reach, so both are read the same way here.
+ *
+ * @param {object} system
+ * @returns {boolean}
+ */
+function isMelee(system) {
+  return system.melee !== null && system.melee !== undefined;
 }

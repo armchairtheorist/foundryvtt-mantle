@@ -20,7 +20,7 @@
 
 import { MANTLE } from "../config.mjs";
 import { scaleAdversary } from "../rules/adversary.mjs";
-import { fields, count, text, choice, options, ladder, resource, track } from "./_fields.mjs";
+import { fields, count, text, choice, options, ladder, resource, track, affinities } from "./_fields.mjs";
 
 /**
  * Templates a GM may layer onto a Regular baseline. Blank means "run the stat
@@ -74,6 +74,13 @@ export default class AdversaryData extends foundry.abstract.TypeDataModel {
       burdenSlots: track(),
       wounds: new fields.ArrayField(new fields.SchemaField({ effect: text() })),
       burdens: new fields.ArrayField(new fields.SchemaField({ effect: text() })),
+
+      /**
+       * Damage affinities. Characters gain these from masteries and gear;
+       * adversaries carry them on the stat block, like Sorrowmaw's Hardened.
+       */
+      resistances: affinities(),
+      weaknesses: affinities(),
 
       spd: count(5),
       sen: count(10),
@@ -179,5 +186,12 @@ export default class AdversaryData extends foundry.abstract.TypeDataModel {
     // The harm rules read `slots` on both actor types, so adversaries expose
     // the same shape rather than making every caller branch on actor type.
     this.slots = { wound: scaled.woundSlots, burden: scaled.burdenSlots };
+
+    // Adversaries carry their affinities on the stat block rather than earning
+    // them, but expose the same derived shape a character does.
+    this.affinities = {
+      resistances: Array.from(this.resistances),
+      weaknesses: Array.from(this.weaknesses)
+    };
   }
 }

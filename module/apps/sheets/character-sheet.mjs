@@ -10,6 +10,7 @@
 
 import { MANTLE } from "../../config.mjs";
 import { prepareConditions } from "./_conditions-context.mjs";
+import { prepareManeuvers } from "./_maneuvers-context.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -41,7 +42,9 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
       castSpell: MantleCharacterSheet.#onCastSpell,
       addCondition: MantleCharacterSheet.#onAddCondition,
       removeCondition: MantleCharacterSheet.#onRemoveCondition,
-      endTurn: MantleCharacterSheet.#onEndTurn
+      endTurn: MantleCharacterSheet.#onEndTurn,
+      useManeuver: MantleCharacterSheet.#onUseManeuver,
+      useReaction: MantleCharacterSheet.#onUseReaction
     }
   };
 
@@ -101,6 +104,7 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     context.canForestall = this.document.reflexiveWeapons.length > 0;
 
     context.conditions = prepareConditions(this.document);
+    Object.assign(context, prepareManeuvers(this.document));
 
     return context;
   }
@@ -562,5 +566,37 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
    */
   static async #onEndTurn() {
     await this.document.endTurn();
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onUseManeuver(_event, target) {
+    const id = target.dataset.maneuver;
+    if (id) await this.document.useManeuver(id);
+  }
+
+  /**
+   * Take a reaction.
+   *
+   * Each routes to the method that knows how it resolves — the reactive
+   * defenses oppose a roll, the reactive attacks make one, and Brace changes
+   * the actor's state rather than rolling anything.
+   *
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onUseReaction(_event, target) {
+    const id = target.dataset.reaction;
+    const actor = this.document;
+
+    if (id === "dodge") await actor.rollDodge();
+    else if (id === "brace") await actor.rollBrace();
+    else if (id === "deflect") await actor.rollDeflect(actor.deflectWeapons[0]);
+    else if (id === "forestall") await actor.rollForestall(actor.reflexiveWeapons[0]);
+    else if (id === "intercept" || id === "counterattack") await actor.rollReactiveAttack(id);
   }
 }

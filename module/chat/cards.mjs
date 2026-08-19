@@ -23,6 +23,8 @@
  */
 
 import MantleRoll from "../dice/roll.mjs";
+import { MANTLE } from "../config.mjs";
+import { maneuverEffectSize } from "../rules/maneuvers.mjs";
 
 const TEMPLATE = "systems/mantle/templates/chat/roll-card.hbs";
 
@@ -68,6 +70,10 @@ async function renderCard(roll, state) {
     ladderKind: context.ladderKind ?? "vitality",
     damageTypes: context.damageTypes ?? [],
     penetrating: context.penetrating ?? false,
+    maneuver: context.maneuver ?? null,
+    maneuverEffect: context.maneuver
+      ? maneuverLabel(context.maneuver, maneuverEffectSize(resolved.effective, context.maneuver.max))
+      : "",
     dice: roll.diceResults,
     resolved,
     // Chips are only worth showing when the dice genuinely read more than one
@@ -154,6 +160,13 @@ async function applyToTargets(message) {
 
   const state = message.getFlag("mantle", "card") ?? {};
   const resolved = roll.resolve(state);
+
+  // Shove, Grab, and Feint deal no damage: what they land is scaled to net
+  // successes, which is exactly the number the card's stepper has been
+  // adjusting. Applying from here rather than at roll time is what lets the
+  // defender's Dodge reduce it — including all the way to nothing.
+  if (roll.mantle.maneuver) return applyManeuverToTargets(message, roll.mantle.maneuver, resolved);
+
   const amount = resolved.result?.total;
 
   if (!amount) {
@@ -179,6 +192,63 @@ async function applyToTargets(message) {
     });
 
     await reportHarm(actor, amount, result);
+  }
+}
+
+/* -------------------------------------------- */
+
+/**
+ * How a maneuver's effect reads at a given size.
+ *
+ * @param {object} maneuver
+ * @param {number} size
+ * @returns {string}
+ */
+function maneuverLabel(maneuver, size) {
+  if (size <= 0) return game.i18n.localize("MANTLE.Maneuver.noEffect");
+
+  if (maneuver.applies) {
+    const condition = game.i18n.localize(MANTLE.conditions[maneuver.applies].label);
+    return `${condition} ${size}`;
+  }
+
+  return game.i18n.format(maneuver.effect, { size });
+}
+
+/**
+ * Apply a maneuver's effect to whatever is targeted.
+ *
+ * Zero net successes lands nothing at all — a Feint the defender fully dodged
+ * applies no Vulnerable, rather than a minimum of one.
+ *
+ * @param {ChatMessage} message
+ * @param {object} maneuver
+ * @param {object} resolved
+ */
+async function applyManeuverToTargets(message, maneuver, resolved) {
+  const size = maneuverEffectSize(resolved.effective, maneuver.max);
+  if (size <= 0) {
+    ui.notifications.warn(game.i18n.localize("MANTLE.Maneuver.noEffect"));
+    return;
+  }
+
+  const targets = Array.from(game.user.targets).map((token) => token.actor).filter(Boolean);
+  if (targets.length === 0) {
+    ui.notifications.warn(game.i18n.localize("MANTLE.Card.noTargets"));
+    return;
+  }
+
+  for (const actor of targets) {
+    // A maneuver with no condition to apply — Shove — is pure narration: the
+    // squares are pushed by whoever is moving the token.
+    if (maneuver.applies) await actor.changeCondition(maneuver.applies, size);
+
+    await ChatMessage.create({
+      content: `<div class="mantle mantle-harm-card">
+          <p><strong>${actor.name}</strong> — ${maneuverLabel(maneuver, size)}</p>
+        </div>`,
+      speaker: ChatMessage.getSpeaker({ actor })
+    });
   }
 }
 

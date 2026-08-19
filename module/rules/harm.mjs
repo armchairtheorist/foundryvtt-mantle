@@ -29,14 +29,37 @@ import { MANTLE } from "../config.mjs";
  * @returns {"resistant"|"weak"|"normal"}
  */
 export function damageAffinity(damageTypes, resistances = [], weaknesses = []) {
-  const resists = damageTypes.some((type) => resistances.includes(type));
-  const vulnerable = damageTypes.some((type) => weaknesses.includes(type));
+  const resists = matchesAffinity(damageTypes, resistances);
+  const vulnerable = matchesAffinity(damageTypes, weaknesses);
 
   if (resists && vulnerable) return "normal";
   if (resists) return "resistant";
   if (vulnerable) return "weak";
   return "normal";
 }
+
+/**
+ * Whether any of an attack's damage types is covered by a list of affinities.
+ *
+ * An entry may name a single type or one of the group shorthands, so
+ * "Resistance (Physical)" answers for Slashing, Piercing, and Crushing alike
+ * without the stat block having to write all three.
+ *
+ * @param {string[]} damageTypes
+ * @param {string[]} affinities
+ * @returns {boolean}
+ */
+function matchesAffinity(damageTypes, affinities) {
+  /** @type {Record<string, string[]>} */
+  const groups = MANTLE.damageTypeGroups;
+
+  return affinities.some((entry) => {
+    const group = groups[entry];
+    return group ? damageTypes.some((type) => group.includes(type)) : damageTypes.includes(entry);
+  });
+}
+
+/* -------------------------------------------- */
 
 /**
  * Apply an affinity to an amount. Resistance halves and rounds down, weakness
@@ -140,13 +163,18 @@ export function applyDamage({
  * Strain never touches Guard, and a Burden lands when Strain *reaches* Max
  * Strain, not when it exceeds it — an easy off-by-one to get wrong.
  *
+ * Resistance and weakness are deliberately absent, and this function takes no
+ * affinity to be passed. Nothing halves or doubles Strain: not Brace, not
+ * Arcane Shield, not a Mark called shot. The one exception in the game is the
+ * Iron Will mastery, which is its own halving rather than an affinity, and is
+ * applied by the player before the amount reaches here.
+ *
  * @param {object} options
  * @param {number} options.amount
  * @param {number} options.strain - Current Strain
  * @param {number} options.maxStrain
  * @param {number} options.burdenSlots
  * @param {number} [options.burdensTaken]
- * @param {"resistant"|"weak"|"normal"} [options.affinity]
  * @returns {{strainAfter: number, burdensInflicted: number, lost: boolean}}
  */
 export function applyStrain({
@@ -154,10 +182,9 @@ export function applyStrain({
   strain,
   maxStrain,
   burdenSlots,
-  burdensTaken = 0,
-  affinity = "normal"
+  burdensTaken = 0
 }) {
-  let current = strain + applyAffinity(amount, affinity);
+  let current = strain + amount;
   let burdensInflicted = 0;
   let lost = false;
 
