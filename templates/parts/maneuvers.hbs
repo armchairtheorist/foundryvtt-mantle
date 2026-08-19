@@ -9,7 +9,7 @@
   <h3>{{localize "MANTLE.Maneuver.title"}}</h3>
 
   <div class="maneuver-grid">
-    {{#each maneuvers as |maneuver|}}
+    {{#each basicManeuvers as |maneuver|}}
       <button type="button" class="maneuver {{#unless maneuver.affordable}}unaffordable{{/unless}}"
               data-action="useManeuver" data-maneuver="{{maneuver.id}}">
         <span class="what">{{localize maneuver.label}}</span>

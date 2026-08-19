@@ -1702,7 +1702,7 @@
 .mantle .maneuvers-bar {
   .maneuver-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(122px, 1fr));
     gap: 4px;
   }
 
@@ -1712,14 +1712,29 @@
     border-top: 1px dashed var(--mantle-border);
   }
 
+  /* "Catch Your Breath" and "Use Consumable" do not fit on one line at this
+     width, and core gives buttons a fixed height — so the second line used to
+     spill out over the hint below. The button is sized for two lines instead:
+     grid rather than flex so a wrapping label grows downward without shoving
+     the cost off the end, and every button in a row shares the taller height
+     so the bar stays a grid rather than a ragged edge. */
   button.maneuver {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    align-content: center;
+    gap: 2px 6px;
     font-size: 0.8em;
-    padding: 2px 6px;
-    line-height: 1.7;
+    padding: 3px 6px;
+    line-height: 1.25;
+    height: auto;
+    min-height: 2.9em;
+
+    .what {
+      text-align: left;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
 
     .cost {
       font-weight: 700;

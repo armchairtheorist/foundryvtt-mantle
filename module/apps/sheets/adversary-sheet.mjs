@@ -89,6 +89,9 @@ export default class MantleAdversarySheet extends HandlebarsApplicationMixin(Act
     context.templateIgnored = system.scaled.templateIgnored;
 
     context.conditions = prepareConditions(this.document);
+
+    // Adds `basicManeuvers`, deliberately not `maneuvers` — the stat block's
+    // own printed maneuvers already own that key just above.
     Object.assign(context, prepareManeuvers(this.document));
 
     return context;

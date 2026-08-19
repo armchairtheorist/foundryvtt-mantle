@@ -5,6 +5,10 @@
  * no reactions by default — but the maneuvers they *can* take are the same
  * general ones a character takes, Shove and Feint included, so the bar is built
  * from one table for both.
+ *
+ * The list is `basicManeuvers`, not `maneuvers`: an adversary's stat block has
+ * its own printed maneuvers — its attacks — under that name, and the two must
+ * not share a key in the render context.
  */
 
 import { MANTLE } from "../../config.mjs";
@@ -19,7 +23,7 @@ import { MANTLE } from "../../config.mjs";
  * produce a warning.
  *
  * @param {any} actor - A MantleActor
- * @returns {{maneuvers: object[], reactions: object[]}}
+ * @returns {{basicManeuvers: object[], reactions: object[]}}
  */
 export function prepareManeuvers(actor) {
   /**
@@ -41,7 +45,7 @@ export function prepareManeuvers(actor) {
   const affordable = (cost) =>
     !tracksVigor || cost <= (actor.system.vigor?.value ?? 0);
 
-  const maneuvers = Object.entries(maneuverTable)
+  const basicManeuvers = Object.entries(maneuverTable)
     .filter(([, maneuver]) => tracksVigor || maneuver.enemy === true)
     .map(([id, maneuver]) => ({
       id,
@@ -54,7 +58,7 @@ export function prepareManeuvers(actor) {
 
   // Enemies have no reactions by default; anything they can answer with is
   // written on the stat block instead.
-  if (!tracksVigor) return { maneuvers, reactions: [] };
+  if (!tracksVigor) return { basicManeuvers, reactions: [] };
 
   const hasMelee = actor.meleeWeapons?.length > 0;
   /** @type {Record<string, boolean>} */
@@ -76,5 +80,5 @@ export function prepareManeuvers(actor) {
       affordable: affordable(reaction.vigorCost ?? 0)
     }));
 
-  return { maneuvers, reactions };
+  return { basicManeuvers, reactions };
 }
