@@ -666,6 +666,16 @@ MANTLE.valorCosts = {
 /** Heroic Feat adds at most this many successes to any single roll. */
 MANTLE.heroicFeatMaxSuccesses = 3;
 
+/* -------------------------------------------- */
+/*  Rest                                         */
+/* -------------------------------------------- */
+
+/**
+ * Consumable points an interlude restocks. The rules say "at least 1", with the
+ * GM free to grant more, so this is the floor rather than the rule.
+ */
+MANTLE.interludeConsumableRestock = 1;
+
 /** A Heroic Feat can add at most this many successes to a single roll. */
 MANTLE.heroicFeatMaxSuccesses = 3;
 

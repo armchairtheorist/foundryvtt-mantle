@@ -41,6 +41,28 @@
     </span>
   </div>
 
+  {{!-- The two rests, run across every member at once. Doing an interlude by
+        hand for four characters after every fight is where a session's time
+        goes; the choices that cost Resolve are still asked, one player at a
+        time. --}}
+  <div class="section rests">
+    <h3>{{localize "MANTLE.Rest.title"}}</h3>
+    <div class="rest-buttons">
+      <button type="button" data-action="interlude"
+              data-tooltip="{{localize 'MANTLE.Rest.interludeHint'}}">
+        <i class="fa-solid fa-campground"></i> {{localize "MANTLE.Rest.interlude"}}
+      </button>
+      <button type="button" data-action="downtime"
+              data-tooltip="{{localize 'MANTLE.Rest.downtimeHint'}}">
+        <i class="fa-solid fa-bed"></i> {{localize "MANTLE.Rest.downtime"}}
+      </button>
+      <button type="button" data-action="beginCombat"
+              data-tooltip="{{localize 'MANTLE.Rest.beginCombatHint'}}">
+        <i class="fa-solid fa-swords"></i> {{localize "MANTLE.Rest.beginCombat"}}
+      </button>
+    </div>
+  </div>
+
   <div class="section spends">
     <h3>{{localize "MANTLE.Valor.spend"}}</h3>
     {{#each spends as |spend|}}

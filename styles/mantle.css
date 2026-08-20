@@ -1319,6 +1319,18 @@
   overflow-y: auto;
 }
 
+/* The two rests, and the combat re-entry check that goes with them. Three
+   buttons of equal weight: none of them is the "normal" one. */
+.mantle .rests .rest-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 6px;
+
+  button {
+    font-size: 0.9em;
+  }
+}
+
 /* Heroic Feat sits under the success stepper, because it is a decision about
    that number and the rules explicitly allow it after the dice are read. */
 .mantle .heroic-feat {

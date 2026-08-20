@@ -17,6 +17,7 @@
  */
 
 import { MANTLE } from "../../config.mjs";
+import { earnsMerit } from "../../rules/rest.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -33,7 +34,10 @@ export default class MantlePartySheet extends HandlebarsApplicationMixin(ActorSh
       gainValor: MantlePartySheet.#onGainValor,
       addMember: MantlePartySheet.#onAddMember,
       removeMember: MantlePartySheet.#onRemoveMember,
-      openMember: MantlePartySheet.#onOpenMember
+      openMember: MantlePartySheet.#onOpenMember,
+      interlude: MantlePartySheet.#onInterlude,
+      downtime: MantlePartySheet.#onDowntime,
+      beginCombat: MantlePartySheet.#onBeginCombat
     }
   };
 
@@ -180,5 +184,91 @@ export default class MantlePartySheet extends HandlebarsApplicationMixin(ActorSh
   static async #onOpenMember(_event, target) {
     const actor = await fromUuid(target.dataset.uuid);
     actor?.sheet?.render({ force: true });
+  }
+
+  /* -------------------------------------------- */
+  /*  Rest                                         */
+  /* -------------------------------------------- */
+
+  /** Every member that still resolves to a character actor. */
+  get #characters() {
+    return Array.from(this.document.system.members)
+      .map((uuid) => fromUuidSync(uuid))
+      .filter((actor) => actor?.type === "character");
+  }
+
+  /**
+   * Run one rest across every member and post a single report.
+   *
+   * One card rather than one per character: an interlude is a party-level
+   * event, and four separate cards would bury the one line that matters.
+   *
+   * @this {MantlePartySheet}
+   * @param {string} method - The actor method to run
+   * @param {string} title
+   */
+  async #rest(method, title) {
+    const characters = this.#characters;
+    if (characters.length === 0) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Party.noMembers"));
+      return;
+    }
+
+    const sections = [];
+    for (const actor of characters) {
+      // Sequential on purpose: each character's Resolve spends are asked one
+      // at a time, and four dialogs at once would be unanswerable.
+      const lines = await actor[method]();
+      if (lines.length > 0) sections.push(`<p><strong>${actor.name}</strong> — ${lines.join(" · ")}</p>`);
+    }
+
+    if (sections.length === 0) return;
+
+    await ChatMessage.create({
+      content: `<div class="mantle mantle-harm-card">
+          <p class="what">${title}</p>
+          ${sections.join("")}
+        </div>`,
+      speaker: ChatMessage.getSpeaker({ actor: this.document })
+    });
+  }
+
+  /**
+   * @this {MantlePartySheet}
+   */
+  static async #onInterlude() {
+    await this.#rest("interlude", game.i18n.localize("MANTLE.Rest.interlude"));
+  }
+
+  /**
+   * Downtime also resets the party's Valor to zero — and awards a merit first
+   * if the pool got high enough, which is why the check happens before the
+   * reset rather than after it.
+   *
+   * @this {MantlePartySheet}
+   */
+  static async #onDowntime() {
+    const system = this.document.system;
+    const earned = earnsMerit(system.valor.value, system.meritThreshold);
+
+    await this.#rest("downtime", game.i18n.localize("MANTLE.Rest.downtime"));
+    await this.document.update({ "system.valor.value": 0 });
+
+    await ChatMessage.create({
+      content: `<div class="mantle mantle-harm-card">
+          <p><strong>${this.document.name}</strong> — ${game.i18n.localize(
+            earned ? "MANTLE.Rest.meritEarned" : "MANTLE.Rest.noMerit"
+          )}</p>
+          <p class="notes">${game.i18n.localize("MANTLE.Rest.valorReset")}</p>
+        </div>`,
+      speaker: ChatMessage.getSpeaker({ actor: this.document })
+    });
+  }
+
+  /**
+   * @this {MantlePartySheet}
+   */
+  static async #onBeginCombat() {
+    await this.#rest("beginCombat", game.i18n.localize("MANTLE.Rest.beginCombat"));
   }
 }

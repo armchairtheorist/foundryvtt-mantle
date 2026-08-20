@@ -15,18 +15,26 @@ import MantleRoll from "../dice/roll.mjs";
 import { MANTLE } from "../config.mjs";
 import { buildPool, standardModifiers } from "../dice/pool.mjs";
 import { postRollCard } from "../chat/cards.mjs";
+import {
+  affordableHeals,
+  combatReentry,
+  downtimeRestore,
+  healCost,
+  interludeConditions,
+  interludeRestore
+} from "../rules/rest.mjs";
 import { limitBreakRoutes } from "../rules/valor.mjs";
 import { promptAttack } from "../apps/attack-dialog.mjs";
 import { promptCast } from "../apps/cast-dialog.mjs";
 import { promptAction } from "../apps/action-dialog.mjs";
 import {
   allConditionStacks,
-  actionAllowed,
   changeCondition,
   clearConditionsForTurn,
   conditionStacks,
   setCondition
 } from "./conditions.mjs";
+import { actionAllowed } from "../rules/conditions.mjs";
 import {
   catchYourBreathHeal,
   steadyYourselfClear,
@@ -1052,6 +1060,226 @@ export default class MantleActor extends Actor {
       { label: reaction.label },
       game.i18n.localize("MANTLE.Reaction.braceEffect")
     );
+  }
+
+  /* -------------------------------------------- */
+  /*  Rest                                         */
+  /* -------------------------------------------- */
+
+  /**
+   * Take an interlude: the pause between encounters.
+   *
+   * Restores what the rest restores, drops the conditions the fight put on,
+   * and then *offers* the two things that cost Resolve — restoring Vitality
+   * for 1, and healing Wounds and Burdens for their severity. Those are
+   * choices, so they are asked rather than taken.
+   *
+   * Faltering and Unraveling are left exactly as they are. They neither clear
+   * nor tick here; whether they come back next fight depends on whether the
+   * harm underneath was healed, which is what `beginCombat` reads.
+   *
+   * @returns {Promise<string[]>} What happened, for the report
+   */
+  async interlude() {
+    if (this.type !== "character") return [];
+
+    const lines = [];
+    await this.update(interludeRestore(this.system));
+    lines.push(game.i18n.localize("MANTLE.Rest.restored"));
+
+    const plan = interludeConditions(this.conditions);
+    for (const id of plan.clears) await this.clearCondition(id);
+
+    if (plan.clears.length > 0) {
+      lines.push(
+        game.i18n.format("MANTLE.Rest.conditionsCleared", { count: plan.clears.length })
+      );
+    }
+    if (plan.persists.length > 0) {
+      lines.push(
+        game.i18n.format("MANTLE.Rest.conditionsPersist", {
+          conditions: plan.persists
+            .map((id) => game.i18n.localize(MANTLE.conditions[id].label))
+            .join(", ")
+        })
+      );
+    }
+    if (plan.pauses.length > 0) {
+      lines.push(
+        game.i18n.format("MANTLE.Rest.conditionsPaused", {
+          conditions: plan.pauses
+            .map((id) => game.i18n.localize(MANTLE.conditions[id].label))
+            .join(", ")
+        })
+      );
+    }
+
+    // The Crisis route into a Limit Break refreshes here rather than at the
+    // start of a turn — it is once per combat.
+    await this.unsetFlag("mantle", "crisisLimitBreakUsed");
+
+    lines.push(...(await this.#spendResolveOnRecovery()));
+    return lines;
+  }
+
+  /**
+   * Take downtime: the mission-level rest.
+   *
+   * Everything comes back, and the Wounds themselves heal — except any the GM
+   * has anchored to the story, which is why the harm is confirmed rather than
+   * silently wiped.
+   *
+   * @returns {Promise<string[]>}
+   */
+  async downtime() {
+    if (this.type !== "character") return [];
+
+    const lines = [];
+    await this.update(downtimeRestore(this.system));
+    lines.push(game.i18n.localize("MANTLE.Rest.fullyRestored"));
+
+    // Narrative conditions survive downtime too: the relic is still out there.
+    const plan = interludeConditions(this.conditions);
+    for (const id of [...plan.clears, ...plan.pauses]) await this.clearCondition(id);
+
+    const harms = this.system.wounds.length + this.system.burdens.length;
+    if (harms > 0) {
+      const clear = await foundry.applications.api.DialogV2.confirm({
+        window: { title: game.i18n.localize("MANTLE.Rest.downtime") },
+        classes: ["mantle"],
+        content: `<p>${game.i18n.format("MANTLE.Rest.healAllHint", { count: harms })}</p>`,
+        rejectClose: false,
+        modal: true
+      });
+
+      if (clear) {
+        await this.update({ "system.wounds": [], "system.burdens": [] });
+        lines.push(game.i18n.format("MANTLE.Rest.healedAll", { count: harms }));
+      } else {
+        lines.push(game.i18n.localize("MANTLE.Rest.harmKept"));
+      }
+    }
+
+    await this.unsetFlag("mantle", "crisisLimitBreakUsed");
+    return lines;
+  }
+
+  /**
+   * What a character re-enters combat carrying.
+   *
+   * Faltering and Unraveling were paused by the interlude rather than cleared.
+   * An unhealed Critical Wound restarts Faltering at 1 and an unhealed
+   * Breakdown restarts Unraveling at 1 — at one stack, not at the stack the
+   * character reached, so the escalation begins again.
+   *
+   * @returns {Promise<string[]>}
+   */
+  async beginCombat() {
+    if (this.type !== "character") return [];
+
+    const stacks = combatReentry({
+      criticalWound: this.system.wounds.some((wound) => wound.severity >= 3),
+      breakdown: this.system.burdens.some((burden) => burden.severity >= 3)
+    });
+
+    const lines = [];
+    for (const [id, held] of Object.entries(stacks)) {
+      // Never below what they already carry: a character who somehow kept a
+      // higher stack keeps it.
+      if (this.conditionStacks(id) >= held) continue;
+
+      await this.changeCondition(id, held - this.conditionStacks(id));
+      lines.push(`${game.i18n.localize(MANTLE.conditions[id].label)} ${held}`);
+    }
+
+    return lines;
+  }
+
+  /**
+   * Offer the two Resolve spends an interlude allows.
+   *
+   * @returns {Promise<string[]>}
+   */
+  async #spendResolveOnRecovery() {
+    const lines = [];
+    const system = this.system;
+
+    if (system.vitality.value < system.vitality.max && system.resolve.value >= 1) {
+      const restore = await foundry.applications.api.DialogV2.confirm({
+        window: { title: this.name },
+        classes: ["mantle"],
+        content: `<p>${game.i18n.format("MANTLE.Rest.vitalityHint", {
+          vitality: system.vitality.value,
+          max: system.vitality.max,
+          resolve: system.resolve.value
+        })}</p>`,
+        rejectClose: false,
+        modal: true
+      });
+
+      if (restore) {
+        await this.update({
+          "system.vitality.value": system.vitality.max,
+          "system.resolve.value": system.resolve.value - 1
+        });
+        lines.push(game.i18n.localize("MANTLE.Rest.vitalityRestored"));
+      }
+    }
+
+    lines.push(...(await this.#healHarmWithResolve("wounds")));
+    lines.push(...(await this.#healHarmWithResolve("burdens")));
+    return lines;
+  }
+
+  /**
+   * Heal Wounds or Burdens by spending Resolve equal to their severity.
+   *
+   * One at a time, cheapest offered first, and only while the character can
+   * still afford something — a Critical Wound at 3 Resolve is a real decision
+   * against three Flesh Wounds, and the player makes it.
+   *
+   * @param {"wounds"|"burdens"} track
+   * @returns {Promise<string[]>}
+   */
+  async #healHarmWithResolve(track) {
+    const lines = [];
+
+    while (true) {
+      const harms = this.system[track];
+      const resolve = this.system.resolve.value;
+      const affordable = affordableHeals(harms, resolve);
+      if (affordable.indices.length === 0) break;
+
+      const chosen = await this.#pickOption(
+        game.i18n.format(`MANTLE.Rest.heal${track === "wounds" ? "Wound" : "Burden"}`, {
+          resolve
+        }),
+        [
+          { value: "", label: game.i18n.localize("MANTLE.Rest.healNothing") },
+          ...affordable.indices.map((index) => ({
+            value: String(index),
+            label: `${harms[index].effect} — ${healCost(harms[index])} ${game.i18n.localize(
+              "MANTLE.Resource.resolve"
+            )}`
+          }))
+        ]
+      );
+
+      if (!chosen) break;
+
+      const index = Number(chosen);
+      const cost = healCost(harms[index]);
+      const remaining = harms.filter((_, at) => at !== index);
+
+      await this.update({
+        [`system.${track}`]: remaining,
+        "system.resolve.value": resolve - cost
+      });
+
+      lines.push(game.i18n.format("MANTLE.Rest.healed", { effect: harms[index].effect, cost }));
+    }
+
+    return lines;
   }
 
   /* -------------------------------------------- */
