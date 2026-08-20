@@ -110,6 +110,11 @@
             <span class="cost">{{feature.system.activation.vigorCost}} {{localize "MANTLE.Resource.vigorShort"}}</span>
           {{/if}}
           <span class="activation">{{localize (concat "MANTLE.Activation." feature.system.activation.type)}}</span>
+          {{!-- A passive is always on; there is nothing to press. --}}
+          {{#unless (eq feature.system.activation.type "passive")}}
+            <a class="control use" data-action="useItem"
+               data-tooltip="{{localize 'MANTLE.Item.useHint'}}"><i class="fa-solid fa-play"></i></a>
+          {{/unless}}
         </div>
       {{/each}}
     </div>

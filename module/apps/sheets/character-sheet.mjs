@@ -44,7 +44,8 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
       removeCondition: MantleCharacterSheet.#onRemoveCondition,
       endTurn: MantleCharacterSheet.#onEndTurn,
       useManeuver: MantleCharacterSheet.#onUseManeuver,
-      useReaction: MantleCharacterSheet.#onUseReaction
+      useReaction: MantleCharacterSheet.#onUseReaction,
+      useItem: MantleCharacterSheet.#onUseItem
     }
   };
 
@@ -387,6 +388,16 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
   static async #onRollWeapon(_event, target) {
     const weapon = this.#itemFor(target);
     if (weapon) await this.document.rollWeapon(weapon);
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onUseItem(_event, target) {
+    const item = this.#itemFor(target);
+    if (item) await this.document.useItem(item);
   }
 
   /**

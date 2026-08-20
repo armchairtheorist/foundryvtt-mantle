@@ -1319,6 +1319,17 @@
   overflow-y: auto;
 }
 
+/* Activation controls read as an action rather than as bookkeeping, so they
+   take the Valor gold rather than the muted grey the other row controls use. */
+.mantle .control.use {
+  color: var(--mantle-valor);
+
+  &:hover {
+    color: var(--mantle-valor);
+    filter: brightness(1.3);
+  }
+}
+
 /* The two rests, and the combat re-entry check that goes with them. Three
    buttons of equal weight: none of them is the "normal" one. */
 .mantle .rests .rest-buttons {

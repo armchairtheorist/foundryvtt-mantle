@@ -153,6 +153,8 @@
         </a>
         <span class="name" data-action="editItem">{{item.name}}</span>
         <span class="effect">{{item.system.effect}}</span>
+        <a class="control use" data-action="useItem"
+           data-tooltip="{{localize 'MANTLE.Item.useHint'}}"><i class="fa-solid fa-hand-sparkles"></i></a>
         <a class="control" data-action="deleteItem"><i class="fa-solid fa-trash"></i></a>
       </div>
     {{else}}
@@ -170,6 +172,8 @@
         <span class="name" data-action="editItem">{{item.name}}</span>
         <span class="category">{{item.system.category}}</span>
         <span class="effect">{{item.system.effect}}</span>
+        <a class="control use" data-action="useItem"
+           data-tooltip="{{localize 'MANTLE.Item.useConsumableHint'}}"><i class="fa-solid fa-flask"></i></a>
         <a class="control" data-action="deleteItem"><i class="fa-solid fa-trash"></i></a>
       </div>
     {{else}}

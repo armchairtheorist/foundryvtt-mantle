@@ -98,6 +98,10 @@
             {{localize (lookup (lookup ../config.cores lb.system.requiredCore) "label")}} {{lb.system.requiredCoreValue}}
           {{/if}}
         </span>
+        {{#if lb.system.equipped}}
+          <a class="control use" data-action="useItem"
+             data-tooltip="{{localize 'MANTLE.Item.useLimitBreakHint'}}"><i class="fa-solid fa-burst"></i></a>
+        {{/if}}
         <a class="control" data-action="deleteItem"><i class="fa-solid fa-trash"></i></a>
       </div>
     {{else}}

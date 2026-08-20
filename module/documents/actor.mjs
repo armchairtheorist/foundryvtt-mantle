@@ -51,6 +51,34 @@ import {
   burdenEffect
 } from "../rules/harm.mjs";
 
+/**
+ * A thrown consumable, shaped as a weapon profile.
+ *
+ * Some consumables are attacks — a flask that resolves on a damage ladder — and
+ * the attack path only knows how to read weapons. Rather than teaching it a
+ * second shape, the consumable is translated into the one it already reads.
+ *
+ * @param {any} item - A consumable Item with `isAttack` set
+ * @returns {{name: string, system: object}}
+ */
+function consumableAsWeapon(item) {
+  return {
+    name: item.name,
+    system: {
+      attribute: item.system.attribute,
+      damageTypes: item.system.damageTypes,
+      tags: item.system.tags,
+      // Thrown, so ranged only: a consumable has a Range but never a reach.
+      melee: null,
+      range: item.system.range,
+      damage: item.system.damage,
+      // The consumable point is the price; there is no second Vigor cost.
+      attackCost: 0,
+      special: item.system.effect
+    }
+  };
+}
+
 export default class MantleActor extends Actor {
   /**
    * v14 splits Active Effect application into phases and tracks which have run.
@@ -772,24 +800,95 @@ export default class MantleActor extends Actor {
   }
 
   /**
-   * Use Consumable: spend a consumable point.
+   * Use Consumable: pick one from the known list and spend a point on it.
    *
-   * Which consumable, and what it does, stays with the player — the point is
-   * the part with a number attached.
+   * A consumable point buys any entry from the catalog rather than a specific
+   * stocked item, so the list is what the character knows about — and if they
+   * know none, the point is still spendable on something the table names.
    *
    * @param {object} maneuver
    */
   async #useConsumable(maneuver) {
-    const system = this.system;
-    if ((system.consumables?.value ?? 0) < 1) {
-      ui.notifications.warn(game.i18n.localize("MANTLE.Maneuver.noConsumablePoints"));
-      return null;
+    const known = this.items.filter((item) => item.type === "consumable");
+
+    const chosen = known.length > 0
+      ? await this.#pickItem(game.i18n.localize("MANTLE.Item.whichConsumable"), known, {
+          allowNone: game.i18n.localize("MANTLE.Item.somethingElse")
+        })
+      : null;
+
+    if (chosen === undefined) return null;
+    return this.useItem(chosen, { maneuver });
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Use an owned item: a consumable, a granted feature, or a wondrous item.
+   *
+   * All three come down to the same two steps — pay whatever it costs, then
+   * say what it does — so they share one path. What the effect actually *does*
+   * stays with the table, except where a consumable is a thrown weapon, which
+   * resolves on its ladder like any other attack.
+   *
+   * @param {Item|null} item - Null spends a consumable point on something
+   *   the table names rather than an owned entry
+   * @param {object} [options]
+   * @param {object} [options.maneuver] - The maneuver that triggered this
+   * @returns {Promise<ChatMessage|null|void>}
+   */
+  async useItem(item, { maneuver = null } = {}) {
+    if (!(await this.#allowedToAct())) return null;
+
+    if (item?.type === "limitbreak") {
+      return this.#limitBreak(MANTLE.maneuvers.limitBreak, item);
     }
 
-    if (!(await this.#spendVigor(maneuver.vigor))) return null;
+    const isConsumable = item === null || item.type === "consumable";
 
-    await this.update({ "system.consumables.value": system.consumables.value - 1 });
-    return this.#report(maneuver, game.i18n.localize("MANTLE.Maneuver.spentConsumable"));
+    if (isConsumable) {
+      const points = this.system.consumables?.value ?? 0;
+      if (points < 1) {
+        ui.notifications.warn(game.i18n.localize("MANTLE.Maneuver.noConsumablePoints"));
+        return null;
+      }
+    }
+
+    // A thrown consumable is an attack, and attackWith owns the Vigor for one —
+    // so the point comes off here and the rest is left to the attack.
+    if (item?.system?.isAttack) {
+      await this.update({ "system.consumables.value": this.system.consumables.value - 1 });
+      return this.attackWith(consumableAsWeapon(item), { title: item.name });
+    }
+
+    const cost = maneuver?.vigor ?? item?.system?.activation?.vigorCost ?? 0;
+    if (!(await this.#spendVigor(cost))) return null;
+
+    if (isConsumable) {
+      await this.update({ "system.consumables.value": this.system.consumables.value - 1 });
+    }
+
+    const notes = [
+      isConsumable ? game.i18n.localize("MANTLE.Maneuver.spentConsumable") : "",
+      cost > 0 ? game.i18n.format("MANTLE.Reaction.cost", { cost }) : "",
+      item?.system?.activation?.uses ?? ""
+    ]
+      .filter(Boolean)
+      .join(" · ");
+
+    const effect =
+      item?.system?.effect || item?.system?.description || item?.system?.trigger || "";
+
+    return ChatMessage.create({
+      content: `<div class="mantle mantle-harm-card">
+          <p><strong>${this.name}</strong> — ${
+            item?.name ?? game.i18n.localize("MANTLE.Maneuver.useConsumable")
+          }</p>
+          ${notes ? `<p class="notes">${notes}</p>` : ""}
+          ${effect ? `<div class="effect">${effect}</div>` : ""}
+        </div>`,
+      speaker: ChatMessage.getSpeaker({ actor: this })
+    });
   }
 
   /**
@@ -808,9 +907,9 @@ export default class MantleActor extends Actor {
    * @param {object} maneuver
    * @returns {Promise<ChatMessage|null>}
    */
-  async #limitBreak(maneuver) {
+  async #limitBreak(maneuver, preChosen = null) {
     const equipped = this.limitBreaks;
-    if (equipped.length === 0) {
+    if (!preChosen && equipped.length === 0) {
       ui.notifications.warn(game.i18n.localize("MANTLE.LimitBreak.noneEquipped"));
       return null;
     }
@@ -833,9 +932,10 @@ export default class MantleActor extends Actor {
     }
 
     const chosen =
-      equipped.length === 1
+      preChosen ??
+      (equipped.length === 1
         ? equipped[0]
-        : await this.#pickItem(game.i18n.localize("MANTLE.LimitBreak.which"), equipped);
+        : await this.#pickItem(game.i18n.localize("MANTLE.LimitBreak.which"), equipped));
     if (!chosen) return null;
 
     const route =
@@ -872,17 +972,28 @@ export default class MantleActor extends Actor {
   /**
    * Pick one of several owned items by name.
    *
+   * Three outcomes, deliberately distinct: an item, `null` for the offered
+   * none-of-these row, and `undefined` for a cancelled dialog. Callers that
+   * treat "none" as a real answer — spending a consumable point on something
+   * the table names — need to tell those two apart.
+   *
    * @param {string} title
    * @param {any[]} items
-   * @returns {Promise<any|null>}
+   * @param {object} [options]
+   * @param {string} [options.allowNone] - Label for a none-of-these row
+   * @returns {Promise<any|null|undefined>}
    */
-  async #pickItem(title, items) {
-    const id = await this.#pickOption(
-      title,
-      items.map((item) => ({ value: item.id, label: item.name }))
-    );
+  async #pickItem(title, items, { allowNone = "" } = {}) {
+    const NONE = "__none__";
+    const choices = items.map((item) => ({ value: item.id, label: item.name }));
+    if (allowNone) choices.push({ value: NONE, label: allowNone });
 
-    return id ? items.find((item) => item.id === id) ?? null : null;
+    const id = await this.#pickOption(title, choices);
+
+    if (!id) return undefined;
+    if (id === NONE) return null;
+
+    return items.find((item) => item.id === id) ?? undefined;
   }
 
   /**
