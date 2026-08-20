@@ -818,7 +818,10 @@ export default class MantleActor extends Actor {
       : null;
 
     if (chosen === undefined) return null;
-    return this.useItem(chosen, { maneuver });
+
+    // useManeuver already asked whether a locked-out character may act; asking
+    // again on the way through would be two prompts for one press.
+    return this.useItem(chosen, { maneuver, gated: true });
   }
 
   /* -------------------------------------------- */
@@ -835,10 +838,11 @@ export default class MantleActor extends Actor {
    *   the table names rather than an owned entry
    * @param {object} [options]
    * @param {object} [options.maneuver] - The maneuver that triggered this
+   * @param {boolean} [options.gated] - The caller already checked the lockout
    * @returns {Promise<ChatMessage|null|void>}
    */
-  async useItem(item, { maneuver = null } = {}) {
-    if (!(await this.#allowedToAct())) return null;
+  async useItem(item, { maneuver = null, gated = false } = {}) {
+    if (!gated && !(await this.#allowedToAct())) return null;
 
     if (item?.type === "limitbreak") {
       return this.#limitBreak(MANTLE.maneuvers.limitBreak, item);
