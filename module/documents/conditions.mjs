@@ -170,6 +170,18 @@ export async function clearConditionsForTurn(actor) {
     );
   }
 
+  // Frenzy next: Strain the carrier pays for their own rage. It is Strain
+  // rather than damage, so Guard does not answer it.
+  for (const entry of plan.selfStrain) {
+    await actor.applyHarm({ amount: entry.strain, strain: true });
+    lines.push(
+      game.i18n.format("MANTLE.Condition.selfStrainTick", {
+        condition: game.i18n.localize(MANTLE.conditions[entry.id].label),
+        strain: entry.strain
+      })
+    );
+  }
+
   for (const id of plan.auto) {
     const after = await changeCondition(actor, id, -1);
     lines.push(conditionLine(id, after));

@@ -362,8 +362,8 @@ MANTLE.unarmedAttack = {
  * the roll card's net-success stepper is for.
  */
 MANTLE.reactions = {
-  dodge: { label: "MANTLE.Reaction.dodge", attribute: "agi", vigorCost: 2 },
-  deflect: { label: "MANTLE.Reaction.deflect", vigorCost: 1 },
+  dodge: { label: "MANTLE.Reaction.dodge", attribute: "agi", vigorCost: 2, defensive: true },
+  deflect: { label: "MANTLE.Reaction.deflect", vigorCost: 1, defensive: true },
 
   /**
    * Forestall is a reactive *attack* rather than a defense: it makes a Basic
@@ -384,7 +384,7 @@ MANTLE.reactions = {
    * the incoming attack and become Broken, which locks out every further
    * maneuver and reaction until it clears. A last resort, priced as one.
    */
-  brace: { label: "MANTLE.Reaction.brace", vigorCost: 0, appliesSelf: "broken" }
+  brace: { label: "MANTLE.Reaction.brace", vigorCost: 0, appliesSelf: "broken", defensive: true }
 };
 
 /* -------------------------------------------- */
@@ -467,7 +467,7 @@ MANTLE.maneuvers = {
     kind: "clearStrain",
     fullTurn: true
   },
-  limitBreak: { label: "MANTLE.Maneuver.limitBreak", vigor: 0, kind: "simple", fullTurn: true },
+  limitBreak: { label: "MANTLE.Maneuver.limitBreak", vigor: 0, kind: "limitBreak", fullTurn: true },
 
   /** Once per turn, and impossible at MIND 0: 2 Strain buys 1 Vigor. */
   surge: { label: "MANTLE.Maneuver.surge", vigor: 0, kind: "surge", oncePerTurn: true }
@@ -574,7 +574,14 @@ MANTLE.conditions = {
   defeated: { label: "MANTLE.Condition.defeated", stackable: false, clear: "persistent" },
   exhausted: { label: "MANTLE.Condition.exhausted", stackable: false, clear: "roll", rollAttributes: ["pow"] },
   faltering: { label: "MANTLE.Condition.faltering", stackable: true, cap: Infinity, clear: "persistent" },
-  frenzy: { label: "MANTLE.Condition.frenzy", stackable: true, clear: "persistent" },
+  // Frenzy burns the character who carries it: Strain equal to its stacks at
+  // the end of every turn, until Steady Yourself puts the rage down.
+  frenzy: {
+    label: "MANTLE.Condition.frenzy",
+    stackable: true,
+    clear: "persistent",
+    strainPerStack: 1
+  },
   frightened: { label: "MANTLE.Condition.frightened", stackable: false, clear: "roll", rollAttributes: ["pre"] },
   hindered: { label: "MANTLE.Condition.hindered", stackable: true, clear: "roll", rollAttributes: ["pow", "agi"] },
   impaired: { label: "MANTLE.Condition.impaired", stackable: true, clear: "auto" },
@@ -655,6 +662,9 @@ MANTLE.valorCosts = {
   heroicFortune: 2,
   heroicFeatPerSuccess: 1
 };
+
+/** Heroic Feat adds at most this many successes to any single roll. */
+MANTLE.heroicFeatMaxSuccesses = 3;
 
 /** A Heroic Feat can add at most this many successes to a single roll. */
 MANTLE.heroicFeatMaxSuccesses = 3;

@@ -25,6 +25,7 @@
 import MantleRoll from "../dice/roll.mjs";
 import { MANTLE } from "../config.mjs";
 import { maneuverEffectSize } from "../rules/maneuvers.mjs";
+import { heroicFeatSuccesses } from "../rules/valor.mjs";
 
 const TEMPLATE = "systems/mantle/templates/chat/roll-card.hbs";
 
@@ -39,7 +40,9 @@ const TEMPLATE = "systems/mantle/templates/chat/roll-card.hbs";
  * @returns {Promise<ChatMessage>}
  */
 export async function postRollCard(roll, { actor, title = "", subtitle = "" } = {}) {
-  const state = { adjustment: 0, allocationIndex: 0, title, subtitle };
+  // The actor is recorded on the card rather than read from the speaker: a
+  // Heroic Feat needs the roller's party, and a speaker can be an alias.
+  const state = { adjustment: 0, allocationIndex: 0, title, subtitle, actorId: actor?.id ?? null };
   const content = await renderCard(roll, state);
 
   return ChatMessage.create({
@@ -79,6 +82,7 @@ async function renderCard(roll, state) {
     // Chips are only worth showing when the dice genuinely read more than one
     // way; a single reading is not a choice.
     showAllocations: resolved.allocations.length > 1,
+    heroicFeat: heroicFeatOffer(roll, state),
     config: CONFIG.MANTLE
   });
 }
@@ -98,6 +102,129 @@ async function updateCard(message, changes) {
 
   const content = await renderCard(roll, state);
   await message.update({ content, "flags.mantle.card": state });
+}
+
+/* -------------------------------------------- */
+
+/**
+ * Whether this card can still buy successes with the party's Valor.
+ *
+ * Heroic Feat is the one Valor spend the rules explicitly allow *after* the
+ * dice are read — "the character can decide to apply this after the roll is
+ * made" — so it belongs on the card rather than in the roll dialog. Testing
+ * your luck is the sole exclusion, and luck rolls carry no attribute pool at
+ * all, which is how they are recognised here.
+ *
+ * @param {MantleRoll} roll
+ * @param {object} state
+ * @returns {{valor: number, spent: number, max: number}|null}
+ */
+function heroicFeatOffer(roll, state) {
+  if (roll.mantle.attribute === "luck") return null;
+
+  const party = partyFor(state.actorId);
+  if (!party) return null;
+
+  const spent = state.heroicFeat ?? 0;
+  const available = heroicFeatSuccesses(party.system.valor.value, MANTLE.heroicFeatMaxSuccesses - spent);
+
+  // Nothing left to buy, and nothing already bought worth reporting.
+  if (available <= 0 && spent <= 0) return null;
+
+  return { valor: party.system.valor.value, spent, max: available };
+}
+
+/**
+ * The Party actor whose pool a given character draws on.
+ *
+ * @param {string} [actorId]
+ * @returns {Actor|null}
+ */
+function partyFor(actorId) {
+  const actor = actorId ? game.actors.get(actorId) : null;
+  return actor?.party ?? null;
+}
+
+/**
+ * Buy successes on this roll with the party's Valor.
+ *
+ * One Valor per success, at most three on any single roll — counted across
+ * repeated presses, so three separate +1s cost three Valor and exhaust the
+ * allowance exactly as one +3 would.
+ *
+ * @param {ChatMessage} message
+ */
+async function spendHeroicFeat(message) {
+  const state = message.getFlag("mantle", "card") ?? {};
+  const party = partyFor(state.actorId);
+  if (!party) return;
+
+  const spent = state.heroicFeat ?? 0;
+  const buying = heroicFeatSuccesses(
+    party.system.valor.value,
+    MANTLE.heroicFeatMaxSuccesses - spent
+  );
+
+  if (buying <= 0) {
+    ui.notifications.warn(game.i18n.localize("MANTLE.Valor.noHeroicFeat"));
+    return;
+  }
+
+  const wanted = await promptHeroicFeat(buying, party.system.valor.value);
+  if (!wanted) return;
+
+  const cost = wanted * MANTLE.valorCosts.heroicFeatPerSuccess;
+  await party.update({ "system.valor.value": party.system.valor.value - cost });
+
+  await updateCard(message, {
+    adjustment: (state.adjustment ?? 0) + wanted,
+    heroicFeat: spent + wanted
+  });
+
+  await ChatMessage.create({
+    content: `<div class="mantle mantle-harm-card">
+        <p><strong>${party.name}</strong> — ${game.i18n.format("MANTLE.Valor.heroicFeatSpent", {
+          successes: wanted,
+          cost
+        })}</p>
+      </div>`,
+    speaker: ChatMessage.getSpeaker({ actor: party })
+  });
+}
+
+/**
+ * Ask how many successes to buy.
+ *
+ * @param {number} max - The most this pool can afford right now
+ * @param {number} valor - Valor remaining, for the prompt
+ * @returns {Promise<number>}
+ */
+async function promptHeroicFeat(max, valor) {
+  const options = Array.from({ length: max }, (_, index) => index + 1)
+    .map(
+      (n) =>
+        `<option value="${n}">${game.i18n.format("MANTLE.Valor.heroicFeatOption", {
+          successes: n,
+          cost: n * MANTLE.valorCosts.heroicFeatPerSuccess
+        })}</option>`
+    )
+    .join("");
+
+  const chosen = await foundry.applications.api.DialogV2.prompt({
+    window: { title: game.i18n.localize("MANTLE.Valor.heroicFeat") },
+    classes: ["mantle"],
+    content: `<form>
+        <p class="hint">${game.i18n.format("MANTLE.Valor.poolRemaining", { valor })}</p>
+        <label class="row"><select name="successes">${options}</select></label>
+      </form>`,
+    ok: {
+      label: game.i18n.localize("MANTLE.Valor.spend"),
+      callback: (_event, button) => new FormData(button.form).get("successes")
+    },
+    rejectClose: false
+  });
+
+  return Number(chosen) || 0;
 }
 
 /* -------------------------------------------- */
@@ -138,6 +265,9 @@ export function activateCardListeners(message, html) {
       await updateCard(message, { allocationIndex: Number(chip.dataset.allocation) });
     });
   }
+
+  const feat = card.querySelector("[data-heroic-feat]");
+  if (feat) feat.addEventListener("click", () => spendHeroicFeat(message));
 
   const apply = card.querySelector("[data-apply]");
   if (apply) apply.addEventListener("click", () => applyToTargets(message));

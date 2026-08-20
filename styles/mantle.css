@@ -1319,6 +1319,36 @@
   overflow-y: auto;
 }
 
+/* Heroic Feat sits under the success stepper, because it is a decision about
+   that number and the rules explicitly allow it after the dice are read. */
+.mantle .heroic-feat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+
+  button {
+    flex: 0 1 auto;
+    font-size: 0.85em;
+    color: var(--mantle-valor);
+    border-color: var(--mantle-valor);
+  }
+
+  .spent {
+    font-size: 0.8em;
+    font-weight: 700;
+    color: var(--mantle-valor);
+  }
+
+  .pool {
+    margin-left: auto;
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--mantle-muted);
+  }
+}
+
 /* -------------------------------------------- */
 /*  Adversary sheet                              */
 /* -------------------------------------------- */

@@ -17,7 +17,8 @@ import { MANTLE } from "../config.mjs";
  * same shape, and this is the one place that needs to say so.
  *
  * @type {Record<string, {label: string, stackable: boolean, cap?: number,
- *   clear: string, rollAttributes?: string[], typed?: boolean}>}
+ *   clear: string, rollAttributes?: string[], typed?: boolean,
+ *   strainPerStack?: number}>}
  */
 const CONDITIONS = MANTLE.conditions;
 
@@ -68,7 +69,8 @@ export function applyStacks(id, current, delta) {
  * @param {Record<string, number>} stacks - Condition id to stacks held
  * @returns {{auto: string[], roll: {id: string, attributes: string[]}[],
  *   persistent: string[], escalating: string[],
- *   wracked: {id: string, stacks: number, damage: number}[]}}
+ *   wracked: {id: string, stacks: number, damage: number}[],
+ *   selfStrain: {id: string, stacks: number, strain: number}[]}}
  */
 export function endOfTurnPlan(stacks) {
   /** @type {string[]} */ const auto = [];
@@ -76,6 +78,7 @@ export function endOfTurnPlan(stacks) {
   /** @type {string[]} */ const persistent = [];
   /** @type {string[]} */ const escalating = [];
   /** @type {{id: string, stacks: number, damage: number}[]} */ const wracked = [];
+  /** @type {{id: string, stacks: number, strain: number}[]} */ const selfStrain = [];
 
   for (const [id, held] of Object.entries(stacks)) {
     if (held <= 0) continue;
@@ -88,6 +91,12 @@ export function endOfTurnPlan(stacks) {
       wracked.push({ id, stacks: held, damage: held * WRACKED_DAMAGE_PER_STACK });
     }
 
+    // Frenzy costs its carrier Strain equal to its stacks, every turn. Unlike
+    // Wracked this is not damage and Guard does not answer it.
+    if (condition.strainPerStack) {
+      selfStrain.push({ id, stacks: held, strain: held * condition.strainPerStack });
+    }
+
     if (condition.clear === "auto") auto.push(id);
     else if (condition.clear === "roll") {
       roll.push({ id, attributes: condition.rollAttributes ?? [] });
@@ -95,7 +104,7 @@ export function endOfTurnPlan(stacks) {
     else persistent.push(id);
   }
 
-  return { auto, roll, persistent, escalating, wracked };
+  return { auto, roll, persistent, escalating, wracked, selfStrain };
 }
 
 /**
@@ -156,4 +165,28 @@ export function conditionSideEffects(id) {
     default:
       return { clears: [], carries: [] };
   }
+}
+
+/**
+ * Whether a creature's conditions forbid an action, and which one forbids it.
+ *
+ * Two conditions lock actions out rather than merely taxing them. Broken stops
+ * everything until it clears — which is what makes Brace a last resort rather
+ * than a cheap defense. Frenzy stops defenses only: a Frenzied character cannot
+ * Brace or use a reactive defense, but their reactive *attacks* are sharper
+ * than ever.
+ *
+ * This reports rather than enforces. Whether a locked-out action is refused
+ * outright or merely warned about is a table decision, not a rules one.
+ *
+ * @param {Record<string, number>} stacks - Condition id to stacks held
+ * @param {object} action
+ * @param {boolean} [action.defensive] - Whether it is Brace or a reactive defense
+ * @returns {{allowed: boolean, blockedBy: string|null}}
+ */
+export function actionAllowed(stacks, { defensive = false } = {}) {
+  if ((stacks.broken ?? 0) > 0) return { allowed: false, blockedBy: "broken" };
+  if (defensive && (stacks.frenzy ?? 0) > 0) return { allowed: false, blockedBy: "frenzy" };
+
+  return { allowed: true, blockedBy: null };
 }

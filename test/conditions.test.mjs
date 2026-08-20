@@ -12,6 +12,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import {
+  actionAllowed,
   applyStacks,
   conditionModifiers,
   conditionSideEffects,
@@ -171,5 +172,80 @@ describe("side effects and modifiers", () => {
 
   test("a creature with no conditions has no modifiers", () => {
     assert.deepEqual(conditionModifiers({}), { impaired: 0, hindered: false });
+  });
+});
+
+describe("Frenzy", () => {
+  test("costs its carrier Strain equal to its stacks, every turn", () => {
+    // The Barbarian's rage burns the Barbarian. Strain, not damage — Guard
+    // does not answer it.
+    assert.deepEqual(endOfTurnPlan({ frenzy: 3 }).selfStrain, [
+      { id: "frenzy", stacks: 3, strain: 3 }
+    ]);
+    assert.deepEqual(endOfTurnPlan({ frenzy: 1 }).selfStrain, [
+      { id: "frenzy", stacks: 1, strain: 1 }
+    ]);
+  });
+
+  test("does not clear on its own", () => {
+    // Persistent: only Steady Yourself puts it down.
+    const plan = endOfTurnPlan({ frenzy: 2 });
+    assert.deepEqual(plan.auto, []);
+    assert.deepEqual(plan.roll, []);
+    assert.ok(plan.persistent.includes("frenzy"));
+  });
+
+  test("nothing else in the catalog costs its carrier Strain", () => {
+    for (const id of Object.keys(MANTLE.conditions)) {
+      if (id === "frenzy") continue;
+      assert.deepEqual(endOfTurnPlan({ [id]: 2 }).selfStrain, [], id);
+    }
+  });
+});
+
+describe("lockouts", () => {
+  test("Broken stops everything", () => {
+    assert.deepEqual(actionAllowed({ broken: 1 }, {}), {
+      allowed: false,
+      blockedBy: "broken"
+    });
+    assert.equal(actionAllowed({ broken: 1 }, { defensive: true }).allowed, false);
+  });
+
+  test("Frenzy stops defenses but sharpens attacks", () => {
+    // Brace and reactive defenses are out; reactive attacks are the whole
+    // point of being Frenzied, and gain +1d per stack.
+    assert.deepEqual(actionAllowed({ frenzy: 2 }, { defensive: true }), {
+      allowed: false,
+      blockedBy: "frenzy"
+    });
+    assert.equal(actionAllowed({ frenzy: 2 }, {}).allowed, true);
+  });
+
+  test("an unafflicted character is stopped by nothing", () => {
+    assert.deepEqual(actionAllowed({}, { defensive: true }), {
+      allowed: true,
+      blockedBy: null
+    });
+  });
+
+  test("Broken is reported ahead of Frenzy when both hold", () => {
+    // One reason is a message; two is a lecture. Broken is the wider ban.
+    assert.equal(actionAllowed({ broken: 1, frenzy: 3 }, { defensive: true }).blockedBy, "broken");
+  });
+});
+
+describe("the reaction table", () => {
+  test("marks exactly the defenses as defensive", () => {
+    const defensive = Object.entries(
+      /** @type {Record<string, any>} */ (MANTLE.reactions)
+    )
+      .filter(([, reaction]) => reaction.defensive)
+      .map(([id]) => id)
+      .sort();
+
+    // Brace and the two reactive defenses. Intercept, Forestall and
+    // Counterattack are attacks and stay available to a Frenzied character.
+    assert.deepEqual(defensive, ["brace", "deflect", "dodge"]);
   });
 });

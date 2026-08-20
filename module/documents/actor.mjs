@@ -15,11 +15,13 @@ import MantleRoll from "../dice/roll.mjs";
 import { MANTLE } from "../config.mjs";
 import { buildPool, standardModifiers } from "../dice/pool.mjs";
 import { postRollCard } from "../chat/cards.mjs";
+import { limitBreakRoutes } from "../rules/valor.mjs";
 import { promptAttack } from "../apps/attack-dialog.mjs";
 import { promptCast } from "../apps/cast-dialog.mjs";
 import { promptAction } from "../apps/action-dialog.mjs";
 import {
   allConditionStacks,
+  actionAllowed,
   changeCondition,
   clearConditionsForTurn,
   conditionStacks,
@@ -105,6 +107,30 @@ export default class MantleActor extends Actor {
 
     const profile = MANTLE.unarmedAttack;
     return { name: game.i18n.localize(profile.name), system: profile };
+  }
+
+  /**
+   * The Party actor this character belongs to, if any.
+   *
+   * Membership is stored on the party rather than on the character, so this
+   * searches. A character in no party simply has no Valor to spend — which is
+   * a perfectly ordinary state for an NPC ally or a one-shot pregen.
+   *
+   * @returns {Actor|null}
+   */
+  get party() {
+    if (this.type !== "character") return null;
+
+    return (
+      game.actors?.find(
+        (actor) => actor.type === "party" && actor.system.members?.has(this.uuid)
+      ) ?? null
+    );
+  }
+
+  /** Equipped Limit Breaks — what this character may actually activate. */
+  get limitBreaks() {
+    return this.items.filter((item) => item.type === "limitbreak" && item.system.equipped);
   }
 
   /** Equipped weapons that can be used for the Deflect reaction. */
@@ -218,7 +244,7 @@ export default class MantleActor extends Actor {
     const pool = buildPool(base, modifiers);
 
     const roll = MantleRoll.fromPool(pool, {
-      ladder, ladderKind, bonusDamage, damageTypes, penetrating, hitLocation, maneuver
+      attribute, ladder, ladderKind, bonusDamage, damageTypes, penetrating, hitLocation, maneuver
     });
     await roll.evaluate();
 
@@ -479,6 +505,7 @@ export default class MantleActor extends Actor {
    */
   async rollDodge() {
     const reaction = MANTLE.reactions.dodge;
+    if (!(await this.#allowedToAct(reaction))) return null;
     if (!(await this.#spendVigor(reaction.vigorCost))) return null;
 
     return this.rollAction({
@@ -504,6 +531,7 @@ export default class MantleActor extends Actor {
     }
 
     const reaction = MANTLE.reactions.deflect;
+    if (!(await this.#allowedToAct(reaction))) return null;
     if (!(await this.#spendVigor(reaction.vigorCost))) return null;
 
     return this.rollAction({
@@ -558,6 +586,8 @@ export default class MantleActor extends Actor {
     const maneuver = MANTLE.maneuvers[id];
     if (!maneuver) return null;
 
+    if (!(await this.#allowedToAct())) return null;
+
     switch (maneuver.kind) {
       case "attack":
         return this.#maneuverAttack(id, maneuver);
@@ -571,6 +601,8 @@ export default class MantleActor extends Actor {
         return this.#shakeItOff(maneuver);
       case "consumable":
         return this.#useConsumable(maneuver);
+      case "limitBreak":
+        return this.#limitBreak(maneuver);
       default:
         return this.#announceManeuver(id, maneuver, options);
     }
@@ -641,7 +673,20 @@ export default class MantleActor extends Actor {
     const cleared = Math.min(steadyYourselfClear(system.strain.max), system.strain.value);
 
     await this.update({ "system.strain.value": system.strain.value - cleared });
-    return this.#report(maneuver, game.i18n.format("MANTLE.Maneuver.steadied", { cleared }));
+
+    // Steady Yourself is the only thing that puts a Frenzy down, and it clears
+    // the whole rage rather than a stack of it.
+    const frenzy = this.conditionStacks("frenzy");
+    if (frenzy > 0) await this.clearCondition("frenzy");
+
+    const notes = [
+      game.i18n.format("MANTLE.Maneuver.steadied", { cleared }),
+      frenzy > 0 ? game.i18n.localize("MANTLE.Maneuver.frenzyEnded") : ""
+    ]
+      .filter(Boolean)
+      .join(" · ");
+
+    return this.#report(maneuver, notes);
   }
 
   /**
@@ -740,8 +785,122 @@ export default class MantleActor extends Actor {
   }
 
   /**
-   * A maneuver the system prices but does not resolve — Move, Shift, Hide, and
-   * Limit Break. The Vigor comes off and the table takes it from there.
+   * Limit Break: pick one of the equipped Limit Breaks, pay for it, and post
+   * what it does.
+   *
+   * Two routes, and the character may have both. Three Valor from the party
+   * pool is the ordinary price. A character in Crisis may instead spend
+   * nothing and take Exhausted once it resolves — once per combat, refreshing
+   * at the next Interlude, which is why the flag is cleared by the Interlude
+   * rather than by the start of a turn.
+   *
+   * The effect itself is narrated, not resolved: Limit Breaks rewrite the turn
+   * in ways no system could apply on its own.
+   *
+   * @param {object} maneuver
+   * @returns {Promise<ChatMessage|null>}
+   */
+  async #limitBreak(maneuver) {
+    const equipped = this.limitBreaks;
+    if (equipped.length === 0) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.LimitBreak.noneEquipped"));
+      return null;
+    }
+
+    const party = this.party;
+    const routes = limitBreakRoutes({
+      valor: party?.system.valor.value ?? 0,
+      crisis: this.system.states?.crisis ?? false,
+      crisisUsed: this.getFlag("mantle", "crisisLimitBreakUsed") === true
+    });
+
+    if (routes.length === 0) {
+      ui.notifications.warn(
+        game.i18n.format("MANTLE.LimitBreak.cannotAfford", {
+          cost: MANTLE.valorCosts.limitBreak,
+          valor: party?.system.valor.value ?? 0
+        })
+      );
+      return null;
+    }
+
+    const chosen =
+      equipped.length === 1
+        ? equipped[0]
+        : await this.#pickItem(game.i18n.localize("MANTLE.LimitBreak.which"), equipped);
+    if (!chosen) return null;
+
+    const route =
+      routes.length === 1
+        ? routes[0]
+        : await this.#pickRoute(routes);
+    if (!route) return null;
+
+    if (route.cost > 0) {
+      await party.update({ "system.valor.value": party.system.valor.value - route.cost });
+    }
+
+    if (route.exhausts) {
+      await this.setFlag("mantle", "crisisLimitBreakUsed", true);
+      await this.changeCondition("exhausted", 1);
+    }
+
+    const paid =
+      route.route === "valor"
+        ? game.i18n.format("MANTLE.LimitBreak.paidValor", { cost: route.cost })
+        : game.i18n.localize("MANTLE.LimitBreak.paidCrisis");
+
+    return ChatMessage.create({
+      content: `<div class="mantle mantle-harm-card">
+          <p><strong>${this.name}</strong> — ${game.i18n.localize(maneuver.label)}</p>
+          <p class="what">${chosen.name}</p>
+          <p class="notes">${paid} · ${game.i18n.localize("MANTLE.Maneuver.fullTurn")}</p>
+          <div class="effect">${chosen.system.description || ""}</div>
+        </div>`,
+      speaker: ChatMessage.getSpeaker({ actor: this })
+    });
+  }
+
+  /**
+   * Pick one of several owned items by name.
+   *
+   * @param {string} title
+   * @param {any[]} items
+   * @returns {Promise<any|null>}
+   */
+  async #pickItem(title, items) {
+    const id = await this.#pickOption(
+      title,
+      items.map((item) => ({ value: item.id, label: item.name }))
+    );
+
+    return id ? items.find((item) => item.id === id) ?? null : null;
+  }
+
+  /**
+   * Ask which route pays for a Limit Break, when both are open.
+   *
+   * @param {{route: string, cost: number, exhausts: boolean}[]} routes
+   * @returns {Promise<{route: string, cost: number, exhausts: boolean}|null>}
+   */
+  async #pickRoute(routes) {
+    const chosen = await this.#pickOption(
+      game.i18n.localize("MANTLE.LimitBreak.how"),
+      routes.map((route) => ({
+        value: route.route,
+        label:
+          route.route === "valor"
+            ? game.i18n.format("MANTLE.LimitBreak.routeValor", { cost: route.cost })
+            : game.i18n.localize("MANTLE.LimitBreak.routeCrisis")
+      }))
+    );
+
+    return routes.find((route) => route.route === chosen) ?? null;
+  }
+
+  /**
+   * A maneuver the system prices but does not resolve — Move, Shift, and Hide.
+   * The Vigor comes off and the table takes it from there.
    *
    * @param {string} id
    * @param {object} maneuver
@@ -885,6 +1044,8 @@ export default class MantleActor extends Actor {
    */
   async rollBrace() {
     const reaction = MANTLE.reactions.brace;
+    if (!(await this.#allowedToAct(reaction))) return null;
+
     await this.changeCondition(reaction.appliesSelf, 1);
 
     return this.#report(
@@ -913,6 +1074,35 @@ export default class MantleActor extends Actor {
    * @param {number} cost
    * @returns {Promise<boolean>} Whether the cost was paid
    */
+  /**
+   * Whether a locked-out action goes ahead anyway.
+   *
+   * Broken forbids everything and Frenzy forbids defenses, but the answer is a
+   * confirmation rather than a refusal: the GM may have granted an exception,
+   * and a button that silently does nothing reads as broken software. Nothing
+   * has been spent by the time this is asked.
+   *
+   * @param {object} [action]
+   * @param {boolean} [action.defensive]
+   * @returns {Promise<boolean>}
+   */
+  async #allowedToAct(action = {}) {
+    const { allowed, blockedBy } = actionAllowed(this.conditions, action);
+    if (allowed) return true;
+
+    return foundry.applications.api.DialogV2.confirm({
+      window: { title: game.i18n.localize("MANTLE.Reaction.lockedOut") },
+      classes: ["mantle"],
+      content: `<p>${game.i18n.format("MANTLE.Reaction.lockedOutHint", {
+        condition: game.i18n.localize(MANTLE.conditions[blockedBy].label)
+      })}</p>`,
+      rejectClose: false,
+      modal: true
+    });
+  }
+
+  /* -------------------------------------------- */
+
   async #spendVigor(cost) {
     if (!cost) return true;
 

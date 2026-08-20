@@ -54,6 +54,25 @@
             data-tooltip="{{localize 'MANTLE.Card.addHint'}}">+</button>
   </div>
 
+  {{!-- Heroic Feat is the one Valor spend the rules allow after the dice are
+        read, so it belongs here rather than in the roll dialog. Shown only
+        while the party can still afford successes, or has already bought
+        some — a button that cannot be pressed is noise. --}}
+  {{#if heroicFeat}}
+    <div class="heroic-feat">
+      {{#if heroicFeat.max}}
+        <button type="button" data-heroic-feat
+                data-tooltip="{{localize 'MANTLE.Valor.heroicFeatHint'}}">
+          <i class="fa-solid fa-hand-fist"></i> {{localize "MANTLE.Valor.heroicFeat"}}
+        </button>
+      {{/if}}
+      {{#if heroicFeat.spent}}
+        <span class="spent">{{localize "MANTLE.Valor.heroicFeatApplied"}} +{{heroicFeat.spent}}</span>
+      {{/if}}
+      <span class="pool">{{localize "MANTLE.Valor.valor"}} {{heroicFeat.valor}}</span>
+    </div>
+  {{/if}}
+
   {{#if resolved.isGraze}}
     <div class="graze">{{localize "MANTLE.Card.graze"}}</div>
   {{/if}}
