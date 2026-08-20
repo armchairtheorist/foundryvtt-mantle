@@ -29,6 +29,7 @@ const ICONS = {
   frightened: { glyph: "FR", tint: "#5b2a72" },
   hindered: { glyph: "HI", tint: "#9a6b1f" },
   impaired: { glyph: "IM", tint: "#9a6b1f" },
+  invisible: { glyph: "IV", tint: "#2f5b8c" },
   hidden: { glyph: "HD", tint: "#2f5b8c" },
   obscured: { glyph: "OB", tint: "#2f5b8c" },
   lost: { glyph: "LO", tint: "#1c1c1c" },

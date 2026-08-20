@@ -575,6 +575,7 @@ MANTLE.conditions = {
   frightened: { label: "MANTLE.Condition.frightened", stackable: false, clear: "roll", rollAttributes: ["pre"] },
   hindered: { label: "MANTLE.Condition.hindered", stackable: true, clear: "roll", rollAttributes: ["pow", "agi"] },
   impaired: { label: "MANTLE.Condition.impaired", stackable: true, clear: "auto" },
+  invisible: { label: "MANTLE.Condition.invisible", stackable: false, clear: "persistent" },
   lost: { label: "MANTLE.Condition.lost", stackable: false, clear: "persistent" },
   provoked: { label: "MANTLE.Condition.provoked", stackable: false, clear: "auto" },
   shrouded: { label: "MANTLE.Condition.shrouded", stackable: false, clear: "roll", rollAttributes: ["ins"] },
@@ -588,12 +589,16 @@ MANTLE.conditions = {
 /**
  * Visibility states, as token markers.
  *
- * Hidden and Obscured are *states* rather than conditions: the rules list them
- * under visibility, they do not stack, and nothing clears them at end of turn.
- * They are registered as status effects all the same, because a GM still needs
- * to mark which token is which — but they are deliberately not in the condition
- * table, and so never appear in the condition bar with stack controls that
- * would mean nothing.
+ * Hidden and Obscured are *states* rather than conditions: section 8 lists them
+ * under Visibility as a relationship between one creature and another, with no
+ * stacks and nothing to clear at end of turn. They are registered as status
+ * effects all the same, because a GM still needs to mark which token is which —
+ * but they are deliberately not in the condition table, and so never appear in
+ * the condition bar with stack controls that would mean nothing.
+ *
+ * Invisible is the opposite case and belongs in the table above: section 8
+ * writes it as a real [CONDITION] block, persistent and non-stacking, granted
+ * by an ability rather than by where you are standing.
  */
 MANTLE.visibilityMarkers = {
   hidden: "MANTLE.Visibility.hidden",

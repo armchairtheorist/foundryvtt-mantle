@@ -47,6 +47,12 @@ function rules(name) {
  *
  * @returns {Map<string, {tags: string[], damage: number[], special: string}>}
  */
+/** Every `[CONDITION]` block, capturing its name and its whole body. */
+const BLOCK = /^\[CONDITION\]\s*(.+)$([\s\S]*?)(?=^```)/gm;
+
+/** A row of the section 7 summary table: name | stackable | clear type. */
+const TABLE_ROW = /^\|\s*([A-Z][A-Za-z ()]+?)\s*\|\s*(yes[^|]*|no)\s*\|\s*(auto-clear|roll-to-clear[^|]*|persistent)\s*\|$/gm;
+
 function parseWeapons() {
   const blocks = rules("equipment").split("```").filter((block) => block.includes("[WEAPON]"));
   /** @type {Map<string, {tags: string[], damage: number[], special: string}>} */
@@ -255,58 +261,89 @@ describe("masteries match the Masteries catalog", () => {
 
 /* -------------------------------------------- */
 
-describe("conditions match the Quick Start", () => {
-  const quickstart = rules("quickstart");
-
+describe("conditions match the rules", () => {
   /**
-   * The condition table: name, stackable, clear type. Parsed from the summary
-   * table rather than the individual blocks, because the table is the list the
-   * system's own table has to agree with.
+   * Every condition, from every `[CONDITION]` block in every rules document.
+   *
+   * Not the section 7 summary table: that table is a summary, and two real
+   * conditions live outside it — Invisible, defined under Invisibility in
+   * section 8, and Frenzy, defined in the Barbarian archetype. Reading the
+   * table alone is what led to Invisible being deleted from CONFIG as an
+   * invention. The blocks are the definition; the table is a convenience.
    */
-  const canonical = [...quickstart.matchAll(/^\|\s*([A-Z][A-Za-z ()]+?)\s*\|\s*(yes[^|]*|no)\s*\|\s*(auto-clear|roll-to-clear[^|]*|persistent)\s*\|$/gm)].map(
-    (row) => ({
-      name: row[1].trim(),
-      stackable: row[2].startsWith("yes"),
-      uncapped: row[2].includes("unlimited") || row[2].includes("uncapped"),
-      clear: row[3].startsWith("auto") ? "auto" : row[3].startsWith("roll") ? "roll" : "persistent"
-    })
-  );
+  const canonical = [
+    ...rules("quickstart").matchAll(BLOCK),
+    ...rules("archetypes").matchAll(BLOCK),
+    ...rules("masteries").matchAll(BLOCK),
+    ...rules("spellcasting").matchAll(BLOCK),
+    ...rules("limit-breaks").matchAll(BLOCK)
+  ].map((block) => {
+    const body = block[0];
+    const stackable = /Stackable:\s*yes/i.test(body);
+    const clear = body.match(/Clear[- ]Type:\s*(\w+)/i)?.[1].toLowerCase() ?? "";
 
-  test("the table parsed at all", () => {
-    assert.ok(canonical.length >= 16, `parsed ${canonical.length} conditions`);
+    return {
+      // "Wracked (Damage Type)" is `wracked`; the rest lowercase directly.
+      id: block[1].replace(/\s*\(.*\)$/, "").trim().toLowerCase(),
+      name: block[1].trim(),
+      stackable,
+      // "yes (max 3)" is the norm; Faltering and Unraveling say "unlimited".
+      uncapped: /Stackable:[^\n]*(unlimited|uncapped|no max)/i.test(body),
+      clear: clear.startsWith("auto") ? "auto" : clear.startsWith("roll") ? "roll" : "persistent"
+    };
   });
 
-  test("the system knows every condition the table lists", () => {
+  test("the blocks parsed at all", () => {
+    assert.ok(canonical.length >= 18, `parsed ${canonical.length} conditions`);
+
+    // The two that live outside section 7 are the whole reason this reads
+    // blocks rather than the table. If a rules edit ever moves them, the rest
+    // of this suite would quietly stop covering them.
+    const ids = canonical.map((c) => c.id);
+    assert.ok(ids.includes("invisible"), "Invisible, from section 8");
+    assert.ok(ids.includes("frenzy"), "Frenzy, from the Barbarian archetype");
+  });
+
+  test("the system knows every condition the rules define", () => {
     for (const condition of canonical) {
-      // "Wracked (Damage Type)" is `wracked`; the rest lowercase directly.
-      const id = condition.name.replace(/\s*\(.*\)$/, "").toLowerCase();
-      assert.ok(id in MANTLE.conditions, `${condition.name} → ${id}`);
+      assert.ok(condition.id in MANTLE.conditions, `${condition.name} → ${condition.id}`);
     }
   });
 
   test("stackability and clear type match, condition for condition", () => {
     for (const condition of canonical) {
-      const id = condition.name.replace(/\s*\(.*\)$/, "").toLowerCase();
-      const known = /** @type {Record<string, any>} */ (MANTLE.conditions)[id];
+      const known = /** @type {Record<string, any>} */ (MANTLE.conditions)[condition.id];
 
-      assert.equal(Boolean(known.stackable), condition.stackable, `${id}: stackable`);
-      assert.equal(known.clear, condition.clear, `${id}: clear type`);
+      assert.equal(Boolean(known.stackable), condition.stackable, `${condition.id}: stackable`);
+      assert.equal(known.clear, condition.clear, `${condition.id}: clear type`);
 
       // Faltering and Unraveling are the only two without a cap of 3.
-      if (condition.uncapped) assert.equal(known.cap, Infinity, `${id}: uncapped`);
+      if (condition.uncapped) assert.equal(known.cap, Infinity, `${condition.id}: uncapped`);
     }
   });
 
   test("the system invents no condition the rules do not have", () => {
-    const listed = new Set(
-      canonical.map((c) => c.name.replace(/\s*\(.*\)$/, "").toLowerCase())
-    );
+    const defined = new Set(canonical.map((c) => c.id));
 
     for (const id of Object.keys(MANTLE.conditions)) {
-      // Frenzy is granted by the Barbarian archetype rather than listed among
-      // the general conditions, so it is expected to be absent from the table.
-      if (id === "frenzy") continue;
-      assert.ok(listed.has(id), `${id} is in CONFIG but not in the rules table`);
+      assert.ok(defined.has(id), `${id} is in CONFIG but no rules document defines it`);
+    }
+  });
+
+  test("the section 7 table agrees with the blocks it summarizes", () => {
+    // The table is not the source of truth, but a table that disagrees with a
+    // block is a rules bug worth surfacing to the author.
+    const table = [...rules("quickstart").matchAll(TABLE_ROW)].map((row) => ({
+      id: row[1].replace(/\s*\(.*\)$/, "").trim().toLowerCase(),
+      stackable: row[2].startsWith("yes")
+    }));
+
+    assert.ok(table.length >= 16, `parsed ${table.length} table rows`);
+
+    for (const row of table) {
+      const block = canonical.find((c) => c.id === row.id);
+      assert.ok(block, `${row.id} is in the table but has no [CONDITION] block`);
+      assert.equal(block.stackable, row.stackable, `${row.id}: table vs block`);
     }
   });
 });
