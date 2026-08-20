@@ -245,6 +245,9 @@ MANTLE.skills = {
 /** The bonus a trained skill contributes to an action roll. */
 MANTLE.skillBonus = 2;
 
+/** The bonus an attack gains when the attacker is Hidden from the target. */
+MANTLE.hiddenAttackBonus = 2;
+
 /* -------------------------------------------- */
 /*  Equipment                                    */
 /* -------------------------------------------- */

@@ -1287,7 +1287,36 @@
         color: var(--mantle-warning);
       }
     }
+
+    /* Out of reach, out of range, or unseen. Not a bad pool — no pool. The
+       readout carries the reason in place of a die count. */
+    &.blocked {
+      border-color: var(--mantle-vitality);
+
+      .value {
+        font-size: 0.95em;
+        color: var(--mantle-vitality);
+      }
+    }
   }
+
+  /* Checkboxes read left-to-right — box, then what it means — rather than
+     pushed to opposite ends of the row like the labelled inputs. */
+  .row.check {
+    justify-content: flex-start;
+    gap: 8px;
+
+    input[type="checkbox"] {
+      flex: 0 0 auto;
+    }
+  }
+}
+
+/* The attack dialog asks more questions than the action dialog, so it gets a
+   scroll rather than growing past the bottom of the screen. */
+.mantle .attack-dialog {
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
 /* -------------------------------------------- */

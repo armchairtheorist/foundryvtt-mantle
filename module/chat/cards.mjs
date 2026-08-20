@@ -191,7 +191,7 @@ async function applyToTargets(message) {
       strain: isStrain
     });
 
-    await reportHarm(actor, amount, result);
+    await reportHarm(actor, amount, result, context.hitLocation ?? "mass");
   }
 }
 
@@ -263,7 +263,7 @@ async function applyManeuverToTargets(message, maneuver, resolved) {
  * @param {number} amount
  * @param {object} result
  */
-async function reportHarm(actor, amount, result) {
+async function reportHarm(actor, amount, result, hitLocation = "mass") {
   const owed = result.strain ? result.burdensInflicted : result.woundsInflicted;
   const lines = [];
 
@@ -278,7 +278,8 @@ async function reportHarm(actor, amount, result) {
   const harm = result.strain ? "burden" : "wound";
   const button =
     owed > 0 && !result.defeated && !result.lost
-      ? `<button type="button" data-harm="${harm}" data-actor="${actor.id}">
+      ? `<button type="button" data-harm="${harm}" data-actor="${actor.id}"
+             data-hit-location="${hitLocation}">
            ${game.i18n.format(`MANTLE.Card.take${harm === "wound" ? "Wound" : "Burden"}`, { count: owed })}
          </button>`
       : "";
@@ -315,7 +316,13 @@ async function takeHarm(button) {
   // A Wound is taken once; disable immediately so a double-click cannot take two.
   button.disabled = true;
 
-  const result = kind === "wound" ? await actor.takeWound() : await actor.takeBurden();
+  // A called shot floors the Wound's severity — Edge at 2, Mark at 3 — so the
+  // location declared when the attack was rolled has to survive all the way to
+  // the button that finally takes the Wound. Burdens have no location.
+  const hitLocation = button.dataset.hitLocation ?? "mass";
+
+  const result =
+    kind === "wound" ? await actor.takeWound({ hitLocation }) : await actor.takeBurden();
   if (!result) return;
 
   await ChatMessage.create({

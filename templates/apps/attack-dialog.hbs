@@ -1,0 +1,99 @@
+{{!--
+  The attack dialog.
+
+  Where the target is standing matters as much as what the attacker is holding,
+  so the positional questions come first and the readout at the bottom is the
+  pool that will actually hit the table — or the reason there will be no roll.
+--}}
+<form class="mantle action-dialog attack-dialog">
+
+  {{#if canSwitchMode}}
+    {{!-- A Dagger is Melee 1 and Range 5. Which one this swing is decides the
+          range penalty, whether cover applies, and whether Frenzy helps. --}}
+    <label class="row">
+      {{localize "MANTLE.Attack.mode"}}
+      <select name="mode">
+        <option value="melee" {{#unless ranged}}selected{{/unless}}>
+          {{localize "MANTLE.Attack.melee"}} ({{reach}})
+        </option>
+        <option value="ranged" {{#if ranged}}selected{{/if}}>
+          {{localize "MANTLE.Attack.ranged"}} ({{maxRange}})
+        </option>
+      </select>
+    </label>
+  {{/if}}
+
+  <label class="row">
+    {{localize "MANTLE.Attack.hitLocation"}}
+    <select name="hitLocation">
+      {{#each locations as |location|}}
+        <option value="{{location.key}}">
+          {{location.label}}{{#if location.penalty}} ({{location.penalty}}d){{/if}}
+        </option>
+      {{/each}}
+    </select>
+  </label>
+
+  {{!-- Measured from the canvas when a token is targeted, and editable
+        regardless: the map is often a sketch of the fiction. Blank means
+        unmeasured, which contributes nothing rather than refusing. --}}
+  <label class="row">
+    {{localize "MANTLE.Attack.distance"}}
+    <input type="number" name="distance" value="{{distance}}" min="0" max="200"
+           placeholder="{{localize 'MANTLE.Attack.unmeasured'}}"
+           data-tooltip="{{localize 'MANTLE.Attack.distanceHint'}}">
+  </label>
+
+  <label class="row">
+    {{localize "MANTLE.Attack.visibility"}}
+    <select name="visibility">
+      {{#each visibility as |state|}}
+        <option value="{{state.key}}">{{state.label}}</option>
+      {{/each}}
+    </select>
+  </label>
+
+  <label class="row check">
+    <input type="checkbox" name="cover"
+           data-tooltip="{{localize 'MANTLE.Attack.coverHint'}}">
+    {{localize "MANTLE.Attack.cover"}}
+  </label>
+
+  <label class="row check">
+    <input type="checkbox" name="hiddenAttacker"
+           data-tooltip="{{localize 'MANTLE.Attack.hiddenHint'}}">
+    {{localize "MANTLE.Attack.hidden"}}
+  </label>
+
+  {{!-- Pre-filled from what the attacker is actually carrying, but editable
+        rather than applied silently: a penalty applied twice is worse than one
+        applied by hand. --}}
+  <label class="row">
+    {{localize "MANTLE.Condition.impaired"}}
+    <input type="number" name="impaired" value="{{conditions.impaired}}" min="0" max="10">
+  </label>
+
+  <label class="row check">
+    <input type="checkbox" name="hindered" {{#if conditions.hindered}}checked{{/if}}>
+    {{localize "MANTLE.Condition.hindered"}}
+  </label>
+
+  {{#if frenzy}}
+    <label class="row">
+      {{localize "MANTLE.Condition.frenzy"}}
+      <input type="number" name="frenzy" value="{{frenzy}}" min="0" max="3"
+             data-tooltip="{{localize 'MANTLE.Attack.frenzyHint'}}">
+    </label>
+  {{/if}}
+
+  <label class="row">
+    {{localize "MANTLE.Modifier.situational"}}
+    <input type="number" name="situational" value="0" min="-10" max="10"
+           data-tooltip="{{localize 'MANTLE.Action.situationalHint'}}">
+  </label>
+
+  <div class="action-summary">
+    <span class="label">{{localize "MANTLE.Action.pool"}}</span>
+    <span class="value" data-pool>0d6</span>
+  </div>
+</form>

@@ -15,6 +15,7 @@ import MantleRoll from "../dice/roll.mjs";
 import { MANTLE } from "../config.mjs";
 import { buildPool, standardModifiers } from "../dice/pool.mjs";
 import { postRollCard } from "../chat/cards.mjs";
+import { promptAttack } from "../apps/attack-dialog.mjs";
 import { promptCast } from "../apps/cast-dialog.mjs";
 import { promptAction } from "../apps/action-dialog.mjs";
 import {
@@ -210,13 +211,14 @@ export default class MantleActor extends Actor {
     bonusDamage = 0,
     damageTypes = [],
     penetrating = false,
+    hitLocation = "mass",
     maneuver = null
   }) {
     const base = this.system.attributes?.[attribute] ?? 0;
     const pool = buildPool(base, modifiers);
 
     const roll = MantleRoll.fromPool(pool, {
-      ladder, ladderKind, bonusDamage, damageTypes, penetrating, maneuver
+      ladder, ladderKind, bonusDamage, damageTypes, penetrating, hitLocation, maneuver
     });
     await roll.evaluate();
 
@@ -269,7 +271,27 @@ export default class MantleActor extends Actor {
     const damageTypes = await this.#resolveDamageTypes(weapon);
     if (!damageTypes) return;
 
-    const modifiers = standardModifiers({ ...options, trained: false });
+    // Where the target is standing, what the attacker can see, and which part
+    // of the target they are aiming at. Skipped only by callers that already
+    // know the shape of the attack and pass `silent`.
+    let hitLocation = options.hitLocation ?? "mass";
+    let modifiers;
+
+    if (options.silent) {
+      modifiers = standardModifiers({ ...options, trained: false });
+    } else {
+      const declared = await promptAttack(this, weapon, { attribute });
+      if (!declared) return;
+
+      modifiers = declared.modifiers;
+      hitLocation = declared.hitLocation;
+    }
+
+    // Nothing is spent until the attack is actually declared. Everything above
+    // this line can still be backed out of — cancelling the dialog, or being
+    // out of reach — and a cancelled attack must cost nothing.
+    const cost = options.vigorCost ?? weapon.system.attackCost ?? 0;
+    if (!(await this.#spendVigor(cost))) return;
 
     // Vulnerable hands the attacker a die per stack, and is spent by the
     // attack that used it whatever the attack goes on to roll.
@@ -285,6 +307,7 @@ export default class MantleActor extends Actor {
       modifiers,
       ladder: options.maneuver ? null : weapon.system.damage,
       ladderKind: "vitality",
+      hitLocation,
       damageTypes,
       penetrating: tags.includes("penetrating"),
       maneuver: options.maneuver ?? null
@@ -507,8 +530,11 @@ export default class MantleActor extends Actor {
       return null;
     }
 
-    if (!(await this.#spendVigor(MANTLE.reactions.forestall.vigorCost))) return null;
-    return this.attackWith(weapon);
+    return this.attackWith(weapon, {
+      title: game.i18n.localize(MANTLE.reactions.forestall.label),
+      subtitle: weapon.name,
+      vigorCost: MANTLE.reactions.forestall.vigorCost
+    });
   }
 
   /* -------------------------------------------- */
@@ -567,11 +593,13 @@ export default class MantleActor extends Actor {
       maneuver.weapon === "unarmed" ? this.unarmedAttack : await this.#pickMeleeWeapon(maneuver);
     if (!weapon) return null;
 
-    if (!(await this.#spendVigor(maneuver.vigor))) return null;
-
     return this.attackWith(weapon, {
       title: game.i18n.localize(maneuver.label),
       subtitle: weapon.name,
+      // The maneuver's own price, not the weapon's: Shove and Grab cost 2
+      // whatever you are holding, and Feint costs 2 even with a Cumbersome
+      // weapon that would make a Basic Attack cost 3.
+      vigorCost: maneuver.vigor,
       maneuver: {
         id,
         applies: maneuver.applies ?? null,
@@ -838,11 +866,10 @@ export default class MantleActor extends Actor {
     const weapon = await this.#pickMeleeWeapon(reaction);
     if (!weapon) return null;
 
-    if (!(await this.#spendVigor(reaction.vigorCost))) return null;
-
     return this.attackWith(weapon, {
       title: game.i18n.localize(reaction.label),
-      subtitle: weapon.name
+      subtitle: weapon.name,
+      vigorCost: reaction.vigorCost
     });
   }
 
