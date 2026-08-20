@@ -545,6 +545,13 @@ MANTLE.grazeStrain = { basic: 1, shaped: 2 };
 /** Penalty for casting without a spell focus equipped. */
 MANTLE.noFocusPenalty = -1;
 
+/** Border colour for a spell area, so it reads as a spell rather than a ruler. */
+MANTLE.templateBorderColor = "#7a4fa8";
+
+/** Degrees the mouse wheel turns an aimed template, and with Shift held. */
+MANTLE.templateRotation = 15;
+MANTLE.templateFineRotation = 5;
+
 /* -------------------------------------------- */
 /*  Conditions                                   */
 /* -------------------------------------------- */

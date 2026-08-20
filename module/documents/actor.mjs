@@ -24,6 +24,9 @@ import {
   interludeRestore
 } from "../rules/rest.mjs";
 import { limitBreakRoutes } from "../rules/valor.mjs";
+import { castTemplate, isMultiTarget } from "../rules/templates.mjs";
+import { rangeAtStep } from "../rules/shaping.mjs";
+import { placeSpellTemplate } from "../canvas/spell-template.mjs";
 import { promptAttack } from "../apps/attack-dialog.mjs";
 import { promptCast } from "../apps/cast-dialog.mjs";
 import { promptAction } from "../apps/action-dialog.mjs";
@@ -1502,7 +1505,7 @@ export default class MantleActor extends Actor {
     const choice = await promptCast(this);
     if (!choice) return null;
 
-    const { art, resonance, cast } = choice;
+    const { art, resonance, shape, cast } = choice;
     const entry = (resonance.system.arts ?? []).find((e) => e.art === art.name);
     if (!entry) return null;
 
@@ -1515,6 +1518,18 @@ export default class MantleActor extends Actor {
 
     await this.update({ "system.vigor.value": this.system.vigor.value - cast.vigorCost });
 
+    // The area goes on the map before the roll, not after: an area spell is
+    // rolled separately against each target, so the table needs to see who is
+    // caught before anyone rolls anything.
+    const descriptor = castTemplate({
+      areaStep: cast.steps.area,
+      special: shape.special,
+      specialSize: shape.specialSize,
+      rangeSquares: rangeAtStep(cast.steps.range, this.system.sen ?? 0).squares
+    });
+
+    if (descriptor) await placeSpellTemplate(this, descriptor);
+
     // The Resonance decides which of the Art's two ladders this pairing uses.
     // "both" means the caster chooses; default to Vitality, which the card's
     // ladder display makes obvious enough to correct by hand.
@@ -1524,10 +1539,21 @@ export default class MantleActor extends Actor {
     const modifiers = [];
     if (cast.penalty) modifiers.push({ label: "MANTLE.Cast.shapingPenalty", value: cast.penalty });
 
+    // An area spell rolls once per target against each target's own defenses,
+    // so the card says as much rather than letting one roll look like the
+    // whole spell.
+    const multiTarget = isMultiTarget({ areaStep: cast.steps.area, special: shape.special });
+    const subtitle = [
+      game.i18n.format("MANTLE.Cast.subtitle", { cost: cast.vigorCost }),
+      multiTarget ? game.i18n.localize("MANTLE.Cast.perTarget") : ""
+    ]
+      .filter(Boolean)
+      .join(" · ");
+
     const message = await this.rollAction({
       attribute: this.system.castingAttribute,
       title: `${resonance.name} ${art.name}`,
-      subtitle: game.i18n.format("MANTLE.Cast.subtitle", { cost: cast.vigorCost }),
+      subtitle,
       modifiers,
       ladder,
       ladderKind,
