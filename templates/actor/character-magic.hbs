@@ -42,6 +42,34 @@
             <span>{{localize "MANTLE.Shaping.duration"}}: {{art.system.basicShape.duration.step}}{{#unless art.system.basicShape.duration.shapeable}} ({{localize "MANTLE.Sheet.fixed"}}){{/unless}}</span>
             <span>{{localize "MANTLE.Shaping.area"}}: {{art.system.basicShape.area.step}}{{#unless art.system.basicShape.area.shapeable}} ({{localize "MANTLE.Sheet.fixed"}}){{/unless}}</span>
           </div>
+
+          {{!-- Both ladders, printed. Which one a cast uses is the Resonance's
+                choice, so a caster reading their options needs to see both —
+                and if the roll ever fails them, the bands are right here to
+                resolve by hand. --}}
+          {{#each ../config.spellLadders as |track|}}
+            {{#with (lookup art.system track.key) as |rungs|}}
+              {{#if rungs.[0]}}
+                <div class="art-ladder">
+                  <span class="track">{{localize track.label}}</span>
+                  <div class="ladder">
+                    {{#each ../../../config.bands as |band|}}
+                      <div class="rung">
+                        <span class="band">{{#if (eq band "3")}}3+{{else}}{{band}}s{{/if}}</span>
+                        <span class="effect">{{lookup rungs band}}</span>
+                      </div>
+                    {{/each}}
+                    {{#if rungs.overflow}}
+                      <div class="rung overflow">
+                        <span class="band">{{localize "MANTLE.Sheet.overflow"}}</span>
+                        <span class="effect">{{rungs.overflow}}</span>
+                      </div>
+                    {{/if}}
+                  </div>
+                </div>
+              {{/if}}
+            {{/with}}
+          {{/each}}
         </div>
       {{else}}
         <p class="empty">{{localize "MANTLE.Sheet.noArts"}}</p>

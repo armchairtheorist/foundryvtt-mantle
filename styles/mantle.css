@@ -1319,6 +1319,53 @@
   overflow-y: auto;
 }
 
+/* An Art prints both its ladders, because which one a cast uses is the
+   Resonance's choice — and because a table that cannot roll still needs to
+   read the band and resolve it by hand. */
+.mantle .art-ladder {
+  margin-top: 4px;
+
+  .track {
+    font-size: 0.7em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--mantle-muted);
+  }
+
+  .ladder {
+    display: grid;
+    gap: 1px;
+    margin-top: 2px;
+  }
+
+  .rung {
+    display: grid;
+    grid-template-columns: 3em 1fr;
+    gap: 8px;
+    align-items: baseline;
+    padding: 1px 4px;
+    font-size: 0.85em;
+    border-radius: 3px;
+
+    &:nth-child(odd) {
+      background: var(--mantle-panel);
+    }
+
+    .band {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--mantle-muted);
+    }
+
+    &.overflow .band {
+      font-size: 0.8em;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+}
+
 /* Activation controls read as an action rather than as bookkeeping, so they
    take the Valor gold rather than the muted grey the other row controls use. */
 .mantle .control.use {

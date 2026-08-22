@@ -25,7 +25,7 @@ import {
 } from "../rules/rest.mjs";
 import { limitBreakRoutes } from "../rules/valor.mjs";
 import { castTemplate, isMultiTarget } from "../rules/templates.mjs";
-import { rangeAtStep } from "../rules/shaping.mjs";
+import { pairingEffects, rangeAtStep } from "../rules/shaping.mjs";
 import { placeSpellTemplate } from "../canvas/spell-template.mjs";
 import { promptAttack } from "../apps/attack-dialog.mjs";
 import { promptCast } from "../apps/cast-dialog.mjs";
@@ -1549,11 +1549,11 @@ export default class MantleActor extends Actor {
       }
     }
 
-    // The Resonance decides which of the Art's two ladders this pairing uses.
-    // "both" means the caster chooses; default to Vitality, which the card's
-    // ladder display makes obvious enough to correct by hand.
-    const ladderKind = entry.ladder === "strain" ? "strain" : "vitality";
-    const ladder = ladderKind === "strain" ? art.system.strainLadder : art.system.vitalityLadder;
+    // The Resonance decides which of the Art's two ladders this pairing uses,
+    // what it deals, and whether Guard answers it.
+    const effects = pairingEffects(entry);
+    const ladder =
+      effects.ladderKind === "strain" ? art.system.strainLadder : art.system.vitalityLadder;
 
     const modifiers = [];
     if (cast.penalty) modifiers.push({ label: "MANTLE.Cast.shapingPenalty", value: cast.penalty });
@@ -1575,10 +1575,10 @@ export default class MantleActor extends Actor {
       subtitle,
       modifiers,
       ladder,
-      ladderKind,
-      bonusDamage: entry.bonusDamage ?? 0,
-      damageTypes: Array.from(entry.tags ?? []).filter((tag) => tag in CONFIG.MANTLE.damageTypes),
-      penetrating: (entry.tags ?? []).includes("penetrating")
+      ladderKind: effects.ladderKind,
+      bonusDamage: effects.bonusDamage,
+      damageTypes: effects.damageTypes,
+      penetrating: effects.penetrating
     });
 
     // Grazing costs the caster Strain, and more if the spell was shaped.

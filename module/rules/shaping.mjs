@@ -190,3 +190,30 @@ export function validCombinations(resonances, arts) {
 
   return combinations;
 }
+
+/**
+ * What one Art/Resonance pairing contributes to the roll.
+ *
+ * The Resonance's entry decides which of the Art's two ladders the pairing
+ * uses, what damage types it deals, and whether it ignores Guard. Every one of
+ * those reads the entry's `tags`, which is a SetField on a real Item and a
+ * plain array in authored content — so the reading is done in one place that
+ * accepts either, rather than at each call site where one of them will
+ * eventually be wrong.
+ *
+ * @param {{ladder?: string, tags?: Iterable<string>, bonusDamage?: number}} entry
+ * @returns {{ladderKind: "vitality"|"strain", damageTypes: string[],
+ *   penetrating: boolean, bonusDamage: number}}
+ */
+export function pairingEffects(entry) {
+  const tags = entry.tags ? Array.from(entry.tags) : [];
+
+  return {
+    // "both" means the caster chooses; Vitality is the default, and the card's
+    // ladder makes it obvious enough to correct by hand.
+    ladderKind: entry.ladder === "strain" ? "strain" : "vitality",
+    damageTypes: tags.filter((tag) => tag in MANTLE.damageTypes),
+    penetrating: tags.includes("penetrating"),
+    bonusDamage: entry.bonusDamage ?? 0
+  };
+}

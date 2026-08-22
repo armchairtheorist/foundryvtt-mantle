@@ -545,6 +545,17 @@ MANTLE.grazeStrain = { basic: 1, shaped: 2 };
 /** Penalty for casting without a spell focus equipped. */
 MANTLE.noFocusPenalty = -1;
 
+/**
+ * The two ladders an Art carries, for sheets that print both.
+ *
+ * Which one a cast resolves on is the Resonance's choice, so a caster reading
+ * their own Arts needs to see both rather than guess.
+ */
+MANTLE.spellLadders = [
+  { key: "vitalityLadder", label: "MANTLE.Sheet.vitalityLadder" },
+  { key: "strainLadder", label: "MANTLE.Sheet.strainLadder" }
+];
+
 /** Border colour for a spell area, so it reads as a spell rather than a ruler. */
 MANTLE.templateBorderColor = "#7a4fa8";
 

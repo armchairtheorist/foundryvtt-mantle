@@ -8,7 +8,14 @@
 
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-import { computeCast, rangeAtStep, durationAtStep, areaPenalty, validCombinations } from "../module/rules/shaping.mjs";
+import {
+  computeCast,
+  rangeAtStep,
+  durationAtStep,
+  areaPenalty,
+  pairingEffects,
+  validCombinations
+} from "../module/rules/shaping.mjs";
 
 /** Rend: 2 Vigor, range SEN (shapeable), duration instantaneous (fixed), single target. */
 const REND = {
@@ -188,5 +195,69 @@ describe("valid Art and Resonance pairings", () => {
   test("an Art the caster has not learned is not offered", () => {
     const combos = validCombinations(resonances, [{ name: "Rend" }]);
     assert.equal(combos.every((c) => c.art === "Rend"), true);
+  });
+});
+
+describe("what a pairing contributes to the roll", () => {
+  /**
+   * On a real Item, `tags` is a SetField and arrives as a Set. In authored
+   * content it is a plain array. Casting was broken for every spell with a
+   * tag because one call site read the Set with `.includes` — and every
+   * offline check passed, because they all fed it authored content.
+   *
+   * So both shapes are tested, on every field that reads tags.
+   */
+  /** @type {[string, (tags: string[]) => Iterable<string>][]} */
+  const shapes = [
+    ["a Set, as a real Item carries", (tags) => new Set(tags)],
+    ["an array, as authored content carries", (tags) => [...tags]]
+  ];
+
+  for (const [label, wrap] of shapes) {
+    test(`damage types are read from ${label}`, () => {
+      const effects = pairingEffects({ ladder: "vitality", tags: wrap(["fire", "penetrating"]) });
+      assert.deepEqual(effects.damageTypes, ["fire"]);
+    });
+
+    test(`penetrating is read from ${label}`, () => {
+      assert.equal(pairingEffects({ tags: wrap(["penetrating"]) }).penetrating, true);
+      assert.equal(pairingEffects({ tags: wrap(["fire"]) }).penetrating, false);
+    });
+  }
+
+  test("no tags at all is not an error", () => {
+    assert.deepEqual(pairingEffects({}), {
+      ladderKind: "vitality",
+      damageTypes: [],
+      penetrating: false,
+      bonusDamage: 0
+    });
+  });
+
+  test("only real damage types survive; other tags are not damage", () => {
+    // "seeking" and "imprecise" are attack tags an area spell gains, not
+    // damage types, and must not reach the card as damage.
+    const effects = pairingEffects({ tags: new Set(["fire", "seeking", "imprecise"]) });
+    assert.deepEqual(effects.damageTypes, ["fire"]);
+  });
+
+  test("the Resonance picks the ladder, and 'both' means Vitality", () => {
+    assert.equal(pairingEffects({ ladder: "strain" }).ladderKind, "strain");
+    assert.equal(pairingEffects({ ladder: "vitality" }).ladderKind, "vitality");
+    assert.equal(pairingEffects({ ladder: "both" }).ladderKind, "vitality");
+    assert.equal(pairingEffects({}).ladderKind, "vitality");
+  });
+
+  test("bonus damage carries through", () => {
+    assert.equal(pairingEffects({ bonusDamage: 3 }).bonusDamage, 3);
+    assert.equal(pairingEffects({}).bonusDamage, 0);
+  });
+
+  test("every pairing in the catalog survives being read as a Set", () => {
+    // The end-to-end guard: whatever the catalog holds, reading it the way a
+    // real Item presents it must not throw.
+    for (const tags of [["fire"], ["cold", "penetrating"], [], ["seeking"]]) {
+      assert.doesNotThrow(() => pairingEffects({ tags: new Set(tags) }));
+    }
   });
 });
