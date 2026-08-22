@@ -113,6 +113,10 @@ async function createTemplate(data, descriptor) {
  * an aimed shape. A cone anchored on the caster only turns — its apex is
  * already fixed — which is what `rotateOnly` means.
  *
+ * Every exit resolves. This is awaited by a cast that has already spent its
+ * Vigor, so a path that neither places nor cancels would suspend the spell
+ * forever — no roll, no card, and no way back.
+ *
  * @param {object} data - Template data, less its final position
  * @param {object} options
  * @param {boolean} options.rotateOnly - Position is fixed; only direction moves
@@ -129,8 +133,12 @@ async function aim(data, { rotateOnly, descriptor, grid }) {
   preview.layer.preview.addChild(preview);
   canvas.templates.activate();
 
-  ui.notifications.info(
-    game.i18n.localize(rotateOnly ? "MANTLE.Template.aimHint" : "MANTLE.Template.placeHint")
+  // Kept on screen rather than flashed: while this is open the canvas is the
+  // only thing that will answer a click, and a caster who missed a two-second
+  // toast has no way to tell that anything is waiting for them.
+  const prompt = ui.notifications.info(
+    game.i18n.localize(rotateOnly ? "MANTLE.Template.aimHint" : "MANTLE.Template.placeHint"),
+    { permanent: true }
   );
 
   return new Promise((resolve) => {
@@ -144,8 +152,10 @@ async function aim(data, { rotateOnly, descriptor, grid }) {
 
       canvas.stage.off("mousemove", handlers.move);
       canvas.stage.off("mousedown", handlers.click);
+      document.removeEventListener("keydown", handlers.key, true);
       canvas.app.view.oncontextmenu = null;
       canvas.app.view.onwheel = null;
+      ui.notifications.remove?.(prompt);
 
       // Clearing the container is what actually removes the preview; destroying
       // the placeable alone leaves an orphan child behind.
@@ -206,8 +216,20 @@ async function aim(data, { rotateOnly, descriptor, grid }) {
       preview.refresh();
     };
 
+    // Escape is the reflex for "get me out of this", and without it the only
+    // ways out are a canvas click or a right-click — neither of which a caster
+    // looking at their character sheet will think to try.
+    handlers.key = (event) => {
+      if (event.key !== "Escape") return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      finish(null);
+    };
+
     canvas.stage.on("mousemove", handlers.move);
     canvas.stage.on("mousedown", handlers.click);
+    document.addEventListener("keydown", handlers.key, true);
     canvas.app.view.oncontextmenu = () => finish(null);
     canvas.app.view.onwheel = handlers.wheel;
   });

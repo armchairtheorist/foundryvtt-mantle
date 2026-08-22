@@ -15,7 +15,7 @@
  * never appears rather than appearing greyed.
  */
 
-import { computeCast, rangeAtStep, durationAtStep } from "../rules/shaping.mjs";
+import { computeCast, rangeAtStep, durationAtStep, validCombinations } from "../rules/shaping.mjs";
 import { MANTLE } from "../config.mjs";
 
 const { DialogV2 } = foundry.applications.api;
@@ -33,6 +33,14 @@ export async function promptCast(actor) {
 
   if (arts.length === 0 || resonances.length === 0) {
     ui.notifications.warn(game.i18n.localize("MANTLE.Cast.needBoth"));
+    return null;
+  }
+
+  // Owning an Art and a Resonance is not the same as being able to pair them.
+  // Refusing here beats opening a dialog whose Cast button cannot work.
+  const pairings = validCombinations(resonances, arts);
+  if (pairings.length === 0) {
+    ui.notifications.warn(game.i18n.localize("MANTLE.Cast.noValidPairings"));
     return null;
   }
 
@@ -80,7 +88,14 @@ export async function promptCast(actor) {
 
   const art = arts.find((a) => a.id === result.get("art"));
   const resonance = resonances.find((r) => r.id === result.get("resonance"));
-  if (!art || !resonance) return null;
+
+  // Nothing should be able to submit this form without both selected, so if it
+  // happens the caster needs to hear about it rather than watch the button do
+  // nothing at all.
+  if (!art || !resonance) {
+    ui.notifications.warn(game.i18n.localize("MANTLE.Cast.nothingChosen"));
+    return null;
+  }
 
   const shape = readShape(result);
   const cast = computeCast({
@@ -180,7 +195,18 @@ function attachLiveCost(html, actor, arts, resonances) {
     html.querySelector(".cast-summary")?.classList.toggle("unaffordable", !affordable);
   };
 
-  form.addEventListener("change", update);
-  form.addEventListener("input", update);
-  update();
+  // The readout is a convenience; the Cast button is the point. An exception
+  // thrown here would escape the render callback and reject the dialog's own
+  // promise, leaving a dialog on screen whose button can never resolve.
+  const safely = () => {
+    try {
+      update();
+    } catch (error) {
+      console.error("Mantle | the cast readout failed to update", error);
+    }
+  };
+
+  form.addEventListener("change", safely);
+  form.addEventListener("input", safely);
+  safely();
 }

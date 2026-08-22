@@ -1506,8 +1506,16 @@ export default class MantleActor extends Actor {
     if (!choice) return null;
 
     const { art, resonance, shape, cast } = choice;
+    // A pairing the Resonance does not list cannot be cast. The dialog filters
+    // these out, so reaching here means something got past it — say so rather
+    // than returning quietly, which reads as a dead button.
     const entry = (resonance.system.arts ?? []).find((e) => e.art === art.name);
-    if (!entry) return null;
+    if (!entry) {
+      ui.notifications.warn(
+        game.i18n.format("MANTLE.Cast.noPairing", { art: art.name, resonance: resonance.name })
+      );
+      return null;
+    }
 
     if (cast.vigorCost > this.system.vigor.value) {
       ui.notifications.warn(
@@ -1521,6 +1529,10 @@ export default class MantleActor extends Actor {
     // The area goes on the map before the roll, not after: an area spell is
     // rolled separately against each target, so the table needs to see who is
     // caught before anyone rolls anything.
+    //
+    // The Vigor is already spent by this point, so the template must never be
+    // able to stop the spell. Placing it is a drawing aid; cancelling it, or
+    // failing to place it at all, still leaves a spell to roll.
     const descriptor = castTemplate({
       areaStep: cast.steps.area,
       special: shape.special,
@@ -1528,7 +1540,14 @@ export default class MantleActor extends Actor {
       rangeSquares: rangeAtStep(cast.steps.range, this.system.sen ?? 0).squares
     });
 
-    if (descriptor) await placeSpellTemplate(this, descriptor);
+    if (descriptor) {
+      try {
+        await placeSpellTemplate(this, descriptor);
+      } catch (error) {
+        console.error("Mantle | placing the spell area failed", error);
+        ui.notifications.warn(game.i18n.localize("MANTLE.Template.failed"));
+      }
+    }
 
     // The Resonance decides which of the Art's two ladders this pairing uses.
     // "both" means the caster chooses; default to Vitality, which the card's
