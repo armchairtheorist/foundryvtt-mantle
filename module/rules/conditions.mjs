@@ -18,14 +18,20 @@ import { MANTLE } from "../config.mjs";
  *
  * @type {Record<string, {label: string, stackable: boolean, cap?: number,
  *   clear: string, rollAttributes?: string[], typed?: boolean,
- *   strainPerStack?: number}>}
+ *   strainPerStack?: number, damagePerStack?: number}>}
  */
 const CONDITIONS = MANTLE.conditions;
 
 /** Stacked conditions cap at 3. Faltering and Unraveling are the exceptions. */
 export const DEFAULT_CAP = 3;
 
-/** Wracked deals this much damage per stack, at the end of the turn. */
+/**
+ * Wracked deals this much damage per stack, at the end of the turn.
+ *
+ * The authority is `damagePerStack` on the condition itself; this is kept as a
+ * named constant because the figure is quoted in tests and reads better than a
+ * literal 2.
+ */
 export const WRACKED_DAMAGE_PER_STACK = 2;
 
 /**
@@ -87,8 +93,11 @@ export function endOfTurnPlan(stacks) {
 
     // Wracked deals its damage before the stack is reduced, so it is reported
     // alongside the auto-clear rather than instead of it.
-    if (condition.typed) {
-      wracked.push({ id, stacks: held, damage: held * WRACKED_DAMAGE_PER_STACK });
+    //
+    // Gated on `damagePerStack`, not on `typed`: Affliction is also typed —
+    // it carries one of the six affliction names — and deals nothing.
+    if (condition.damagePerStack) {
+      wracked.push({ id, stacks: held, damage: held * condition.damagePerStack });
     }
 
     // Frenzy costs its carrier Strain equal to its stacks, every turn. Unlike

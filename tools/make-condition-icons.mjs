@@ -20,6 +20,7 @@ const OUT = "assets/conditions";
 
 /** @type {Record<string, {glyph: string, tint: string}>} */
 const ICONS = {
+  affliction: { glyph: "AF", tint: "#6b4fa8" },
   broken: { glyph: "BR", tint: "#8c2f2f" },
   cursed: { glyph: "CU", tint: "#5b2a72" },
   defeated: { glyph: "DF", tint: "#1c1c1c" },
@@ -27,6 +28,7 @@ const ICONS = {
   faltering: { glyph: "FA", tint: "#1c1c1c" },
   frenzy: { glyph: "FZ", tint: "#8c2f2f" },
   frightened: { glyph: "FR", tint: "#5b2a72" },
+  grabbed: { glyph: "GR", tint: "#7a5c2f" },
   hindered: { glyph: "HI", tint: "#9a6b1f" },
   impaired: { glyph: "IM", tint: "#9a6b1f" },
   invisible: { glyph: "IV", tint: "#2f5b8c" },

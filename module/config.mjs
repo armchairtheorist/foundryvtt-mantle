@@ -587,6 +587,9 @@ MANTLE.defaultStackCap = 3;
  * roll-to-clear condition may use; where two are listed the player picks.
  */
 MANTLE.conditions = {
+  // Given by every Burden, and named from the 1d6 affliction table. Typed
+  // like Wracked, but it deals no damage — only Burdens clear it.
+  affliction: { label: "MANTLE.Condition.affliction", stackable: false, clear: "persistent", typed: true },
   broken: { label: "MANTLE.Condition.broken", stackable: false, clear: "auto" },
   cursed: { label: "MANTLE.Condition.cursed", stackable: false, clear: "persistent" },
   defeated: { label: "MANTLE.Condition.defeated", stackable: false, clear: "persistent" },
@@ -601,7 +604,8 @@ MANTLE.conditions = {
     strainPerStack: 1
   },
   frightened: { label: "MANTLE.Condition.frightened", stackable: false, clear: "roll", rollAttributes: ["pre"] },
-  hindered: { label: "MANTLE.Condition.hindered", stackable: true, clear: "roll", rollAttributes: ["pow", "agi"] },
+  grabbed: { label: "MANTLE.Condition.grabbed", stackable: true, clear: "roll", rollAttributes: ["pow", "agi"] },
+  hindered: { label: "MANTLE.Condition.hindered", stackable: false, clear: "roll", rollAttributes: ["pow", "agi"] },
   impaired: { label: "MANTLE.Condition.impaired", stackable: true, clear: "auto" },
   invisible: { label: "MANTLE.Condition.invisible", stackable: false, clear: "persistent" },
   lost: { label: "MANTLE.Condition.lost", stackable: false, clear: "persistent" },
@@ -611,7 +615,7 @@ MANTLE.conditions = {
   surprised: { label: "MANTLE.Condition.surprised", stackable: false, clear: "auto" },
   unraveling: { label: "MANTLE.Condition.unraveling", stackable: true, cap: Infinity, clear: "persistent" },
   vulnerable: { label: "MANTLE.Condition.vulnerable", stackable: true, clear: "persistent" },
-  wracked: { label: "MANTLE.Condition.wracked", stackable: true, clear: "auto", typed: true }
+  wracked: { label: "MANTLE.Condition.wracked", stackable: true, clear: "auto", typed: true, damagePerStack: 2 }
 };
 
 /**

@@ -27,9 +27,17 @@ import { MANTLE } from "../module/config.mjs";
 describe("stacking", () => {
   test("stacked conditions cap at 3", () => {
     assert.equal(stackCap("impaired"), 3);
-    assert.equal(stackCap("hindered"), 3);
+    assert.equal(stackCap("grabbed"), 3);
     assert.equal(stackCap("wracked"), 3);
     assert.equal(DEFAULT_CAP, 3);
+  });
+
+  test("Hindered stopped stacking in v0.31", () => {
+    // It was "yes (max 3)" through v0.21 and is now flatly non-stackable, with
+    // its effect text unchanged. Grab moved to the new Grabbed condition to
+    // carry the stacks it used to inflict here.
+    assert.equal(stackCap("hindered"), 1);
+    assert.equal(applyStacks("hindered", 0, 3), 1);
   });
 
   test("Faltering and Unraveling are uncapped", () => {
@@ -39,7 +47,7 @@ describe("stacking", () => {
 
   test("a non-stackable condition counts as exactly one stack", () => {
     // Which is what makes "remove stacks equal to your successes" work the same
-    // for Frightened as it does for Hindered.
+    // for Frightened as it does for Grabbed.
     assert.equal(stackCap("frightened"), 1);
     assert.equal(applyStacks("frightened", 0, 3), 1);
   });
@@ -247,5 +255,42 @@ describe("the reaction table", () => {
     // Brace and the two reactive defenses. Intercept, Forestall and
     // Counterattack are attacks and stay available to a Frenzied character.
     assert.deepEqual(defensive, ["brace", "deflect", "dodge"]);
+  });
+});
+
+describe("the v0.31 condition additions", () => {
+  test("Grabbed stacks and clears on POW or AGI", () => {
+    assert.equal(stackCap("grabbed"), 3);
+    const plan = endOfTurnPlan({ grabbed: 2 });
+    assert.deepEqual(plan.roll, [{ id: "grabbed", attributes: ["pow", "agi"] }]);
+  });
+
+  test("Affliction is typed like Wracked but deals no damage", () => {
+    // Both carry a subtype — a damage type for Wracked, one of the six
+    // affliction names for Affliction — so `typed` cannot be what decides
+    // whether a condition ticks damage at end of turn.
+    const table = /** @type {Record<string, any>} */ (MANTLE.conditions);
+    assert.equal(table.affliction.typed, true);
+    assert.equal(table.wracked.typed, true);
+
+    assert.deepEqual(endOfTurnPlan({ affliction: 1 }).wracked, []);
+    assert.deepEqual(endOfTurnPlan({ wracked: 2 }).wracked, [
+      { id: "wracked", stacks: 2, damage: 2 * WRACKED_DAMAGE_PER_STACK }
+    ]);
+  });
+
+  test("Affliction never clears on its own", () => {
+    // Only healing a Burden removes one.
+    const plan = endOfTurnPlan({ affliction: 1 });
+    assert.deepEqual(plan.auto, []);
+    assert.deepEqual(plan.roll, []);
+    assert.ok(plan.persistent.includes("affliction"));
+  });
+
+  test("the six afflictions are the ones the rules roll", () => {
+    assert.deepEqual(
+      Object.values(MANTLE.afflictions).map((k) => String(k).split(".").pop()),
+      ["paranoid", "reckless", "obsessed", "terrified", "withdrawn", "bloodthirsty"]
+    );
   });
 });
