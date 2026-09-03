@@ -1,12 +1,12 @@
-# Mantle — Quick Start Guide
+# Momenta — Quick Start Guide
 
-**Version:** 0.21
+**Version:** 0.31
 
-Mantle is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This guide covers the core rules, the character-build system, and a primer on how Mantle adventure is structured.
+Momenta is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This guide covers the core rules, the character-build system, and a primer on how Momenta adventure is structured.
 
-> **About this document:** The rules are presented concisely for TTRPG-veteran readers. The **Version** line under each document's title is its version marker; the files themselves are versioned in git.
+> **About this document:** The rules are presented concisely for TTRPG-veteran readers. The filename's version suffix is the document's version marker.
 >
-> **Acknowledgements:** Mantle takes inspiration from many excellent TTRPG and JRPG games, including:
+> **Acknowledgements:** Momenta takes inspiration from many excellent TTRPG and JRPG games, including:
 >
 > - **Tri-Stat dX** - BODY / MIND / SOUL primary attribute structure.
 > - **Lancer** - Zipper initiative, dual-track damage, Structure/Stress model.
@@ -15,30 +15,31 @@ Mantle is a tactical, cinematic fantasy TTRPG built around modular archetypes an
 > - **Troubleshooter: Abandoned Children** - Mastery board, mastery sets, "Vigor" terminology.
 > - **Final Fantasy Tactics** - Multi-archetype character building.
 > - **Blades in the Dark** - Slot-based persistent harm, mission structure, narrative play.
-> - **One-Roll Engine** - Dice patterns-as-resolution lineage.
+> - **One-Roll Engine / Yahtzee** - Dice patterns-as-resolution lineage.
 > - **Pathfinder 2e** - Tag-based content design.
 > - **Tales from Elsewhere** - Hit-location concept (Mass/Edge/Mark adopted from Bulk/Brim/Ace).
-> - **GURPS Thaumatology / Ars Magica** - Freeform verb-and-noun spell construction.
+> - **Ars Magica** - Freeform verb-and-noun spell construction.
+> - **13th Age / Daggerheart** - Experience-based narrative play resolution.
 
 
 
-## What is Mantle?
+## What is Momenta?
 
-**Mantle is a tabletop roleplaying game of cinematic, tactical fantasy**. Battles play out on a grid, but they resolve quickly at the speed of a story. You spend **Vigor** to chain together daring **maneuvers**, take **Strain** when you push past your limits, and pour your party's shared **Valor** into **Limit Breaks** that turn desperate situations into legend.
+**Momenta is a tabletop roleplaying game of cinematic, tactical fantasy**. Battles play out on a grid, but they resolve quickly at the speed of a story. You spend **Vigor** to chain together daring **maneuvers**, take **Strain** when you push past your limits, and pour your party's shared **Momentum** into **Limit Breaks** that turn desperate situations into legend.
 
-**Every roll is read twice.** Roll your pool of d6s, count successes to see how well you did, then scan for dice **patterns** like in Yahtzee. **Doubles** land **Solid Hits**. **Triples** and **sequences** fuel rarer and more impactful techniques. Every throw of the dice carries a second chance for something cinematic to happen, and reading it takes a glance, not a calculation.
+**Every roll is read twice.** Roll your pool of d6s, count successes to see how well you did, then scan for dice **patterns** like in Yahtzee. **Doubles** land **Solid Hits**. **Triples** and **Quads** fuel rarer and more impactful techniques. Every throw of the dice carries a second chance for something cinematic to happen, and reading it takes a glance, not a calculation.
 
-**Your victories belong to the table.** Valor is earned by the whole party and spent by whoever needs it most. The game is built for the moment your friend's character does something unforgettable because *you* set it up.
+**Your victories belong to the table.** Momentum is earned by the whole party and spent by whoever needs it most. The game is built for the moment your friend's character does something unforgettable because *you* set it up.
 
 **Magic is a grammar, not a spell list.** Combine an **Art** (the verb: **Rend**, **Mend**, **Compel**, **Impel**...) with a **Resonance** (the noun: **Ignis**, **Lux**, **Mens**, **Terra**...) and the grid of combinations is yours to explore. Arts are fixed and comprehensive; Resonances are an open surface, built to be extended, hacked, and homebrewed.
 
 **Wounds tell stories.** Getting hurt doesn't just tick a number down. Physical **Wounds** and mental **Burdens** carry consequences, **afflictions** give you something to *play*, and pushing on versus resting is a real strategic choice.
 
-**Character building is a game in itself.** Stack always-on **archetypes** and slot **masteries** to tune the build. Go deep to unlock **specialist archetypes**, go broad for new domains, and retrain freely between missions. Experiment without regret.
+**Character building is a minigame in itself.** Combine always-on **archetypes** and slot **masteries** to tune the build. Go deep to unlock **specialist archetypes**, go broad for access to new mastery domains, and retrain freely between missions. Experiment without regret.
 
-**Campaigns with a pulse.** Play runs on **missions** with clear main and side objectives, ticking clocks, and a real strategic choice between pushing on and pulling back to rest. Fight on the grid, breathe in **interludes**, grow in **downtime**, and advance by achieving objectives, and not solely by counting kills. A tactical wargame and a visual novel, taking turns.
+**Campaigns with a pulse.** Play runs on **missions** with clear main and side objectives, ticking clocks, and a real strategic choice between pushing on and pulling back to rest. Fight on the grid, breathe during **interludes**, grow in **downtime**, and advance by achieving objectives, and not solely by counting kills. A tactical wargame and a visual novel, taking turns.
 
-And one core design principle, applied everywhere: **if tracking something isn't fun, Mantle doesn't track it.**
+And one core design principle, applied everywhere: **if tracking something isn't fun, Momenta doesn't track it.**
 
 
 
@@ -92,20 +93,20 @@ Modifiers adjust the number of dice rolled in the dice pool.
 If a dice pool results in rolling 0 dice or fewer:
 
 - Roll 2d6 and take the **lowest** die
-- If the lowest die is a 5 or 6, it counts as one success
+- If the **lowest die is a 5 or 6**, it counts as one success
 - Patterns do not apply
 
-Reference probabilities: 11% for 1 success, 89% for 0 successes
+Reference probabilities: 11% for 1 success, 89% for 0 success
 
 ### Types of Rolls
 
-**Action roll** - Every dice pool roll in Mantle is an action roll. Build the pool from one of the attributes, then apply modifiers (±Nd). If you are trained in a skill relevant to the task (GM adjudication), you can add a **+2d bonus** to the roll (at most one skill can be applied per roll). Some action rolls are opposed.
+**Action roll** - Every dice pool roll in Momenta is an action roll. Build the pool from one of the attributes, then apply modifiers (±Nd). Some action rolls are opposed. In narrative play, if the character has a **Thread** that is applicable to the situation at hand, they can make the action roll with a **+2d bonus**.
 
-**Attack (attack roll)** - Attacks are action rolls made to inflict harm or another undesirable effect on a target. Skills are never applied to attacks. Attacks can usually be opposed by the target's defenses.
+**Attack (a.k.a. attack roll)** - Attacks are action rolls made to inflict harm or another undesirable effect on a target. Threads do not apply to attacks, and attacks can usually be opposed by the target's defenses.
 
-**Opposition roll** - This is an action roll made to **oppose** someone else's action roll. Subtract the opposition roll's successes from the opposed roll's successes; the result (minimum 0 successes) is the roll's **effective successes**. Result bands are always read from effective successes, and an attack reduced to 0 effective successes becomes a *graze*. When opposing an attack, an opposition roll is also called a **defensive roll**.
+**Opposition roll** - This is an action roll made to **oppose** someone else's action roll. Subtract the opposition roll's successes from the opposed roll's successes; the result (minimum 0 successes) is the roll's **effective successes**. Result bands are always read from effective successes, and an attack reduced to 0 effective successes becomes a *graze*. When opposing an attack, an opposition roll can also be called a **defensive roll**.
 
-**Luck roll** - Also known as **testing your luck**, a luck roll is an action roll using LUCK that takes **no modifiers of any kind**: no bonuses, no penalties, no trained skills, no Heroic Feats. Count successes as normal. Nothing ever opposes a luck roll, though a luck roll may itself serve as an opposition roll.
+**Luck roll (a.k.a. testing your luck)** - A luck roll is an action roll using the LUCK attribute that is a straight roll that **does not apply any modifiers**. Momentous Feats and other similar abilities that change the number of successes of action rolls do not apply to a luck roll. This is the only way the LUCK attribute can be used for a dice pool roll. Nothing ever opposes a luck roll, although sometimes a luck roll can itself serve as an opposition roll.
 
 ### Patterns
 
@@ -113,31 +114,33 @@ Besides counting successes when rolling, patterns that emerge from the set of ro
 
 - **Double** - two dice showing the same value
 - **Triple** - three dice showing the same value
-- **Sequence** - four dice showing consecutive values (e.g., `2`, `3`, `4`, `5`)
+- **Quadruple (Quad for short)** - four dice showing the same value
 
 Certain attacks or abilities may define special pattern outcomes.
 
-Each d6 in the dice pool may only be allocated to a single pattern. For example, if a 5d6 pool shows the following values: `2`, `3`, `4`, `5`, `5`
+Each d6 in the dice pool may only be allocated to a single pattern. For example, if a 5d6 pool shows the following values: `2`, `3`, `5`, `5`, `5`
 
 - You can pick out one double pattern (`5`, `5`)
-- Or a sequence pattern (`2`, `3`, `4`, `5`)
-- But you cannot pick out both the double and the sequence, as that will require allocating one of the `5` to more than one pattern, which is disallowed.
+- Or a triple pattern (`5`, `5`, `5`)
+- But you cannot pick out both the double and the triple, as that will require allocating two of the `5` to more than one pattern, which is disallowed.
 
-**Every pattern that is allocated will trigger**, including repeated patterns. For example, a roll of `1`, `1`, `4`, `5`, `5` will result in two double patterns, and the double pattern outcome will trigger two times (if applicable).
+A pattern is usually written as **Double N**, **Triple N**, or **Quad N**, with N representing the pattern value.
 
-By default, a **pattern will only trigger** if the roll achieves at least **1 effective success**. Thus, a *graze* will not trigger any patterns. Specific pattern's may specify additional requirements that override this default.
+**Every pattern that is allocated will trigger**, including repeated patterns. For example, a roll of `1`, `1`, `4`, `5`, `5` will result in a Double 1 and a Double 5, and the outcome of the double pattern will be applied twice (if applicable). However, it's always the choice of the person who rolls the dice whether to allocate any dice to a pattern or not.
+
+By default, a **pattern will only trigger** if the action roll achieves at least **1 effective success**. Thus, a *graze* will not trigger any patterns. Specific patterns may specify additional requirements that override this default.
 
 Reference probabilities:
 
-| Pool | Double | Triple | Sequence |
-| ---- | ------ | ------ | -------- |
-| 2d6  | 17%    | -      | -        |
-| 3d6  | 44%    | 3%     | -        |
-| 4d6  | 72%    | 10%    | 6%       |
-| 5d6  | 91%    | 21%    | 15%      |
-| 6d6  | 98%    | 37%    | 27%      |
-| 7d6  | 100%   | 54%    | 38%      |
-| 8d6  | 100%   | 71%    | 49%      |
+| Pool | Double | Triple | Quad |
+| ---- | ------ | ------ | ---- |
+| 2d6  | 17%    | -      | -    |
+| 3d6  | 44%    | 3%     | -    |
+| 4d6  | 72%    | 10%    | 0.5% |
+| 5d6  | 91%    | 21%    | 2%   |
+| 6d6  | 98%    | 37%    | 5%   |
+| 7d6  | 100%   | 54%    | 11%  |
+| 8d6  | 100%   | 71%    | 18%  |
 
 
 
@@ -163,8 +166,8 @@ Besides attributes, every character also has three cores, representing the found
 | Core | Sum of | Contributes towards |
 |---|---|---|
 | BODY | POW + AGI | Vitality, Vigor refresh, Body mastery slots |
-| MIND | REA + INS | Strain, Surges, Mind mastery slots |
-| SOUL | PRE + LUCK | Strain, Valor, Soul mastery slots, Resolve, Wondrous item slots |
+| MIND | REA + INS | Strain, Surges, Wondrous Item slots, Mind mastery slots |
+| SOUL | PRE + LUCK | Strain, Momentum, Resolve, Bonds, Soul mastery slots |
 
 ### Vitality
 
@@ -200,7 +203,7 @@ Burden Slots = 3
 Resolve is a strategic resource that represents a character's innate resilience, a character's personal capacity to recover, push on, and endure. Characters can use Resolve during a mission to recover lost Vitality, clear Wounds, and remove Burdens.
 
 ```
-Resolve = SOUL + 6
+Resolve = SOUL + 8
 ```
 
 Resolve is refreshed during **downtime**.
@@ -229,21 +232,21 @@ Equipping armor will increase a character's Max Guard. Certain abilities and mas
 
 A character's Guard value may temporarily exceed their Max Guard. When that happens, it is called **Over-Guard**. A character with Over-Guard will not have their Guard replenished to its Max Guard value at the beginning of the turn.
 
-> **What Guard stops — and what it doesn't.** Guard absorbs **Vitality damage from attacks** before your Vitality is touched. Guard does **not** absorb: **Strain damage** (mental harm ignores armor and Guard alike); **untyped damage** (falling, drowning, and other environmental harm — these are not attacks); damage from attacks or effects with the **Penetrating** tag (including all damage from **Wracked** conditions); or any damage that is not from an attack. Resistance and weakness apply only to the damage that gets past Guard.
+> **What Guard stops, and what it doesn't.** Guard absorbs **Vitality damage from attacks** before your Vitality is touched. Guard does **not** absorb: **Strain damage** (mental harm ignores armor and Guard alike); **untyped damage** (falling, drowning, and other environmental harm — these are not attacks); damage from attacks or effects with the **Penetrating** tag (including all damage from **Wracked** conditions); or any damage that is not from an attack. Resistance and weakness apply only to the damage that gets past Guard.
 
 ### Speed
 
 Speed (SPD) is a stat representing how many squares (or hexes) a character can travel every time they take the **Move** maneuver. It is determined by the character's **ancestry archetype**, and the value generally ranges between 4 to 6.
 
-> Combat in Mantle can be played on either **square** or **hex** maps. For convenience, we will refer to only squares in the core rules when it comes to movement, but it is applicable to hexes as well.
+> Combat in Momenta can be played on either **square** or **hex** maps. For convenience, we will refer to only squares in the core rules when it comes to movement, but it is applicable to hexes as well.
 
 ### Senses
 
-Senses (SEN) is a stat representing the effective range in squares (or hexes) that a character can generally perceive without penalty. Like SPD, it is also determined by the character's **ancestry archetype**, with typical values ranging between 10-15.
+Senses (SEN) is a stat representing the effective range in squares that a character can generally perceive without penalty. Like SPD, it is also determined by the character's **ancestry archetype**, with typical values ranging between 10-15.
 
 ### Size
 
-Size (SIZE) is a stat representing how big the character is, and is determined by the character's **ancestry archetype**. Most characters will be some variation of Size 1.
+Size (SIZE) is a stat representing how big the character is, and is determined by the character's **ancestry archetype**. Most characters will be some variation of Size 1. The number in the SIZE represents the number of squares the character occupies on the map.
 
 | SIZE | Description | Footprint   | Examples               |
 | ---- | ----------- | ----------- | ---------------------- |
@@ -273,16 +276,18 @@ Characters start with a fixed number of gear slots, wondrous item slots, and con
 
 ```
 Gear Slots = 3
-Wondrous Item Slots = SOUL
+Wondrous Item Slots = MIND
 Consumable Points = 2
 ```
 
-### Languages Known
+### Threads and Bonds
 
-All characters will know the **Common** language, which represents the prevalent language that almost everyone speaks in the world. Besides Common, a character will know a number of additional languages based on their REA score:
+Threads represent lived experiences and character backstory, used primarily for narrative play. Most characters will start out with 3 Threads, but this could be modified by their **ancestry archetype** or chosen **masteries**.
+
+Bonds are relationships that a character develops through play over time. Bond can guide character behavior, and if it is strong enough, it could change what the characters can do. There is a limit to the number of individual Bonds that a character may hold at any one time.
 
 ```
-Additional Languages = REA + 1
+Max Bonds = SOUL + 3
 ```
 
 
@@ -297,7 +302,7 @@ Before combat can begin, the GM will have to do the following:
 
    - **Allies** - combatants belonging to the player side, which includes all player characters, as well as non-player characters that are aligned with the players.
 
-   - **Enemies** - combatants that play the role of antagonists for the allies.
+   - **Adversaries** - combatants that play the role of enemies or antagonists for the allies.
 
    - **Independents** - combatants belonging to neither the player side nor the enemy side.
 
@@ -307,7 +312,7 @@ Once the above is done, the GM will start the first round of combat and follow t
 
 ### Surprise
 
-If the GM judges that some combatants are caught unaware as combat begins, those actors gain the **Surprised** condition before combat starts. While they have the Surprised condition, they **act last in the turn order**, and they **cannot take reactions**.
+If the GM judges that some combatants are caught unaware as combat begins, those actors gain the **Surprised** condition before combat starts. In short, they act after everyone else and cannot take reactions (see **Surprised** in the Conditions section for the authoritative rules).
 
 Surprise may also be inflicted mid-combat as determined by the GM. In that case, immediately apply the **Surprised** condition on the surprised combatant.
 
@@ -315,23 +320,23 @@ Surprise may also be inflicted mid-combat as determined by the GM. In that case,
 
 ### Turn Order
 
-A round follows a modified *zipper initiative* turn order. Combat alternates turns between the **allies** and **enemies**.
+A round follows a modified *zipper initiative* turn order. Combat alternates turns between the **allies** and **adversaries**.
 
-- For **Round 1**, the **players decide** which of the combatants on the allies takes the first turn. The chosen combatant then takes their turn. If everyone on the allies side is Surprised, then the enemies go first instead.
-- Turns then **alternate sides** - enemies, players, enemies, and so forth, with each side choosing which of its combatants will take the next turn (the GM chooses for the enemies).
+- For **Round 1**, the **players decide** which of the combatants on the allies takes the first turn. The chosen combatant then takes their turn. If everyone on the allies side is Surprised, then the adversaries go first instead.
+- Turns then **alternate sides** - adversaries, allies, adversaries, and so forth, with each side choosing which of its combatants will take the next turn (the GM chooses for the adversaries).
 - When one side has no combatants left that need to take a turn, the other side freely takes all their remaining turns in sequence.
-- Whichever side between allies and enemies took the **final turn** in a round, the **other side** will take the **first turn of the following round**.
+- Whichever side between allies and adversaries took the **final turn** in a round, the **other side** will take the **first turn of the following round**.
 
 Special cases:
 
 - **Slowed** combatants take their turn only after every other **non-Slowed** combatant (on either side) have already taken all their turns.
 
-- NPCs belonging to neither allies nor enemies are considered **independents**, and they always **take their turns last in a round** after both the allies and enemies have already taken all their turns, regardless if anyone has the Slowed condition. An NPC that is allied to a side is not considered an independent; they will take their turn as part of either the allies or enemies as appropriate.
+- NPCs belonging to neither allies nor adversaries are considered **independents**, and they always **take their turns last in a round** after both the allies and adversaries have already taken all their turns, regardless if anyone has the Slowed condition. An NPC allied to either of the two main sides is not considered independent; they will take their turn as part of either the allies or adversaries as appropriate.
 
 In summary:
 
 ```
-Allies/Enemies --> Slowed Allies/Enemies --> Independents
+Allies/Adversaries --> Slowed Allies/Adversaries --> Independents
 ```
 
 ### Taking a Turn
@@ -377,15 +382,15 @@ All characters can perform the following maneuvers during their turn. Certain **
 
 | Maneuver          | Vigor Cost    | Description                                                  |
 | ----------------- | ------------- | ------------------------------------------------------------ |
-| Move              | Free / 1      | Move a number of squares up to SPD. This movement cannot be broken up and has to be resolved all at once. Every Move maneuver costs 1 Vigor, but the first Move maneuver each turn is free. |
-| Shift             | 1             | Move a number of squares up to half SPD (minimum 1). This movement cannot be broken up and has to be resolved all at once. Does not trigger **reactive attacks**. |
+| Move              | Free / 2      | Move a number of squares up to SPD. This movement cannot be broken up and has to be resolved all at once. Every Move maneuver costs 2 Vigor, but the first Move maneuver each turn is free. |
+| Shift             | 2             | Move a number of squares up to half SPD (minimum 1). This movement cannot be broken up and has to be resolved all at once. Does not trigger **reactive attacks**. |
 | Basic Attack      | 2             | Make one attack with an equipped weapon.                     |
 | Shove             | 2             | Make one attack with the **Unarmed Attack** weapon. Instead of dealing damage, push the target away N number of squares, where N = number of successes rolled on the attack (maximum 3). This is considered **forced movement**. |
-| Grab              | 2             | Make one attack with the **Unarmed Attack** weapon. Instead of dealing damage, the target gets the **Hindered N** condition, where N = number of successes rolled on the attack (maximum 3). |
+| Grab              | 2             | Make one attack with the **Unarmed Attack** weapon. Instead of dealing damage, the target gets the **Grabbed N** condition, where N = number of successes rolled on the attack (maximum 3). |
 | Feint             | 2             | Make one Basic Attack with a **melee weapon**. Instead of dealing damage, the target gets the **Vulnerable N** condition, where N = number of successes rolled on the attack (maximum 3). |
 | Use Consumable    | 1             | **Spend a consumable point** to activate the effects of one consumable. |
 | Hide              | 1             | Become **Hidden** if the conditions for hiding are met.      |
-| Shake It Off      | 2             | Clear one stack of the **Hindered** or **Exhausted** condition. |
+| Shake It Off      | 2             | Clear one stack of the **Exhausted**, **Grabbed**, **Hindered**, or **Vulnerable** conditions. |
 | Catch Your Breath | Full turn     | **Spend 1 Resolve to restore Vitality** equal to **half their Max Vitality**. Taking this maneuver does not cost any Vigor, but the character cannot take any other maneuvers or reactions until the start of their next turn, except for their free **Move**. |
 | Steady Yourself   | Full turn     | **Clear Strain** equal to **half their Max Strain**. Taking this maneuver does not cost any Vigor, but the character cannot take any other maneuvers or reactions until the start of their next turn, except for their free **Move**. |
 | Surge             | Free (1/turn) | Burn your mental and spiritual reserves for action. The character may choose to **increase Vigor** up to a **maximum value of MIND**, but for each point of Vigor gained, they will **take 2 Strain**. This cannot raise Vigor above the Max Vigor, and once used, they may not **Surge** again until the start of their next turn. A character with MIND of 0 cannot **Surge**. |
@@ -407,14 +412,14 @@ All characters can perform the following reactions. Certain **masteries** or **a
 
 > For defensive reactions like **Dodge** which are triggered by another combatant targeting a character with an attack, the reaction is declared the moment they are targeted, before the attacker rolls.
 >
-> Note that although **Brace** has no Vigor cost, effectively it can only be used once, as once a character receives the **Broken** condition, they are locked out of taking any further maneuvers and reactions until the condition is cleared. Players should treat this as a last resort.
+> Note that although **Brace** has no Vigor cost, effectively it can only be used once, as once a character receives the **Broken** condition, they are locked out of taking any further maneuvers and reactions until the condition is cleared. Players should treat this as a last resort. Note that Brace is not a reactive defense; it may be used after a reactive defense has already been attempted, and against Indefensible attacks.
 
 Two notable reactions that are available via the **Warrior** archetype:
 
 | Reaction      | Trigger                                                      | Vigor Cost | Description                                                  |
 | ------------- | ------------------------------------------------------------ | ---------- | ------------------------------------------------------------ |
-| Deflect       | When you are targeted by a **melee attack**, and you have an equipped weapon with the **Deflect** or **Shield** tag. For weapons with the Deflect tag, the **weight class** of the weapon must equal or exceed the attacking weapon's weight class. | 1          | *Reactive Defense*<br />You **oppose** the attack with either POW or AGI, depending on the attribute of the weapon used for deflection. Once an equipped weapon has been used in this manner, it cannot be used again to Deflect until the start of their next turn. |
-| Counterattack | When you are targeted by a **melee attack**.                 | 2          | *Reactive Attack*<br />Immediately make a **Basic Attack** against the attacker with an equipped melee weapon. Resolve the counterattack first, then take the triggering damage in full. |
+| Deflect       | When you are targeted by a **melee attack**, and you have an equipped weapon with the **Deflect** or **Shield** tag. For weapons with the Deflect tag, the **weight class** of the weapon must equal or exceed the attacking weapon's weight class. | 1          | *Reactive Defense*<br />You **oppose** the attack with either POW or AGI, depending on the attribute of the weapon used for deflection. Once an equipped weapon has been used in this manner, it cannot be used again to Deflect until the start of their next turn.<br /><br />**Spell attacks:** Only weapons with the **Shield** tag can Deflect a spell attack, unless a weapon specifically states otherwise. |
+| Counterattack | When you are targeted by a **melee attack**.                 | 2          | *Reactive Attack*<br />Immediately make a **Basic Attack** against the attacker with an equipped melee weapon. Resolve the counterattack first, then take the triggering damage in full. Your melee weapon must be able to reach the attacker. |
 
 > **Weapon weight classes:** Superheavy > Heavy > Medium > Light
 >
@@ -426,17 +431,21 @@ Certain attacks will carry the **Indefensible** tag. Against those attacks, the 
 
 ### Grab
 
-To take the Grab maneuver, make one **Unarmed Attack** against the target. Instead of dealing damage, the target gets the **Hindered N** condition, where N = number of successes rolled on the attack (maximum 3). Like any other attack, this Unarmed Attack can be mitigated with **reactive defenses**.
+To take the Grab maneuver, make one **Unarmed Attack** against the target. Instead of dealing damage, the target gets the **Grabbed N** condition, where N = number of successes rolled on the attack (maximum 3). Like any other attack, this Unarmed Attack can be mitigated with **reactive defenses**.
 
-While the **Hindered** condition is active, the target is considered grabbed by the attacker. While grabbed, neither the target nor attacker can **Move** or **Shift** unless they remain adjacent to each other throughout the movement. If one of the two is bigger than the other (based on SIZE), then the bigger creature can move freely, and the smaller creature will be dragged along to remain adjacent to the bigger creature. Being dragged in this manner is considered **forced movement**.
+While the **Grabbed** condition is active, the target is considered grabbed by the attacker. While grabbed, neither the target nor attacker can **Move** or **Shift**. If one of the two is bigger than the other (based on SIZE), then the bigger creature can move freely, and the smaller creature will be dragged along to remain in the same relative position as the bigger creature (GM adjudication for terrain edge cases). Being dragged in this manner is considered **forced movement**.
 
-Once all stacks of the Hindered condition are removed, the target is no longer considered grabbed by the attacker, and both attacker and target can move freely. If the attacker and target are ever no longer adjacent, the grab ends immediately; any remaining Hindered stacks persist.
+Once all stacks of the Grabbed condition are removed, the target is no longer considered grabbed by the attacker, and both attacker and target can move freely. If the attacker and target are ever moved so that the distance between the two increases, the grab ends immediately and any remaining Grabbed stacks are removed.
 
-During the attacker's turn, they can take the Grab maneuver again to attempt to add on more stacks of the Hindered condition. However, like most of the other stackable conditions, the cap on the number of stacks is 3.
+The grabber may also choose to release the grab as a free action at any time, which removes all of the Grabbed stacks. If the grabber becomes Defeated, the grab also ends and all remaining Grabbed stacks are removed.
+
+During the attacker's turn, they can take the Grab maneuver again to attempt to add on more stacks of the Grabbed condition, to a maximum of 3.
 
 ### Free Actions
 
-Minor narrative actions during combat (e.g., opening a door, picking up a key from a table, shouting to an ally, etc.) don't consume Vigor and can be taken freely within reason (GM adjudicates).
+Free actions are maneuvers that are taken during combat that can be freely taken without any Vigor cost (or maneuver cost, for enemies). Free actions can either be taken during the character's turn, or during another character's turn; the description of the action will specify.
+
+Minor narrative actions during combat (e.g., opening a door, picking up a key from a table, shouting to an ally, etc.) can be considered free actions within reason (GM adjudicates).
 
 ### Movement
 
@@ -445,26 +454,22 @@ When a character takes the Move (or Shift) maneuver, they can move a number of s
 - Diagonal movement (on a square grid map) costs 1 square, just like horizontal and vertical movement.
 - Some squares may be considered **difficult terrain**, in which case it costs double to move into that square. If a character only has 1 square of movement, they will not be able to move into difficult terrain.
 - Characters with any stacks of the **Hindered** condition can only **Move up to half SPD** (minimum 1), and they **cannot Shift**.
-- Involuntary movement (like movement caused by the **Shove** maneuver) is called **forced movement**, and does not trigger **Forestall** reactions.
+- Involuntary movement (like movement caused by the **Shove** maneuver) is called **forced movement**, and does not trigger **Forestall** reactions. (Forced movement can, however, trigger **Intercept** reactions; shoving an enemy into an ally's reach is a legitimate setup play.)
 
 Other forms of movement requires special rules:
 
-- **Climb** - All characters are assumed to be able to climb.
-  - **Trained in Climbing skill** - You can **Move** and **Shift** as per normal, but every square while climbing is treated as **difficult terrain**.
-  - **Not trained in Climbing skill** - You **cannot Shift** while climbing. Whenever you take the **Move** maneuver when climbing, you **may not move more than 1 square**, regardless of your SPD.
-- **Swim** - All characters are assumed to be able to swim.
-  - **Trained in Swimming skill** - You can Move and Shift as per normal, but every square while swimming, is treated as **difficult terrain**.
-  -  **Not trained in Swimming skill** - You **cannot Shift** while swimming. While swimming, all maneuvers cost **double the Vigor** (doesn't apply to maneuvers with no Vigor cost).
-- **Horizontal Jump** - When a character takes the **Move** maneuver, they can traverse obstacles (like empty space, pits, or hazards) of no more than **one square long** during their movement, as long as they finish their Move on a flat and stable surface. If they are **trained in the Jumping skill**, they can traverse obstacles up to a length of half their SPD.
-- **Vertical Jump** - A character can take the **Move** maneuver to attempt to jump vertically straight up. The number of squares they can jump is equal to their SIZE value. If they are trained in the Jumping skill, the number of squares they can jump is equal to twice their SIZE value.
+- **Climb** - All characters are assumed to be able to climb. However, you **cannot Shift** while climbing. Whenever you take the **Move** maneuver when climbing, you **may not move more than 1 square**, regardless of your SPD.
+- **Swim** - All characters are assumed to be able to swim. However, you **cannot Shift** while swimming. While swimming, all maneuvers cost **double the Vigor** (doesn't apply to maneuvers with no Vigor cost).
+- **Horizontal Jump** - When a character takes the **Move** maneuver, they can traverse obstacles (like empty space, pits, or hazards) of no more than **one square long** during their movement, as long as they finish their Move on a flat and stable surface.
+- **Vertical Jump** - A character can take the **Move** maneuver to jump vertically straight up. The number of squares they can jump equals **1 + (POW / 2)**.
 
-> **Falling:** A creature that falls takes 2 untyped damage per square of distance fallen. The distance can be mitigated by the character's AGI value. For example, Mira falls 5 squares has an AGI of 3. Effectively, that means she treats the fall as if it is only 2 squares distance, and thus she will only take 4 untyped damage from the fall.
+> **Falling:** A creature that falls takes 2 untyped damage per square of distance fallen. The distance can be mitigated by the character's AGI value. For example, assume that Mira falls 5 squares and has an AGI of 3. Effectively, that means she treats the fall as if it is only 2 squares distance, and thus she will only take 4 untyped damage from the fall.
 
 ### End of the Round
 
 - A combat round ends when every combatant has taken all their turns, and the next round begins.
 
-- Remember, whichever side between the allies and enemies took the **final turn** in a round, the **other side** will take the **first turn of the following round**.
+- Remember, whichever side between the allies and adversaries took the **final turn** in a round, the **other side** will take the **first turn of the following round**.
 
 ### Ending the Combat
 
@@ -507,10 +512,10 @@ Some attacks may force the target to take **Strain**, instead of damage. In whic
 All characters will by default have the **Solid Hit** **pattern** that can be applied for every attack roll.
 
 ```
-[PATTERN] Solid Hit (Double)
-Applies to: Attacks that deal damage
+[PATTERN] Solid Hit (Double N)
+Applies to: Attack rolls that deal damage. (Attacks that deal Strain are not affected.)
 
-Effect: Increase the damage of the attack by 3.
+Effect: Increase the damage of the attack by N.
 ```
 
 ### Melee vs. Ranged Attacks
@@ -519,7 +524,7 @@ Attack tags determine whether an attack is melee or ranged.
 
 **Melee attacks** are tagged with **Melee N**, with N indicating the reach of the weapon in squares. An attacker can attack any target within the stated reach as long as the attack can reasonably reach the target (GM adjudicates). **Melee attacks are not affected by cover**.
 
-**Ranged attacks** are tagged with **Range N**. N is the **maximum range** of the attack in squares. An attacker can attack any target within the maximum range, as long as they have an unobstructed line-of-sight to the target (GM adjudicates). **Ranged attacks are affected by cover**.
+**Ranged attacks** are tagged with **Range N**. N is the **maximum range** of the attack in squares. An attacker can attack any target within the maximum range, as long as they have an unobstructed line-of-sight to the target (see **Line of Sight**). **Ranged attacks are affected by cover**.
 
 For ranged attacks, there could be a penalty modifier to the attack roll depending on how far the target is:
 
@@ -554,7 +559,7 @@ Every attack carries one or more **damage type tags**, set by the weapon, spell,
 | Sonic                        | Attacks that do damage based on sound waves, vibration, or concussive pitch. |
 | Untyped                      | Usually represents falling, drowning, or other kinds of environmental damage. Untyped damage is **not affected by Guard, resistances, weaknesses**, and generally cannot be mitigated. |
 
-> A single attack may carry several damage type tags. For example, a **holy flaming sword** may carry the **Slashing**, **Radiant**, and **Fire** tags.
+> A single attack may carry several damage type tags. For example, a **holy flaming axe** may carry the **Slashing**, **Radiant**, and **Fire** tags.
 >
 
 ### Resistance and Weakness
@@ -564,7 +569,7 @@ Resistances and weaknesses modify the amount of damage that a target may take fr
 - If a target has **resistance**, damage is **halved** (minimum 0) before being applied to Vitality.
 - If a target has **weakness**, damage is **doubled** before being applied to Vitality.
 
-Resistances and weaknesses is only applied to the portion of the damage that hits Vitality, and not to the damage that depletes Guard.
+Resistances and weaknesses are only applied to the portion of the damage that hits Vitality, and not to the damage that depletes Guard.
 
 Also, **attacks that deal Strain** are **not affected by resistance and weakness**. Therefore, effects that grant resistance/weakness to an attack (Brace, Arcane Shield, the Mark hit location, etc.) do nothing against attacks that deal Strain.
 
@@ -582,7 +587,7 @@ Special handling of resistances and weaknesses for attacks that carry multiple d
 
 > **Design note:** Cancelling out resistances and weaknesses in this simple manner is a design decision to speed up play.
 
-Example: Mira deals 20 damage with the holy flaming sword (Slashing, Radiant, Fire) to a creature with 5 Guard:
+Example: Kira deals 20 damage with the holy flaming axe (Slashing, Radiant, Fire) to a creature with 5 Guard:
 
 | If the creature has...                    | Then they will take this much Vitality damage... | Notes                   |
 | ----------------------------------------- | ------------------------------------------------ | ----------------------- |
@@ -599,8 +604,8 @@ Besides **Melee N**, **Range N**, and **damage type tags**, there are a few more
 
 - **Penetrating** - If the attack inflicts damage, then it bypasses Guard and hits Vitality directly. Note that attacks that deal Strain will not benefit from this tag, since Strain damage does not go through Guard.
 - **Indefensible** - The attack cannot be mitigated by using **reactive defenses**. 
-- **Imprecise** - This attack cannot be used to target specific hit locations. It can only target Mass. This means that an Imprecise attack cannot be used to attack a target that is behind Cover.
-- **Seeking** - This attack is not affected by Cover.
+- **Imprecise** - This attack cannot be used to target specific hit locations. It can only target Mass. This means that an Imprecise ranged weapon cannot be used to attack a target that is behind cover (melee weapons are not affected by cover).
+- **Seeking** - This attack is not affected by cover.
 
 ### Area Attacks
 
@@ -620,28 +625,25 @@ Whenever a character's Vitality is reduced to 0 or below:
 
 - Otherwise, you fill an empty Wound slot with a Wound and restore your Vitality back to maximum.
 
-To determine the **severity** of the Wound that you receive, **test your luck** and refer to the below.
+Whenever you gain a Wound, roll against the following table:
 
-```
-Wound Severity (minimum 1) = Number of Wound slots filled (including the Wound to be received) − Number of successes on luck roll
-```
+| 1d6   | Effect                                                       |
+| ----- | ------------------------------------------------------------ |
+| **1** | Gain the **Impaired N** condition, where N = number of Wounds you have (including the one just received) |
+| **2** | Gain the **Hindered** condition                              |
+| **3** | Gain the **Exhausted** condition                             |
+| **4** | Gain the **Slowed** condition                                |
+| **5** | Gain the **Shrouded** condition                              |
+| **6** | Gain the **Broken** condition                                |
 
-> Without any mitigation from the luck roll, by default the first Wound will be a **Flesh Wound**, the second a **Trauma Wound**, and the third a **Critical Wound**.
+If the character rolls a condition that they currently have:
 
-| Wound Severity | Description        | Effect                                                       |
-| -------------- | ------------------ | ------------------------------------------------------------ |
-| **1**          | **Flesh Wound**    | Gain the **Impaired N** condition, where N = number of Wound slots now filled (including this Wound). |
-| **2**          | **Trauma Wound**   | **Roll 1d6:**<br />1-2: Choose one of your equipped gear; the gear becomes disabled until the Wound is removed. If you have no gear left to disable, roll again.<br />3: Gain the **Hindered 1** condition.<br />4: Gain the **Exhausted** condition.<br />5: Gain the **Slowed** condition.<br />6:  Gain the **Shrouded** condition. |
-| **3+**         | **Critical Wound** | Gain the **Faltering 1** and **Broken** conditions.          |
+- For Impaired N, if N is greater than the current Impaired stacks, then the number of stacks gets reset to N.
+- For other conditions, the character rerolls.
 
-> Conditions obtained from Wounds are cleared as per the normal rules for that condition.
->
-> Called shots (see Hit Locations below) that result in a Wound, may have their Wound severity raised:
->
-> - A **Edge** called shot attack that causes a Wound will result in a Wound severity **minimum of 2**.
-> - A **Mark** called shot will result in a Wound severity **minimum of 3**.
->
-> These severity floors apply regardless of the results of testing your luck.
+Conditions obtained from Wounds are cleared as per the normal rules for that condition.
+
+Once the character has filled up their last remaining Wound slot, they also gain the **Faltering 1** condition.
 
 ### Burdens
 
@@ -651,32 +653,22 @@ Whenever a character's Strain reaches or exceeds Max Strain:
 
 - Otherwise, you fill an empty Burden slot with a Burden and reset your Strain back to 0.
 
-To determine the **severity** of the Burden that you receive, **test your luck** and refer to the below:
-
-```
-Burden Severity (minimum 1) = Number of Burden slots filled (including the Burden to be received) − Number of successes on luck roll
-```
-
-> Without any mitigation from the luck roll, by default the first Burden will be **Confusion**, the second an **Affliction**, and the third a **Breakdown**.
->
-
-| Burden Severity | Description | Effect |
-|---|---|---|
-| **1** | **Confusion** | Gain the **Impaired N** condition, where N = number of Burden slots now filled (including this Burden). |
-| **2** | **Affliction** | **Roll 1d6** on the table below and gain an **affliction** that persists until the Burden is removed. If you roll an affliction that you already have, roll again. |
-| **3+** | **Breakdown** | Gain the **Unraveling 1** condition and **roll 1d6** to gain an **affliction** that persists until the Burden is removed. If you roll an affliction that you already have, roll again. |
-
-> Conditions obtained from Burdens are cleared as per the normal rules for that condition.
->
+Whenever you gain a Burden, you also receive an **Affliction** condition. Roll against the following table:
 
 | 1d6 | Affliction | Effect |
 |---|---|---|
-| 1 | **Paranoid** | You cannot voluntarily end your turn adjacent to an ally. |
-| 2 | **Reckless** | You cannot use **Brace**, or any **reactive defenses**, or take the **Shift** maneuver. The GM may also adjudicate that other reactions or maneuvers be included as well. |
-| 3 | **Obsessed** | The GM names a fixation on the battlefield (either a combatant, an object, or a place). Each turn, your first maneuver must either move you closer to, or attack, the fixation, if possible. |
-| 4 | **Terrified** | You cannot voluntarily move toward any combatant that has damaged you this combat; if you begin your turn adjacent to one, your first maneuver must be to move away, if possible. |
-| 5 | **Withdrawn** | You cannot attack a combatant unless it has damaged you or an ally this combat. |
-| 6 | **Bloodthirsty** | Each turn, your first attack must target the nearest combatant to you, regardless whether it's an ally or enemy. |
+| **1** | **Paranoid** | You cannot voluntarily end your turn adjacent to an ally. |
+| **2** | **Reckless** | You cannot use **Brace**, or any **reactive defenses**, or take the **Shift** maneuver. The GM may also adjudicate that other reactions or maneuvers be included as well. |
+| **3** | **Obsessed** | The GM names a fixation on the battlefield (either a combatant, an object, or a place). Each turn, your first maneuver must either move you closer to, or attack, the fixation, if possible. |
+| **4** | **Terrified** | You cannot voluntarily move toward any combatant that has damaged you this combat; if you begin your turn adjacent to one, your first maneuver must be to move away, if possible. |
+| **5** | **Withdrawn** | You cannot attack a combatant unless it has damaged you or an ally this combat. |
+| **6** | **Bloodthirsty** | Each turn, your first attack must target the nearest combatant to you, regardless whether it's an ally or enemy. |
+
+If the character rolls an Affliction that they already possess, then they have to reroll again.
+
+Affliction conditions are only removed when Burdens are healed. Whenever a Burden is removed, the player can choose to remove one Affliction.
+
+Once the character has filled up their last remaining Burden slot, they also gain the **Unraveling 1** condition.
 
 ### Excessive Damage
 
@@ -693,10 +685,7 @@ It is therefore possible for a single huge attack to cause multiple Wounds (or B
 
 ### Healing Wounds and Burdens
 
-Wounds and Burdens persist after combat. They can be healed via **downtime**, **story events**, or by **spending Resolve** during **interludes**:
-
-- Removing **Trauma Wounds** will restore disabled gear.
-- Removing Burdens will remove any afflictions that are tied to that Burden.
+Wounds and Burdens persist after combat. They are healed during **downtime** or by **spending Resolve** during **interludes**.
 
 
 
@@ -713,8 +702,8 @@ When making an attack, the attacker may declare a hit location *before* they rol
 | Hit Location | Targeting Penalty | Effect |
 |---|---|---|
 | Mass | none | No additional effect. |
-| Edge | −2d penalty | If the attack results in a Wound, it will result in a Wound severity **minimum of 2**. |
-| Mark | −3d penalty | The defender gains **weakness** to the attack. If the attack results in a Wound, it will result in a Wound severity **minimum of 3**. |
+| Edge | −2d penalty | On a hit with 1+ successes, the defender gains the **Hindered** condition. |
+| Mark | −3d penalty | The defender gains **weakness** to the attack. If the attack results in a Wound, the defender also receives the **Broken** condition (this is in addition to any conditions that may result from the Wound itself). |
 
 All player characters will have Mass, Edge, and Mark locations. Every creature must always have a Mass. Some creatures may not have Edge or Mark locations. Individual enemy stat blocks may declare additional valid targets or restrictions.
 
@@ -744,7 +733,7 @@ There are three clear types for conditions. Note that for clearing purposes, a *
 
 - **Persistent** - Does not clear on its own. The condition is only removed by specific means specified within the condition description.
 
-Conditions may also be cleared via special abilities or maneuvers. For example, the **Shake It Off** maneuver can automatically clear stacks of the **Hindered** or **Exhausted** conditions.
+Conditions may also be cleared via special abilities or maneuvers. For example, the **Shake It Off** maneuver can automatically clear stacks of the **Exhausted**, **Grabbed**, **Hindered** or **Vulnerable** conditions.
 
 ### List of Conditions
 
@@ -752,13 +741,15 @@ Here are the list of general conditions. Special abilities, archetypes, or maste
 
 | Condition | Stackable? | Clear Type |
 |---|---|---|
+| Affliction (Affliction Type) | no | persistent |
 | Broken | no | auto-clear |
 | Cursed | no | persistent |
 | Defeated | no | persistent |
 | Exhausted | no | roll-to-clear (POW) |
 | Faltering | yes (uncapped) | persistent |
 | Frightened | no | roll-to-clear (PRE) |
-| Hindered | yes (max 3) | roll-to-clear (POW or AGI) |
+| Grabbed | yes (max 3) | roll-to-clear (POW or AGI) |
+| Hindered | no | roll-to-clear (POW or AGI) |
 | Impaired | yes (max 3) | auto-clear |
 | Lost | no | persistent |
 | Provoked | no | auto-clear |
@@ -768,6 +759,14 @@ Here are the list of general conditions. Special abilities, archetypes, or maste
 | Unraveling | yes (uncapped) | persistent |
 | Vulnerable | yes (max 3) | persistent |
 | Wracked (Damage Type) | yes (max 3) | auto-clear |
+
+```
+[CONDITION] Affliction (Affliction Type)
+Stackable: no
+Clear Type: persistent
+
+Effect: You suffer a mental affliction that affects your behavior. Afflictions are usually given by Burdens, and whenever a Burden is removed, you can choose one Affliction to remove. You may not have more than one Affliction of the same type.
+```
 
 ```
 [CONDITION] Broken
@@ -792,7 +791,7 @@ Clear Type: persistent
 
 Effect: You are out of the combat. You no longer take any turns, maneuvers, or reactions. When you receive the Defeated condition, your Vitality is set to 0, and any stacks of the Faltering condition are cleared.
 
-When the Defeated condition is removed, your Vitality is restored to 1, and you may immediately spend 1 Resolve for a free Catch Your Breath maneuver that is resolved immediately, and has no Vigor cost.
+When the Defeated condition is removed, your Vitality is restored to 1, and you may immediately take the Catch Your Breath maneuver as a free action (no Vigor cost) that is resolved immediately.
 ```
 
 ```
@@ -802,7 +801,7 @@ Clear Type: roll-to-clear (POW)
 
 Effect: Refresh only half your Vigor at the beginning of each turn (minimum 1).
 
-Special: For enemies or creature that do not track Vigor, if they gain the Exhausted condition, they instead lose one maneuver and one reaction per turn while they have the condition.
+Special: Enemies and creatures that do not track Vigor are affected differently by Exhausted. While they have the condition, they lose one of their maneuvers each turn (either their Move maneuver, or their non-Move maneuver - either one qualifies), and they cannot use scripted defenses.
 ```
 
 ```
@@ -810,10 +809,7 @@ Special: For enemies or creature that do not track Vigor, if they gain the Exhau
 Stackable: yes (unlimited)
 Clear Type: persistent
 
-Effect: At the end of your turn, roll a single 1d6. If you roll less than your number of Faltering
-stacks, you immediately gain the Defeated condition; otherwise, add 1 to your Faltering stack.
-
-The Faltering condition is cleared if the Critical Wound that caused the condition is healed.
+Effect: At the end of your turn, roll a single 1d6. If you roll above the number of Faltering stacks, you are safe and add 1 to your Faltering stack. Otherwise, you are at risk of being Defeated. Make a luck roll, and if you get 0 successes, immediately gain the Defeated condition. Otherwise, add 1 to your Faltering stack.
 ```
 
 ```
@@ -825,8 +821,18 @@ Effect: You cannot voluntarily move toward, or melee attack, the source of the f
 ```
 
 ```
-[CONDITION] Hindered
+[CONDITION] Grabbed
 Stackable: yes (max 3)
+Clear Type: roll-to-clear (POW or AGI)
+
+Effect: You are being held by a grabber. While grabbed, neither you nor the grabber can Move or Shift. If one of the two is bigger than the other (based on SIZE), then the bigger creature can move freely, and the smaller creature will be dragged along to remain in the same relative position as the bigger creature (GM adjudication for terrain edge cases). Being dragged in this manner is considered forced movement.
+
+All stacks are removed if the distance between you and your grabber increases, if the grabber releases you, or if the grabber is Defeated.
+```
+
+```
+[CONDITION] Hindered
+Stackable: no
 Clear Type: roll-to-clear (POW or AGI)
 
 Effect: Your SPD is halved (minimum 1). You apply a -1d penalty on all attacks, and all attacks against you gain a +1d bonus. You cannot take the Shift maneuver, or take the Dodge reaction.
@@ -871,7 +877,7 @@ Effect: Your senses are degraded. All creatures beyond 1 square of you are treat
 ```
 [CONDITION] Slowed
 Stackable: no
-Clear-Type: roll-to-clear (AGI)
+Clear Type: roll-to-clear (AGI)
 
 Effect: You may take your turn in a round only after every non-Slowed combatant on every side has already taken all their turns. If you can take multiple turns per round, you can only take your turns after all of the non-Slowed combatants have taken theirs.
 ```
@@ -879,7 +885,7 @@ Effect: You may take your turn in a round only after every non-Slowed combatant 
 ```
 [CONDITION] Surprised
 Stackable: no
-Clear-Type: auto-clear
+Clear Type: auto-clear
 
 Effect: While you have this condition, you also have the Slowed condition, and you cannot take reactions. When the Surprised condition is cleared, the attached Slowed condition is also cleared.
 ```
@@ -889,9 +895,7 @@ Effect: While you have this condition, you also have the Slowed condition, and y
 Stackable: yes (unlimited)
 Clear Type: persistent
 
-Effect: At the end of your turn, roll a single 1d6. If you roll less than your number of Unraveling stacks, you immediately gain the Lost condition; otherwise, add 1 to your Unraveling stack.
-
-The Unraveling condition is cleared if the Breakdown that caused the condition is healed.
+Effect: At the end of your turn, roll a single 1d6. If you roll above the number of Unraveling stacks, you are safe and add 1 to your Unraveling stack. Otherwise, you are at risk of being Lost. Make a luck roll, and if you get 0 successes, immediately gain the Lost condition. Otherwise, add 1 to your Unraveling stack.
 ```
 
 ```
@@ -899,7 +903,7 @@ The Unraveling condition is cleared if the Breakdown that caused the condition i
 Stackable: yes (max 3)
 Clear Type: persistent
 
-Effect: The first attack that targets you next gains +1d per stack of the Vulnerable condition. All stacks of the Vulnerable condition are cleared once the attack has been resolved.
+Effect: The first attack that targets you next gains +1d per stack of the Vulnerable condition (this includes area attacks as well). All stacks of the Vulnerable condition are cleared once the attack has been resolved. Attacks that do not roll (such as a Grunt's fixed-success attacks, or a spell attack using the Channeler's Patron's Will ability) are not affected and do not consume the stacks.
 ```
 
 ```
@@ -919,7 +923,7 @@ States are not conditions that can be applied and removed, but are instead deriv
 | State    | Definition                                                   |
 | -------- | ------------------------------------------------------------ |
 | Crisis   | A creature is in **Crisis** if they have either the **Faltering** or **Unraveling** conditions, or if they have **no Wound slots** or **no Burden slots** remaining. |
-| Stressed | A creature is **Stressed** if their Strain is at least **half of their Max Strain** (rounded down). Example, if a character has a Max Strain of 7, they are considered Stressed if they have 3 or more Strain. |
+| Stressed | A creature is **Stressed** if their Strain is at least **half of their Max Strain**. Example, if a character has a Max Strain of 7, they are considered Stressed if they have 3 or more Strain. |
 
 
 
@@ -946,9 +950,18 @@ Certain ancestry archetypes may grant special vision abilities to mitigate poor 
 - **Low-Light Vision** - Characters with Low-Light Vision can treat **Dim Light** as **Bright light**, and **Darkness** as **Dim Light** for vision and targeting purposes.
 - **Darkvision** - Characters with Darkvision can treat both **Dim Light** and **Darkness** as **Bright Light** for vision and targeting purposes.
 
+### Line of Sight
+
+Some attacks and abilities require **line of sight** to their target: every **ranged attack**, every spell delivered beyond Touch, and any ability that says so. You have line of sight to a target if you can trace an unobstructed straight line from any part of your square to any part of the target's square.
+
+- **Solid obstacles** — walls, closed doors, terrain the GM rules as impassable to sight — **block line of sight**. A target you cannot trace a clear line to cannot be targeted.
+- **Partial obstructions** — low walls, furniture, other creatures — **do not block line of sight**, but may grant **Cover** (see below).
+- Line of sight is about geometry, not eyesight. Darkness, Hidden, and Invisible are governed by the Vision rules; you may have line of sight to a target you cannot see.
+- The **Seeking** tag ignores Cover, not line of sight.
+
 ### Cover
 
-Cover is a relationship between attacker and target; the target is behind something that shields part of their body. **A creature with Cover cannot have their Mass targeted by a ranged attack** (the attacker can only attempt an Edge or Mark attack).
+Cover is a relationship between attacker and target; the target is behind something that shields part of their body. **A creature with cover cannot have their Mass targeted by a ranged attack** (the attacker can only attempt an Edge or Mark attack).
 
 If the target offers no valid Edge or Mark (e.g., a creature that is all Mass), it simply cannot be hit by a ranged attack from that angle.
 
@@ -961,7 +974,7 @@ Certain abilities may grant the Invisibility condition.
 ```
 [CONDITION] Invisible
 Stackable: no
-Clear-Type: persistent
+Clear Type: persistent
 
 Effect: You are always hidden to all other combatants. Combatants that are capable of locating invisible creatures will treat you as obscured instead.
 ```
@@ -973,25 +986,22 @@ Combatants may hide in combat by taking the **Hide** maneuver.
 ```
 [MANEUVER] Hide (Vigor 1)
 
-Effect: You can attempt to hide from any enemies that you are obscured from or have cover from. Roll an AGI action roll (+2d bonus if trained in Stealth skill).
-- 0s: You do not become hidden. Your obscured or cover status doesn't change.
-- 1s: You become hidden to the affected enemies until the start of your next turn.
-- 2+: You become hidden to the affected enemies.
+Effect: You can attempt to hide from any enemies that you are obscured from or have cover from. Roll an AGI action roll. With 1+ success, you become hidden to the affected enemies. If you fail to be hidden, you can repeat the Hide maneuver again, spending 1 Vigor for every try.
 
-If at any time you voluntarily show yourself, make an attack, or are otherwise no longer obscured or have cover, then you are immediately no longer hidden to the affected enemies.
+If at any time you voluntarily show yourself, make an attack, or are otherwise no longer obscured or have cover from the enemy that you are hiding from, then you are immediately no longer hidden.
 ```
 
 ### Attacking while Hidden
 
 Attacks made by a hidden attacker gain **+2d bonus to the attack roll** against the affected target. (Attacks made by an obscured attacker has no bonus.)
 
-After the attack, the character is no longer hidden, although if conditions are still valid, they may still be obscured or have cover and thus can immediate take the **Hide** maneuver again to become **Hidden**.
+After the attack, the character is no longer hidden, although if conditions to hide are still valid (they are still obscured or have cover), they can immediately take the **Hide** maneuver again to attempt to become **Hidden** again.
 
 
 
 ## 9. Spellcasting
 
-Spellcasting in Mantle is constructed at the moment of casting from two components:
+Spellcasting in Momenta is constructed at the moment of casting from two components:
 
 - **Art** (the verb)
 - **Resonance** (the noun)
@@ -1061,6 +1071,10 @@ Every Art has a **basic shape**, its default range, duration, and area when cast
 
 The range value represents the maximum number of squares that the spell can reach. Most Arts will start with a basic range shape at either step 1 or 2. Every step up adds **+1 to the Vigor cost** of the spell.
 
+A caster may always deliver a spell at any range step **below** its basic shape at no change in Vigor cost. Casting below the basic shape grants no Vigor discount. Touch can mean either the caster or a creature adjacent to the caster.
+
+A spell delivered at **Touch** is a **melee attack** and carries the **Melee 1** tag: it behaves exactly like any other Melee 1 attack. It is not affected by cover, takes no point-blank penalty, and may be impacted by Reactive Attacks and Reactive Defenses. A spell delivered at any range beyond Touch is considered a **ranged attack** and carries the **Range N** tag, where N is the delivered range.
+
 ### Duration Shaping
 
 | Step     | Duration                |
@@ -1102,7 +1116,7 @@ Instead of area shaping emanations and blasts as described above, spellcasters w
 | ---------- | ---------- | ------------ | ------------------------------------------------------------ |
 | Salvo N    | +N         | none         | Only applies if the Range of the spell is at least Touch, and the basic area shape is at step 1 (single target). You can target up to N additional targets within Range. |
 | Cone N     | +N         | -1d penalty  | Only applies if the Range of the spell is at least Touch. Draw a triangle with the apex adjacent to the caster, that is N squares deep and N squares wide at the base, with the cone pointing in a chosen direction. |
-| Wall N     | +N         | -1d penalty  | Only applies if the Range of the spell is at least 2 squares. Draw a line of N x 2 squares that all have to be adjacent and with one of the squares within Range. The line doesn't need to be straight. |
+| Wall N     | +N         | -1d penalty  | Only applies if the Range of the spell is at least 2 squares. Draw a chain of up to 2 x N connected squares, each adjacent to the previous one (the chain may bend). The wall is 1 square wide, and at least one of its squares must be within Range. |
 | Line       | +2         | -1d penalty  | Only applies if the Range of the spell is at least 2 squares. Draw a straight line originating from the caster that is 2 squares wide and extends a number of squares in a chosen direction up to the Range of the spell. |
 
 ### Grazing with a Spell
@@ -1132,65 +1146,69 @@ There are two notable maneuvers related to spellcasting that are worth highlight
 
 ### List of Arts and Resonances
 
-For a full list of Arts and Resonances, refer to the separate document: `Mantle — Spellcasting Catalog`.
+For a full list of Arts and Resonances, refer to the separate document: `Momenta — Spellcasting Catalog`.
 
 
 
-## 10. Valor and Limit Breaks
+## 10. Momentum and Limit Breaks
 
-**Valor** is the party's shared heroic momentum. It's a single team resource that swells as the heroes seize the initiative and fuels their most powerful maneuvers, **Limit Breaks**.
+**Momentum** is daring rewarded — on the battlefield, across a negotiating table, or in the moment you tell the truth that costs you — and it lasts only as long as you keep moving. It's a shared team resource that swells as the heroes seize the initiative, and it fuels their most powerful maneuvers, **Limit Breaks**.
 
-### Valor
+### Momentum
 
-Valor is a pooled resource shared by the whole party. It starts at 0 up to a maximum value determined by the following:
+Momentum is a pooled resource shared by the whole party. It starts at 0 up to a maximum value determined by the following:
 
 ```
-Max Valor = Sum of every party member's SOUL + number of party members
+Max Momentum = Sum of every party member's SOUL + number of party members
 ```
 
-For the purposes of calculating Valor, only party members that belong to players are counted; NPC allies are not.
+For the purposes of calculating Momentum, only party members that belong to players are counted; NPC allies are not.
 
-For example, if a party has 4 members, and they have SOUL scores of `1`, `0`, `3`, and `3`, then their max Valor is 11.
+For example, if a party has 4 members, and they have SOUL scores of `1`, `0`, `3`, and `3`, then their Max Momentum is 11.
 
-Valor is earned through **significant achievements** and lost through **genuine disasters.** Glory comes from worthy foes and turning points. However, Valor can never rise above the maximum value, or be reduced below 0.
+Momentum is earned through **significant achievements** and lost through **genuine disasters.** Glory comes from worthy foes and turning points. However, Momentum can never rise above the maximum value, or be reduced below 0.
 
-Valor **persists across Interludes** within a mission and is **reset to 0 at downtime.**
+Momentum **persists across interludes** within a mission and is **reset to 0 at downtime.**
 
-> **Design note:** Having Valor persist between combats encourages players to push on instead of frequently taking full rests by going into downtime.
+> **Design note:** Having Momentum persist between combats encourages players to push on instead of frequently taking full rests by going into downtime.
 
-### Gaining Valor
+### Gaining Momentum
 
-| Achievement                                                  | Valor              |
-| ------------------------------------------------------------ | ------------------ |
-| Defeat a **Grunt** or **Regular** enemy                       | none               |
-| Defeat an **Elite** enemy                                    | +1                 |
-| Defeat a **Champion** enemy                                  | +2                 |
-| Defeat a **Nemesis** enemy                                   | +3                 |
-| Finish an encounter by achieving the **main encounter objective** | +3                 |
-| Achieve a **side encounter objective** (i.e., encounter challenge) | +1                 |
-| Perform a **cinematic or heroic act** that swings the combat in the Allies' favor | +1 (GM discretion) |
-| Inflict the **Broken** condition on an enemy                 | +1                 |
-| Remove the **Defeated** or **Lost** condition from an ally   | +1                 |
+| Achievement                                                  | Momentum                |
+| ------------------------------------------------------------ | ----------------------- |
+| Defeat a **Grunt** or **Regular** enemy                      | none                    |
+| Defeat an **Elite** enemy                                    | +1                      |
+| Defeat a **Champion** enemy                                  | +2                      |
+| Defeat a **Nemesis** enemy                                   | +3                      |
+| Finish an encounter by achieving the **main encounter objective** | +3                      |
+| Achieve a **side encounter objective** (i.e., encounter challenge) | +1                      |
+| Perform a **cinematic or heroic act** that swings the combat in the Allies' favor | +1 (GM discretion)      |
+| Inflict the **Broken** condition on an enemy                 | +1                      |
+| Remove the **Defeated** or **Lost** condition from an ally   | +1                      |
+| The party successfully overcomes a **narrative challenge** during an **interlude** | +1 / +2 (GM discretion) |
 
-Other archetype abilities or masteries may also grant additional ways to gain Valor.
+Other archetype abilities or masteries may also grant additional ways to gain Momentum.
 
-### Losing Valor
+### Losing Momentum
 
-| Disaster                                               | Valor                    |
+| Disaster                                               | Momentum                 |
 | ------------------------------------------------------ | ------------------------ |
 | A player character or ally is **Defeated** or **Lost** | -1                       |
 | Fail to achieve the **main encounter objective**       | -3                       |
 | Any other **significant setback or disaster** occurs   | -1 to -3 (GM discretion) |
 
-### Spending Valor
+### Spending Momentum
 
-Valor can be spent during combat to support allies and shift the momentum of battle against the enemy.
+Momentum can be spent to support allies and shift the momentum of battle against the enemy.
 
-| Spending Valor                                               | Valor               |
-| ------------------------------------------------------------ | ------------------- |
-| **Limit Break** - Perform a Limit Break maneuver.            | 3                   |
-| **Heroic Fortune** - When a character is about to take a Wound or Burden, downgrade the severity of the Wound or Burden by 1. This can only be applied once per Wound or Burden. | 2                   |
-| **Heroic Feat** - Add successes to any ally's roll. The character can decide to apply this after the roll is made. Up to 3 successes can be added in this manner on a single roll. This cannot be applied when testing your luck. | 1 per success added |
+| Spending Momentum                                            | Momentum            | Applies to              |
+| ------------------------------------------------------------ | ------------------- | ----------------------- |
+| **Limit Break** - Perform a Limit Break maneuver.            | 3                   | Combat                  |
+| **Momentous Fortune** - When a character tests their luck and receive an undesirable luck roll result, they can choose to reroll. This can only be done once per luck roll, and the character can choose the better result between the old and the new roll. | 2                   | Combat / Narrative Play |
+| **Momentous Feat** - Add successes to any ally's roll. The character can decide to apply this after the roll is made. Up to 3 successes can be added in this manner on a single roll. This cannot be applied when testing your luck. | 1 per success added | Combat / Narrative Play |
+| **Momentous Development** - Players can declare a fact into the fiction that one of the character's Threads makes plausible. This can represent a flashback, or a serendipitous coincidence, or some other plausible development that helps the party's current situation. | 1                   | Narrative Play          |
+
+Momentum may also be spent to power certain special abilities, or spent out-of-combat in certain situations.
 
 ### Limit Breaks
 
@@ -1214,99 +1232,123 @@ You may equip any Limit Break whose prerequisites you meet. A character who does
 
 A Limit Break can be activated in one of two ways:
 
-- A character can spend **3 Valor.** There is no additional Vigor cost.
-- If a character is in **Crisis**, they can perform a Limit Break without spending Valor. There is no additional Vigor cost, but the character gains the **Exhausted** condition immediately after the Limit Break is resolved. This option can only be used **once per combat** (refreshes at the next Interlude).
-
-Here is an example Limit Break:
-
-```
-[LIMIT BREAK] Inazuma Crash
-Prerequisite: Warrior Realized
-
-Effect: Double your SPD for this turn. Choose one equipped melee weapon. For every enemy that enters your weapon's melee range during your turn, make one Basic Attack against it; on 3 or more successes the enemy disregards the attack's normal effects and instead takes a Wound. Each enemy can only be struck once this turn in this manner.
-```
+- A character can spend **3 Momentum.** There is no additional Vigor cost.
+- If a character is in **Crisis**, they can perform a Limit Break without spending Momentum. There is no additional Vigor cost, but the character gains the **Exhausted** condition immediately after the Limit Break is resolved. This option can only be used **once per combat** (refreshes at the next interlude).
 
 ### List of Limit Breaks
 
-For a full list of Limit Breaks, refer to the separate document: `Mantle — Limit Breaks Catalog`.
+For a full list of Limit Breaks, refer to the separate document: `Momenta — Limit Breaks Catalog`.
 
 
 
 ## 11. Rest and Recovery
 
-Mantle uses two rest periods: **interlude** (in between encounters within a mission) and **downtime** (in between missions).  There are no fixed durations for these periods, and the GM can narratively specify the duration as required by the story.
+Momenta uses two rest periods: **interlude** (in between encounters within a mission) and **downtime** (in between missions).  There are no fixed durations for these periods, and the GM can narratively specify the duration as required by the story.
 
 ### Interlude
 
-Any non-combat period within an active mission. The pause between encounters; the moment the party catches its breath.
+Any non-combat period within an active mission. The pause between encounters; the moment the party catches its breath. Interludes happen in two phases, in order:
 
-During an interlude:
+**PHASE 1 - Respite:**
 
 - Vigor and Guard get restored to their usual maximum. Any Over-Guard is lost.
 - All Strain clears.
-- **All combat-scoped conditions clear**, including Defeated and Lost.
-- **Narrative-anchored conditions do NOT clear automatically.** Cursed and similar conditions persist until the narrative source is resolved (a quest completed, a relic destroyed) or a specific ability removes them. The GM may also rule that an otherwise combat-scoped condition persists for narrative reasons (e.g., a Defeated character fatally stabbed, or a Lost character runs off and abandons the party).
+- The following combat-scoped conditions are removed:
+  - All **auto-clear** and **roll-to-clear** conditions.
+  - **Persistent** conditions: **Faltering**, **Unraveling**, **Defeated**, **Lost**, and **Vulnerable**.
+- **Narrative-anchored conditions do NOT clear automatically.** Cursed and similar conditions persist until the narrative source is resolved (a quest completed, a relic destroyed) or a specific ability removes them. The GM may also rule that an otherwise combat-scoped condition persists for narrative reasons (e.g., a Defeated character fatally stabbed, or a Lost character runs off and abandons the party). Afflictions are also not automatically cleared (see below).
 
 - Player characters can choose to spend 1 Resolve to fully restore their Vitality.
 
-- Player characters can choose to spend their Resolve to heal Wounds or Burdens. The amount of Resolve it costs to heal each Wound or Burden is equal to the severity. Players can choose which Wounds or Burdens to clear.
+- Player characters can choose to spend 1 Resolve to heal 1 Wound or 1 Burden. For every Burden that is removed, the player can choose to remove 1 Affliction. The GM may also adjudicate that **narrative-anchored Wounds or Burdens may not be healed** by spending Resolve (e.g., cursed Wounds, magic-bound Burdens).
 
-> Note that disabled equipment can only be restored if the corresponding **Trauma Wound** is healed, and afflictions can only be removed if the corresponding Burdens are healed.
->
-> Also, **Faltering** and **Unraveling** conditions are not cleared, but are paused. During interlude, the characters do not need to make Faltering and Unraveling checks. However, if another combat begins and the corresponding **Critical Wound** or **Breakdown** are not healed, then the character will start combat with Faltering 1 or Unraveling 1 respectively.
+- Restore any disabled equipment, unless the disabling effect states otherwise.
 
-- Equip any gear or wondrous items, that the characters can find.
+- Equip any new gear or wondrous items, that the characters can find.
 - Restock at least 1 consumable point (up to the character maximum, usually 2) and potentially more if the GM adjudicates so.
+
+**PHASE 2 - Interlude Scenes:**
+
+- Every player can choose to participate in one **interlude scene**.
+- In addition, the GM may have special narrative challenges that the players will need to resolve before moving on to the next encounter.
 
 ### Downtime
 
-The mission-level rest, taken between missions, or voluntarily mid-mission if needed. Voluntary downtime spends at least **one beat** of the **mission clock** and **resets the party's Valor**.
+The mission-level rest, taken between missions, or voluntarily mid-mission if needed. Voluntary downtime spends at least **one beat** of the **mission clock** and **resets the party's Momentum**. Downtime happens in two phases, in order:
 
-During downtime:
+**PHASE 1 - Recovery:**
+
 - Vitality is fully restored.
 - Strain is fully cleared.
-- All Wounds and Burdens are healed, **except** those with a narrative reason to persist based on GM adjudication (e.g., cursed Wounds, magic-bound Burdens, maladies requiring a quest to clear).
+- All conditions are cleared, except narrative-anchored conditions (see above).
+- All Wounds and Burdens are healed, except narrative-anchored Wounds and Burdens (see above).
+- Restore any disabled equipment, unless the disabling effect states otherwise.
+- Restock all consumable points.
+- Update their equipment loadout, as needed.
 - Resolve is restored to maximum.
-
-- Valor for the party is reset to 0. (The party will be awarded **merit** if their Valor at the time of entering downtime, is high enough.)
-
+- The party will be awarded **+1 merit** if their Momentum at the time of entering downtime, is greater than or equal to half the party's Max Momentum (minimum 1).
 - Player characters can bank their earned merits for character advancement.
 
-- Player characters can retrain their mastery loadout.
-- Players can perform other downtime activities as allowed by the GM.
+**PHASE 2 - Downtime Actions:**
+
+- Every player can take two **downtime actions**.
+- In addition, the GM may have special narrative challenges that the players will need to resolve before moving on to the next part of the mission.
+- Before the party heads off for the next part of the mission, Momentum for the party is reset to 0.
 
 
 
 ## 12. Outside of Combat
 
-### Narrative Rolls
+Outside of combat (during interludes and downtime), the GM may ask players for **action rolls** or **luck rolls** in order to narratively resolve non-combat challenges. This is called **narrative play**. In these situations, the GM needs to determine the difficulty of the challenge:
 
-Outside of combat (during interludes and downtime), the GM may ask players for **action rolls** or to **test their luck** in order to narratively resolve non-combat challenges. In these situations, the GM needs to determine the difficulty of the roll:
+- **Routine** - Carries some risk, but most characters can handle it without much trouble.
+- **Tricky** - Comes with a chance of failure, and while most characters can succeed, it often comes at a cost.
+- **Daunting** - Poses a higher risk of failure, with most characters likely facing some hardship in the process of completing the task.
+- **Insurmountable** - Extremely difficult challenge that can only be accomplished by the most heroic characters of legend.
 
-- **Routine Roll** - Carries some risk, but most characters can handle it without much trouble.
-- **Tricky Roll** - Comes with a chance of failure, and while most characters can succeed, it often comes at a cost.
-- **Daunting Roll** - Poses a higher risk of failure, with most characters likely facing some hardship in the process of completing the task.
+And also choose which **attribute** the player will need to use for the roll, and adjudicate whether any character **Threads** are applicable (+2d bonus). Since luck rolls are not affected by any modifiers, Threads will thus not apply to luck rolls.
 
-And also choose which **attribute** the player will need to use for the roll, and adjudicate whether any **trained skills** are applicable (+2d bonus).
+If **none of the character's Threads apply**, but one of the player's Bonds plausibly supports, the player can choose to **spend 1 Resolve** to invoke the Bond (instead of a Thread) to gain the same +2d bonus on the action roll.
 
-The players can choose to spend **Valor** for a **Heroic Feat** to influence the outcome of the roll.
+The players can choose to spend **Momentum** for a **Momentous Feat** to influence the outcome of the roll.
 
-| Successes | Routine Roll      | Tricky Roll       | Daunting Roll        |
-| --------- | ----------------- | ----------------- | -------------------- |
-| 0         | Success at a Cost | Failure           | Catastrophic Failure |
-| 1         | Success           | Success at a Cost | Failure              |
-| 2         | Success           | Success           | Success at a Cost    |
-| 3         | Success           | Success           | Success              |
+| Successes | Routine           | Tricky            | Daunting             | Insurmountable       |
+| --------- | ----------------- | ----------------- | -------------------- | -------------------- |
+| 0         | Success at a Cost | Failure           | Catastrophic Failure | Catastrophic Failure |
+| 1         | Success           | Success at a Cost | Failure              | Catastrophic Failure |
+| 2         | Success           | Success           | Success at a Cost    | Failure              |
+| 3+        | Success           | Success           | Success              | Success at a Cost    |
 
-### Success with a Bonus
+> **Design Note:** An Insurmountable task never yields a pure Success on counting successes alone. The only path to an unqualified Success is to use the **Extra Success** pattern. This makes sense, as legend-tier feats always cost something, unless the dice themselves sing.
 
-All characters will by default have the **Success with a Bonus** pattern that can be applied for every narrative action roll or luck roll.
+### Increasing the Odds
+
+Players have three options to help increase the chances of success for their action rolls (none of these apply to luck rolls):
+
+- **Push Yourself** - The player can **spend 1 Resolve** to add a **+1d bonus** to the action roll. Note that the total contribution between Assists and Push Yourself is capped at +2d for any one roll.
+- **Assist** - Before rolling, an ally may describe how they are assisting the player and the assistant **spends 1 Resolve** to grant a **+1d bonus** to the action roll. An ally may only assist on a roll if they themself have a **relevant Thread** to the situation at hand, or at least a **Bond 2 relationship** with the roller. Each ally may contribute at most +1d, and the total contribution between Assists and Push Yourself is capped at +2d for any one roll. 
+- **Momentous Feats** - The player can spend 1 Momentum each to add up to 3 successes to a single action roll. The player can decide to apply this after the roll is made.
+
+For luck rolls, one option applies:
+
+- **Momentous Fortune** - The player can spend 1 Momentum to reroll the an undesirable luck roll result.
+
+### Patterns for Narrative Play Rolls
+
+All characters will by default have the **Extra Success** and **Effortless** patterns that can be applied for every action roll or luck roll during narrative play.
 
 ```
-[PATTERN] Success with a Bonus (Double)
-Applies to: Non-combat narrative action rolls or luck rolls
+[PATTERN] Extra Success (Double N)
+Applies to: Action rolls and luck rolls during narrative play.
 
-Effect: If the result of the roll is "Success", then it turns into "Success with a Bonus" instead.
+Effect: If the result of the roll is "Success", then it turns into "Success with a Bonus" instead. If the result of the roll is "Success at a Cost", then it turns into "Success" instead.
+```
+
+```
+[PATTERN] Effortless (Triple N)
+Applies to: Action rolls during narrative play where Resolve was spent.
+
+Effect: Recover 1 Resolve that was spent. This could apply to Resolve spent by allies to Assist (roller chooses who to recover the Resolve).
 ```
 
 ### Roll Outcomes
@@ -1319,9 +1361,41 @@ Effect: If the result of the roll is "Success", then it turns into "Success with
 | Success              | The character succeeds at whatever they set out to do.       |
 | Success with a Bonus | Not only does the character succeed, but they also receive an extra benefit or boon as determined by the GM. |
 
+Before any action roll, the GM should explain what are the stakes: *what success gets you, and what the cost will be.* For "Success at a Cost" and "Catastrophic Failure" outcomes, the GM can draw from the following sample options, or come up with anything else that is appropriate:
+
+| Option                                                       | Suitable for "Success at a Cost"? | Suitable for "Catastrophic Failure"? |
+| ------------------------------------------------------------ | --------------------------------- | ------------------------------------ |
+| The mission clock advances 1 beat                            | Yes                               | -                                    |
+| A resource is spent, lost, or damaged                        | Yes                               | -                                    |
+| The party loses Momentum                                     | Yes                               | Yes                                  |
+| The party's position worsens (alarm raised, route closed, weather turns; GM discretion) | Yes                               | Yes                                  |
+| The character takes a Wound or Burden                        | -                                 | Yes                                  |
+| A Bond is strained                                           | -                                 | Yes                                  |
+| A new complication enters the fiction (GM discretion)        | -                                 | Yes                                  |
+
+### Group Rolls
+
+When the whole party attempts something together, the GM may call a **group roll**:
+
+1. The GM sets one single difficulty (Routine, Tricky, Daunting, Insurmountable). **Every participant rolls** their own action roll against it. During group rolls, **no one can Assist** (everyone's hands are full).
+2. The group succeeds if **at least half the participants** score at a "Success at a Cost", "Success", or "Success with a Bonus". However, if anyone rolls a "Catastrophic Failure", everyone fails.
+3. Any character that rolls a "Success at a Cost" or a "Catastrophic Failure" still suffer a consequence, regardless of the overall success of the group.
+4. **Carry** - After all of the rolls have been made, a participant who succeeded their roll may **spend 1 Resolve** to "carry" one target participant, if they hold **at least a Bond 2** with them. If the target participant suffers a consequence as a result of the group roll, the carrying player suffers the consequence instead. The player should narrate how their bond helped carry their ally. Note that Carry only re-distributes consequences, and does not affect any roll results.
+
 ### Retrying Rolls
 
 In many cases when you fail a roll, you can't attempt the roll again unless the circumstances of the roll change. The GM will determine when the circumstances have changed enough.
+
+### Momentous Development
+
+During narrative play, players can choose to spend **1 Momentum** to declare a fact into the fiction that one of the character's Threads makes plausible. This can represent a flashback, or a serendipitous coincidence, or some other plausible development that helps the party's current situation. Examples:
+
+- "As a former smuggler, I know a guy in this port that can get us the equipment we need."
+- "Since I am an experienced herbalist, I have picked up these medicinal herbs along the road here, which may help soothe the poison."
+
+The GM can either ratify the player's declaration, or makes adjustments as required.
+
+> **Design note:** The reason this costs Momentum is because this is considered *authorship spend*. We want to encourage player creativity during narrative play, but we also want to enforce the fact that editing the world is not free.
 
 
 
@@ -1335,15 +1409,21 @@ In many cases when you fail a roll, you can't attempt the roll again unless the 
 
 **Step 0** - The GM will decide what is the **starting rank** of the party. Most standard "Heroic" campaigns will start at **Rank 3**.
 
+### The Concept Line
+
+**Step 1** - Every character should have a one-sentence description of their identity, which is also known as the **concept line**. The concept line itself has no mechanical weight, but is the logline that character Threads hang from (see below).
+
+> **Example:** We will try to build Mira, the Half-Elf skirmisher. Her concept line is: "*An exiled princess of Exantria, hunting the ones who drove her family from the throne.*"
+
 ### Determine Cores and Attributes
 
-**Step 1** - A starting Rank 3 character will have **4 attribute points** that can be freely distributed among the **three cores** of BODY/MIND/SOUL.
+**Step 2** - A starting Rank 3 character will have **4 attribute points** that can be freely distributed among the **three cores** of BODY/MIND/SOUL.
 
-> **Example:** We will try to build Mira, the Half-Elf skirmisher. Since Mira is going to be a martial, we will allocate 3 attribute points to her BODY core, and 1 attribute point to her MIND core.
+> **Example:** Since Mira is going to be a martial, we will allocate 3 attribute points to her BODY core, and 1 attribute point to her MIND core.
 >
 > So she will have BODY 3, MIND 1, and SOUL 0.
 
-**Step 2** - For each core, further **allocate the attribute points** across the two attributes for that core. **No single attribute may exceed 3** at character creation.
+**Step 3** - For each core, further **allocate the attribute points** across the two attributes for that core. **No single attribute may exceed 3** at character creation.
 
 > **Example:** Mira is going for the mobile warrior concept, so she allocates her attributes as follows:
 >
@@ -1363,11 +1443,11 @@ For example, a character can have BODY 6, MIND 2, SOUL 3. But they will not be a
 
 ### Determine Archetypes
 
-**Step 3** - Every character must **choose an ancestry archetype**. Their ancestry archetype will take up at least one of their 3 starting ranks. The ancestry archetype will determine their SPD, SEN, and SIZE stats.
+**Step 4** - Every character must **choose an ancestry archetype**. Their ancestry archetype will take up at least one of their 3 starting ranks. The ancestry archetype will determine their SPD, SEN, and SIZE stats.
 
 > **Example:** We choose the **Half-Elf** ancestry archetype for Mira, which suits her skirmisher concept. She has a SPD of 5, SEN of 10, and SIZE of 1M.
 
-**Step 4** - For the remaining 2 starting ranks, the character can freely distribute them across any **path archetypes**. The 2 ranks can be invested into a single path archetype (rank 2), or split among two path archetypes (rank 1 each). Or, they can also be invested into further ranking up their ancestry archetype. Any combination is legal, as long as all of their starting archetype ranks add up to their starting rank of 3.
+**Step 5** - For the remaining 2 starting ranks, the character can freely distribute them across any **path archetypes**. The 2 ranks can be invested into a single path archetype (rank 2), or split among two path archetypes (rank 1 each). Or, they can also be invested into further ranking up their ancestry archetype. Any combination is legal, as long as all of their starting archetype ranks add up to their starting rank of 3.
 
 > **Example:** Mira wants to dedicate herself to martial combat, so she spends her 2 additional starting ranks into the **Warrior** path archetype.
 >
@@ -1375,7 +1455,7 @@ For example, a character can have BODY 6, MIND 2, SOUL 3. But they will not be a
 
 ### Choose Masteries
 
-**Step 5** - The character has a number of mastery slots that can be filled with masteries (special abilities, boons, or features). See below for the full rules on masteries.
+**Step 6** - The character has a number of mastery slots that can be filled with masteries (special abilities, boons, or features). See below for the full rules on masteries.
 
 > **Example:** Based on her Core values, she has the following number of mastery slots based on **mastery type** - 3 body mastery slots, 1 mind mastery slot, and 0 soul mastery slots. In addition, she has 1 wildcard mastery slot that can be used to slot masteries of any type. Total of 5 slots.
 >
@@ -1389,21 +1469,31 @@ For example, a character can have BODY 6, MIND 2, SOUL 3. But they will not be a
 
 ### Choose Equipment
 
-**Step 6** - The character can pick gear to fill out their 3 starting gear slots. The gear that they can choose is based on what their chosen archetypes provide access to.
+**Step 7** - The character can pick gear to fill out their 3 starting gear slots. The gear that they can choose is based on what their chosen archetypes provide access to.
 
 > **Example:** For Mira's 3 gear slots, she will choose two weapons - a **Rapier** and a **Shortbow**, and a **Chain Shirt** armor for protection.
 
-### Choose Narrative Skills
+### Write Threads
 
-**Step 7** - The character can pick narrative skills that are granted by their chosen archetypes (both ancestry and path).
+**Step 8** - The character starts out with 3 Threads, representing different chapters of the character's life, and each written as a short provenance phrase. The Threads should be plausibly aligned with the character's concept line.
 
-> **Example:** Mira's R1 in Half-Elf archetype grants her **4 narrative skills** from **any skill group**. Her R2 in Warrior archetype grants her an additional **2 narrative skills** from either the **Athletics or Subterfuge skill groups**.
+> **Example:** Based on Mira's concept line, she has three Threads representing her backstory before becoming an adventurer:
 >
-> She picks the following narrative skills: **Climbing** (Athletics), **Stealth** (Subterfuge), **Tracking** (Fieldcraft), **Bestiary** (Knowledge), **Seduction** (Influence), **Navigation** (Fieldcraft).
+> 1. "Raised in the Pearl Court of Exantria"
+> 2. "Last student of the crown blademaster, Maestro Corvine"
+> 3. "Three years on the smugglers' roads under a false name"
+
+### Choose Bonds
+
+**Step 9** - The character can allocate 3 Strands across any number of Bonds, subject to the GM's approval of targets.
+
+> **Example:** Mira will allocate all 3 Strands towards a Bond with Kira:
+>
+> - Bond 2 (Kira) - "I am forever indebted to him for saving my life during a moment of my weakness."
 
 ### Finishing Touches
 
-**Step 8** - Calculate all of your character's derived stats, including Max Vitality, Max Strain, Max Vigor, Max Guard, and so forth.
+**Step 10** - Calculate all of your character's derived stats, including Max Vitality, Max Strain, Max Vigor, Max Guard, and so forth.
 
 > **Example:** For Mira, here are her character stats:
 >
@@ -1413,16 +1503,16 @@ For example, a character can have BODY 6, MIND 2, SOUL 3. But they will not be a
 > | Max Strain                     | 5                                      | MIND + SOUL + 3<br />+1 from R1 Half-Elf                     |
 > | Wound Slots                    | 3                                      | Default starting value                                       |
 > | Burden Slots                   | 3                                      | Default starting value                                       |
-> | Resolve                          | 6                                      | SOUL + 6                                                     |
+> | Resolve                          | 8                                     | SOUL + 8                                                    |
 > | Max Vigor                      | Max Vigor: 7<br />Regain (per turn): 4 | Max Vigor = default starting value of 7<br />Regain (per turn) = 3 + (BODY / 2) |
 > | Max Guard                      | 4                                      | +2 from Chain Shirt<br />+1 from R1 Warrior<br />+1 from R2 Warrior |
 > | SPD                            | 5                                      | From Half-Elf ancestry archetype                             |
 > | SEN                            | 10                                     | From Half-Elf ancestry archetype                             |
 > | SIZE                           | 1M (takes up 1 square)                 | From Half-Elf ancestry archetype                             |
 > | Gear Slots                     | 3                                      | Default starting value                                       |
-> | Wondrous Item Slots            | 0                                      | SOUL                                                         |
+> | Wondrous Item Slots            | 1                                     | MIND                                                      |
 > | Consumable Points              | 2                                      | Default starting value                                       |
-> | Languages Known (excl. Common) | 1                                      | REA + 1                                                      |
+> | Max Bonds | 3 | SOUL + 3 |
 
 
 
@@ -1446,7 +1536,7 @@ An archetype at its **maximum rank** is considered as **realized**. Realizing an
 
 ### List of Archetypes
 
-For a full list of archetypes, refer to the separate document: `Mantle — Archetypes Catalog`.
+For a full list of archetypes, refer to the separate document: `Momenta — Archetypes Catalog`.
 
 
 
@@ -1491,111 +1581,40 @@ By default, **masteries in bonus mastery slots can also be retrained**, unless e
 
 ### List of Masteries
 
-For a full list of masteries and mastery sets, refer to the separate document: `Mantle — Masteries Catalog`.
+For a full list of masteries and mastery sets, refer to the separate document: `Momenta — Masteries Catalog`.
 
 
 
-## 16. Narrative Skills
+## 16. Threads
 
-Narrative skills (or just skills) are mostly used out of combat during interludes and downtime, but some skills may also have in-combat uses as well. Skills are binary - you are either **trained** in a skill or you are not.
+A Thread is a chapter of your character's life, written as a short provenance phrase: *"Raised in the Ashmark War College", "Twenty years keeping ledgers in Varga's counting-house", "Field medic on the Ashen March".* Every hero's mantle is woven from the threads of their past.
 
-When performing an **action roll**, if the GM deems that a skill you are trained in is applicable, you get **+2d bonus to the roll**. For every action roll, you can at most apply one trained skill to the roll, and only apply the +2d bonus once.
+Every Thread does **two jobs**:
 
-The GM may decide that certain actions can only be attempted if you are trained in a certain skill (this could be overriden by the **Improviser** mastery).
+1. **Knowledge** - a character should simply *know* what someone who lived that chapter would reasonably know.
+2. **Action rolls** - when performing an action roll, if the GM deems that a Thread is applicable, you get a **+2d bonus** to the roll. Every action roll can at most apply one Thread at a time.
 
-Skills are organized into **skill groups**: Knowledge, Fieldcraft, Athletics, Artisanry, Subterfuge, and Influence.
+### Thread Guidelines
 
-### Knowledge
+Characters begin with **3 Threads**, each ratified by the GM against this test:
 
-These are skills that represent academic understanding, and recalling and reasoning about facts and systems.
+1. **A story lives behind it.** The GM can ask *"how did you come by that?"* and the answer is a story, not a shrug. Trait-shaped Threads are legal if they have roots: *"Never forgets a face"* passes when the answer is *"twenty years matching faces to ledgers in Varga's counting-house."*
+2. **Big enough to recur, small enough to have gaps.** If you can't name three adjacent things it *doesn't* cover, it's too broad. "*Warrior*" fails; "*Raised in the Ashmark War College*" knows tactics and drill but not sailing, poison, or courts.
+3. **Superlatives are flavor.** "*The best baker in East Swineland*" adds the same +2d bonus as just "*a baker*", but the former is infinitely more interesting to roleplay, and should be encouraged.
+4. **Is it compatible with the concept line?** Threads should be chosen to flesh out the backstory of the character concept, and not just for mechanical optimization of narrative play.
 
-| Group     | Skill        | Description                                                  |
-| --------- | ------------ | ------------------------------------------------------------ |
-| Knowledge | History      | The record of past ages: dynasties, wars, migrations, and how the present world came to be. |
-| Knowledge | Religion     | The gods and their faiths — doctrines, rites, holy orders, and the shape of the divine cosmos. |
-| Knowledge | Magic Theory | The workings of magic itself: Resonances, Arts, enchantments, and why a spell behaves as it does. |
-| Knowledge | Esoterica    | Hidden and forbidden lore — cults, curses, omens, spirits, and the truths most people are safer not knowing. |
-| Knowledge | Bestiary     | The kinds, habits, and vulnerabilities of monsters and wild creatures: what a thing is and how it can be felled. |
-| Knowledge | Nature       | The living world understood rather than survived: plants, animals, seasons, and how an ecosystem fits together. |
-| Knowledge | Engineering  | How structures and mechanisms are designed, raised, and brought down — architecture, machinery, and siegecraft. |
-| Knowledge | Politics     | Courts, laws, factions, and bloodlines, and a working sense of where real power actually rests. |
+### Gaining Threads
 
-### Fieldcraft
+Threads are **earned** through the following:
 
-These are skills that help a character live and operate in the wild.
+- **Completing a Personal Project** aimed at gaining a new Thread. The time spent on the project clock *is* the story of how you came by this new experience.
+- **GM reward at a defining story beat**. This can either be awarded to individual characters, or given as a shared award to the whole party that lived through a defining experience in the game (i.e., *"Survived the Sorrowmaw"*).
 
-| Group      | Skill           | Description                                                  |
-| ---------- | --------------- | ------------------------------------------------------------ |
-| Fieldcraft | Tracking        | Following trails and reading the signs creatures and people leave behind — prints, spoor, broken brush, cold ashes. |
-| Fieldcraft | Foraging        | Taking sustenance and raw material from the land: edible plants, clean water, fishing, and snaring small game. |
-| Fieldcraft | Bushcraft       | Making the wild livable — fire, shelter, improvised tools, and weathering hostile terrain and climate. |
-| Fieldcraft | First Aid       | Mundane, hands-on treatment of injury: binding Wounds, stanching blood, setting bone, and stabilizing the badly hurt. |
-| Fieldcraft | Herbalism       | Identifying and preparing wild plants for remedy — poultices, tonics, antidotes (the medicine kit, not the cookpot). |
-| Fieldcraft | Animal Handling | Calming, training, directing, and earning the cooperation of living beasts. |
-| Fieldcraft | Animal Mimicry  | Imitating animal calls and natural sounds to lure game, signal allies, or deceive a listener. |
-| Fieldcraft | Navigation      | Keeping your bearings and finding your way by star, sun, landmark, and map — in wilderness or open water. |
+> **Design note:** For calibration purposes, we should expect roughly **one new Thread per tier of play**. As characters advance and grow and become richer in their experiences, each Thread should be worth a little less than the last.
 
-### Athletics
+### Rewriting Threads
 
-These are skills that represent what a trained body can physically do.
-
-| Group     | Skill      | Description                                                  |
-| --------- | ---------- | ------------------------------------------------------------ |
-| Athletics | Climbing   | Scaling walls, cliffs, ropes, and sheer or treacherous surfaces. |
-| Athletics | Swimming   | Moving through water, diving, fighting currents, and holding breath under pressure. |
-| Athletics | Endurance  | Raw stamina against sustained hardship: forced marches, long labor, sleeplessness, and bodily Strain. |
-| Athletics | Acrobatics | Balance, tumbling, and contortion — keeping a footing on a ledge, rolling through a fall, slipping through a tight gap. |
-| Athletics | Jumping    | Clearing distance and height: leaping chasms, vaulting obstacles, and springing to reach a far hold. |
-| Athletics | Lifting    | Feats of raw strength: hauling, hoisting, forcing doors, and shifting what should not move. |
-| Athletics | Riding     | Controlling a living mount at speed and staying seated through difficulty. |
-| Athletics | Vehicles   | Driving and piloting built conveyances — wagons, chariots, boats — through hazard and at speed. |
-
-### Artisanry
-
-These are skills that involve the skilled making of goods.
-
-| Group     | Skill        | Description                                                  |
-| --------- | ------------ | ------------------------------------------------------------ |
-| Artisanry | Smithing     | Working metal at the forge into weapons, armor, tools, and fittings. |
-| Artisanry | Alchemy      | Brewing potions, tinctures, acids, and reagents through mundane chemistry. |
-| Artisanry | Cooking      | Turning raw ingredients into nourishing or remarkable food and drink, fermenting and brewing included. |
-| Artisanry | Tanning      | Curing hides and furs into leather goods.                    |
-| Artisanry | Stonemasonry | Cutting, carving, dressing, and laying stone — masonry and sculpture alike. |
-| Artisanry | Carpentry    | Working wood into structures, furniture, hafts, and frames.  |
-| Artisanry | Lapidary     | Cutting, polishing, and setting gemstones, and judging the worth of a cut stone. |
-| Artisanry | Tinkering    | Building and repairing small mechanisms and gadgets — clockwork, locks, and intricate contrivances. |
-| Artisanry | Tailoring    | Making garments, rope, sailcloth, and other goods from cloth and fiber. |
-
-### Subterfuge
-
-These are skills that help the character act unseen, unheard, or unsuspected.
-
-| Group      | Skill           | Description                                                  |
-| ---------- | --------------- | ------------------------------------------------------------ |
-| Subterfuge | Stealth         | Moving silently and keeping out of sight, shadow to shadow.  |
-| Subterfuge | Sleight of Hand | Quick, deceptive handwork: picking pockets, palming, planting, and manual misdirection. |
-| Subterfuge | Disguise        | Altering appearance, bearing, and voice to pass as someone — or something — you are not. |
-| Subterfuge | Lockpicking     | Defeating the locks and mechanisms that secure doors, chests, and bindings. |
-| Subterfuge | Traps           | Setting, spotting, and disarming traps, and rigging or wrecking mechanical devices. |
-| Subterfuge | Forgery         | Faking documents, seals, signatures, and craftwork well enough to pass as genuine. |
-| Subterfuge | Surveillance    | The tradecraft of watching and listening unnoticed: shadowing a mark, eavesdropping, reading lips. |
-| Subterfuge | Poisons         | Preparing, concealing, and covertly administering toxins and venoms — and their antidotes. |
-| Subterfuge | Streetwise      | Knowing how the underworld runs: fences, safe houses, gangs, contraband, and who to bribe. |
-| Subterfuge | Escape Artist   | Slipping bonds, manacles, nets, and cells through contortion, dislocation, and concealed tools. |
-
-### Influence
-
-These are skills that move people through word, presence, or performance.
-
-| Group     | Skill       | Description                                                  |
-| --------- | ----------- | ------------------------------------------------------------ |
-| Influence | Charm       | Winning warmth, liking, and goodwill through grace, wit, and easy likability. |
-| Influence | Coercion    | Bending someone to your will through threat, menace, pressure, or sheer force of presence. |
-| Influence | Guile       | Deceiving in the moment: lies, cons, false fronts, and verbal misdirection. |
-| Influence | Read People | Sensing a person's mood, motive, and honesty from how they speak and carry themselves. |
-| Influence | Seduction   | Drawing someone in through romantic or sexual allure.        |
-| Influence | Performance | Holding an audience through music, acting, oratory, dance, or storytelling. |
-| Influence | Etiquette   | Navigating manners, rank, and custom to move through formal society without misstep. |
+Threads cannot be retrained, swapped, or refunded; you cannot retrain your past. However, with GM consent, a player may propose to **editorially rewrite** a Thread that isn't working at the table into something else that is more usable.
 
 
 
@@ -1660,6 +1679,8 @@ Weapons take up a **number of gear slots** depending on their **weight class**:
 | Seeking | This weapon is **not affected by cover**. |
 | Cumbersome | Attacks with this weapon cost **3 Vigor** instead of 2. This includes reactive attacks like **Forestall**, **Intercept**, and **Counterattack**. |
 | Combo | This weapon is part of a **combination weapon**, and it must be equipped with its other part(s). Together, the combination weapon costs **one fewer gear slot than the sum of its parts (minimum 1)**. |
+
+> **Design Note:** The **Deflect** and **Shield** tags mark weapons *capable* of deflecting. The **Deflect reaction** itself must be granted by an ability (e.g., Warrior Rank 1) — the tag alone does not grant it.
 
 ### Multiple Damage Types
 
@@ -1729,17 +1750,27 @@ All spellcasting archetypes will receive a **basic spell focus** with no special
 
 ### Wondrous Items
 
-Wondrous items are unique, magical items that grant the wielder special abilities or bonuses. Wondrous items are unlike normal gear, and need to be equipped into a **wondrous item slot**. A character has a number of wondrous item slots equal to their SOUL value.
+Wondrous items are unique, magical items that grant the wielder special abilities or bonuses. Wondrous items are unlike normal gear, and need to be equipped into a **wondrous item slot**. A character has a number of wondrous item slots equal to their MIND value.
 
 ### Consumables
 
-Consumables are **single-use items** that can be used for healing, buffing, de-buffing, or even attacking. It is assumed that adventurers are generally well prepared and always in possession of a good mix of consumables for most situations. In Mantle, we do not track individual consumables, but instead use **consumable points**.
+Consumables are **single-use items** that can be used for healing, buffing, de-buffing, or even attacking. It is assumed that adventurers are generally well prepared and always in possession of a good mix of consumables for most situations. In Momenta, we do not track individual consumables, but instead use **consumable points**.
 
 To use a consumable, a character will mark off a consumable point, and they can apply the effect of any of the consumables that are on the common consumables catalog. It is assumed that adventurers will have access to all of the common consumables.
 
 As the characters go on adventures, they may discover and gain access to special and rare consumables that they can use.
 
-### Other Equipment
+### Disabling Equipment
+
+There could be abilities or events that cause a character's equipment to be disabled. Disabled equipment still resides on the character sheet, but they just cannot be used until the cause of the disabling is rectified:
+
+- Disabled **weapons** cannot be used for attacks or to deflect.
+- Disabled **armor** do not offer their protection effect any more. However, the armor penalty (if it exists) still applies.
+- Disabled **spell focus** do not count towards a spellcaster having a spell focus equipped anymore (-1d penalty on spellcasting rolls).
+- Disabled **wondrous items** do not grant their active nor passive benefits anymore.
+- If a character's **consumables** are disabled, they keep their consumable points, but they can no longer spend it for consumable effects anymore.
+
+### Untracked Equipment
 
 Standard adventuring gear is not tracked on the character sheet. It is assumed that every character has reasonable access to any piece of mundane adventuring gear, and thus it doesn't have to be accounted for on the character's stat block.
 
@@ -1747,15 +1778,21 @@ Similarly, players who receive McGuffins, maps, or other plot-specific items are
 
 ### List of Equipment
 
-For a full list of equipment, refer to the separate document: `Mantle — Equipment Catalog`.
+For a full list of equipment, refer to the separate document: `Momenta — Equipment Catalog`.
 
 
 
-## 18. Languages
+## 18. Knowledge and Languages
 
-All characters are assumed to know **Common**, which represents the prevalent language that almost everyone speaks in the world. In addition, a character may know **one or more additional languages** depending on their REA value.
+In Momenta, there are generally no rolls required for knowledge checks. For every subject matter in the world, the GM will make a simple determination based on the character's knowledge level:
 
-Special languages could also be granted from archetypes or masteries. These special languages do not count towards the number of additional languages known.
+- **Expert** - a character can be considered an expert in a subject if they have a Thread that reasonably covers it.
+- **Familiar** - a character may not have an applicable Thread, but their concept line and backstory plausibly provides the character with exposure to the subject.
+- **Unfamiliar** - a character does not know any more about this subject than anyone else in the world would.
+
+Languages are governed by the same framework; all characters are assumed to be Expert in **Common**, which represents the prevalent language that almost everyone speaks in the world. For additional languages, it will depend on the character's Threads and concept line.
+
+Specialized knowledge or languages could also be granted from archetypes or masteries.
 
 Action rolls that require clear language understanding may suffer a penalty if the GM adjudicates that there is some kind of language barrier in place.
 
@@ -1767,7 +1804,112 @@ Action rolls that require clear language understanding may suffer a penalty if t
 
 
 
-## 19. Character Advancement
+## 19. Bonds
+
+A **Bond** is a relationship that has become a part of who you are, written as a freeform descriptor, nurtured through play, and strong enough to change what you can do. If Threads are considered chapters and lived experiences of your past, Bonds are the chapters and new experiences still being written.
+
+### Holding Bonds
+
+- You can hold up to **SOUL + 3 Bonds** at a time.
+- Bonds represent relationships between the player character and another **character**, either a fellow PC, or a named NPC of
+  consequence (for enemies, only **Champion** and **Nemesis**-class villains should qualify). With GM approval, a Bond may instead target an **institution**, **place**, or even a **treasured object** (e.g., a fallen kingdom, a father's sword).
+- Bonds are **one-directional**. Your Bond toward someone is yours alone, and may not be reciprocated. In the case when both sides of a relationship hold Bonds toward each other at a high enough intensity, they may unlock new abilities and benefits.
+- During character creation, you start with **3 Strands** (see below) to allocate across any number of Bonds, subject to the GM's approval of targets.
+
+> **GM Note:** While not mandatory, it is highly encouraged that at least one of the starting Bonds is towards a fellow party member.
+
+### Describing Bonds
+
+Every Bond is described with a **freeform descriptor**, written like a Thread: a short phrase naming what this relationship is, in your character's own terms. There is no fixed list of Bond types. Whenever certain abilities care about a Bond's *flavor*, apply the Threads fiction-first test: if the descriptor plausibly qualifies, it qualifies.
+
+Some example Bond descriptors:
+
+- Towards a character - "My one and only rival, and the only one allowed to beat me."
+- Towards a character - "I find her cat ears cute, and I'm curious about her kind."
+- Towards a treasured object - "I must protect this sword at all costs; the fate of my kingdom depends on it."
+
+Bonds can be built on affection, loyalty, rivalry, mistrust, or anything in between. The rules treat them all the same — the fiction is what differs. Whenever you invoke a Bond, you explain how it applies, and the GM adjudicates whether the explanation holds.
+
+### Growing a Bond
+
+Bonds are measured by their intensity level, and they grow by accumulating **Strands**. By default, a Bond intensity of 0 means that there is no Bond in place.
+
+| Intensity       | Total Strands Needed | Description                                                  |
+| --------------- | -------------------- | ------------------------------------------------------------ |
+| 1 - Fleeting    | 1                    | You may invoke the Bond (instead of a Thread) for a **Momentous Development** if you can explain how the Bond applies. You may also **Invoke** the Bond on action rolls, in narrative play or in combat, by spending 1 Resolve (see **Bonds in Combat**). |
+| 2 - Rooted      | 3                    | You may **Assist** the target's narrative rolls without having a relevant Thread. You can also choose to **Carry** them during **group rolls**. You gain the **Stay With Me!** maneuver toward the target (see **Bonds in Combat**). |
+| 3 - Enduring    | 6                    | For the purposes of determining whether your character possesses knowledge, you are considered to be **Familiar** with all subject matters central to the target's life or existence. If two characters hold **mutual Bond 3** toward each other, they may perform **Tandem Maneuvers** during combat. |
+| 4 - Profound    | 10                   | You and the target (if it is a creature, or any other entity that can reasonably communicate) can communicate simple intentions without needing to speak or verbalize within SEN distance (GM adjudicates on what is considered a simple intention). If two characters hold **mutual Bond 4** toward each other, they may perform **Combo Limit Breaks**, and gain the **Come Back to Me!** maneuver toward each other (see **Bonds in Combat**). |
+| 5 - Unbreakable | 15+                  | Unbreakable Bonds no longer count towards the maximum number of Bonds that a character can hold. In addition, whenever you **Assist** on an action roll and the result is a Catastrophic Failure, it will resolve as a Failure instead. Some **Combo Limit Breaks** may require **Bond 5** as a prerequisite. |
+
+When describing Bonds, you can say a **Bond 2** or a **Rooted Bond**, which mean the same thing.
+
+Once a Bond becomes an **Unbreakable Bond**, it no longer counts towards the maximum number of Bonds that a character can hold.
+
+### Earning Strands
+
+| Situation                                                    | Strands                 |
+| ------------------------------------------------------------ | ----------------------- |
+| A **Bond Vignette** interlude scene that resolves meaningfully with the Bond target | +1                      |
+| A **Bond Montage** downtime action that resolves meaningfully with the Bond target | +2                      |
+| A **major story event** that centers the relationship between you and the Bond target: a rescue, betrayal, secret shared, promise kept or broken, realization, etc. | +1 / +2 (GM discretion) |
+| A **defining combat moment** between you and the Bond target: they save your life; you fall defending them; you finally wound your sworn enemy, etc. | +1 / +2 (GM discretion) |
+
+### Changing Bond Intensity
+
+Whenever a character earns enough Strands to rank-up their Bond intensity with a target, the GM may wish to play out a **narrative scene** to describe or explain why the Bond has ranked-up.
+
+Similarly, there could be situations where a **Bond is strained** (usually as a consequence from narrative play). If that happens, the **Bond intensity decreases by 1**, and the character's number of Strands are adjusted to the minimum value of the new intensity level (Example: Going from Bond 4 to Bond 3 will reset the Strands value to 6).
+
+Also, each time a Bond changes its intensity, its holder may rewrite the descriptor in a way that befits the fiction and represents the increased (or decreased) intensity, For example, "Rival" may become "Rival I'd bleed for".
+
+### Bonds in Combat
+
+Bonds change what you can do in a fight, not just in a scene. Two rules govern everything below:
+
+- **Invoking a Bond costs 1 Resolve, and requires roleplay.** Whenever you invoke a Bond, say how the Bond is driving what you do — a line of dialogue, a memory, a promise. If the explanation doesn't hold, the Bond doesn't fire and no Resolve is spent. Maneuvers that a Bond *unlocks* (Tandem Maneuvers, Combo Limit Breaks) cost Vigor as normal, not Resolve.
+- **Defeated and Lost characters cannot invoke Bonds** or use Bond maneuvers — but they can be reached by them.
+
+#### Bond Maneuvers
+
+| Maneuver             | Requires                       | Cost                                   | Effect                                                       |
+| -------------------- | ------------------------------ | -------------------------------------- | ------------------------------------------------------------ |
+| **Invoke**           | Bond 1+ toward the target      | 1 Resolve                              | Before an action roll is made (any roll except a luck roll, including attack and spellcasting rolls), spend 1 Resolve and explain how the Bond applies: the roll gains **+2d**. You may Invoke **for them** — boosting a roll made by your Bond target, whom you must be able to perceive — or **for yourself** — boosting your own roll when the Bond drives your action (fighting alongside them, protecting them, avenging them, proving yourself against them, defending a place or object you hold a Bond toward). A roll can benefit from **at most one** Bond invocation. |
+| **Stay With Me!**    | Bond 2+ toward the target      | Full turn, 1 Resolve                   | Call out to a character you hold the Bond toward, within **SEN** squares and **line of sight**. Remove all stacks of **Faltering** and **Unraveling** from them. |
+| **Come Back to Me!** | Mutual Bond 4+ with the target | Full turn, 1 Resolve (only on success) | Reach an **adjacent** Defeated or Lost character with whom you share a mutual Bond 4+. **Both of you test your luck.** If either of you scores 1+ successes, spend 1 Resolve and remove the target's **Defeated** or **Lost** condition. If neither succeeds, nothing is spent but the turn. |
+
+> Full-turn maneuvers follow the usual rule: no other maneuvers this turn except the free Move.
+
+#### Tandem Maneuvers
+
+Two characters who hold **mutual Bond 3+** toward each other are **tandem partners**. Tandem maneuvers grant no extra action economy — everything costs its usual Vigor — but they let tandem partners act *out of turn*, together.
+
+| Reaction           | Trigger                                                      | Vigor                     | Effect                                                       |
+| ------------------ | ------------------------------------------------------------ | ------------------------- | ------------------------------------------------------------ |
+| **Tandem Strike**  | Your tandem partner makes an attack against a target you can attack. | 2                         | *Reactive Attack*<br />Make a **Basic Attack** with an equipped weapon (melee or ranged) against the same target, with **+1d**. A Tandem Strike cannot itself trigger a Tandem Strike. |
+| **Tandem Defense** | Your **adjacent** tandem partner is targeted by an attack.   | As per the chosen defense | *Reactive Defense*<br />Perform **Dodge** or **Deflect** on your partner's behalf, using your own attributes and equipped weapons. Any damage or effects that get through are still suffered by your partner. An attack can be met by **at most one** reactive defense — the target's own, or a tandem partner's. |
+| **Tandem Advance** | Your tandem partner, within **SEN** squares of you (and you of them), takes the **Move** maneuver. | 2                         | *Reaction*<br />Take the **Move** maneuver at the same time as your partner. Reactions such as Forestall trigger on each of you independently. |
+
+#### Combo Limit Breaks
+
+Two characters who hold **mutual Bond 4+** toward each other may perform **Combo Limit Breaks** — Limit Breaks executed together. Combo Limit Breaks are listed in the Limit Breaks Catalog, and follow these rules:
+
+- **Every participant must have the Combo Limit Break equipped.**
+- **One participant initiates** on their turn. Every other participant must **not yet have taken their turn this round**, and must be able to take a full turn (not Broken, Grabbed, Defeated, or Lost).
+- Activating a Combo Limit Break **uses up the turn of every participant** — it is a full-turn maneuver for all of them.
+- **Only the initiator pays** the activation cost: 3 Momentum, or their once-per-combat Crisis activation.
+- A Combo Limit Break may state **additional prerequisites** (all participants adjacent, a required archetype, a formation, and so on).
+- **Learning them:** you unlock a small selection of Combo Limit Breaks the first time you reach a mutual Bond 4 with anyone, and another selection the first time you reach a mutual Bond 5. Realizing certain Specialist Archetypes may unlock more. Some Combo Limit Breaks require **mutual Bond 5**.
+
+### Releasing Bonds
+
+If the number of Bonds you are holding is already at max, and a new one demands room, you may **release** a bond at any time. Released Bonds lose all accumulated Strands, and they are not refunded to the player. Releasing a **Bond 3 or higher** will require a **narrative scene**, where the character describes or explains why their perspective or feelings have changed.
+
+Releasing an **Unbreakable Bond** is a defining story beat, the kind of scene a campaign is remembered by. The name is a dare, not a rule (especially since Unbreakable Bonds no longer count towards the maximum number of Bonds that a character can hold).
+
+
+
+## 20. Character Advancement
 
 Characters earn **merits** throughout their adventures by completing missions and objectives. Merits can be **banked during downtime** to exchange for a **new character rank**. When a character receives a new character rank, they can deploy the rank onto one of their existing archetypes to improve it, or spend the rank to acquire R1 on a new archetype.
 
@@ -1808,9 +1950,9 @@ This table summarizes all the different advancements at each character rank. Bol
 
 
 
-## 20. Campaign Structure
+## 21. Campaign Structure
 
-Mantle is a **mission-structured** game. A campaign proceeds as a series of missions, with each mission involving a handful of combats and narrative scenes. Characters advance by completing **mission objectives**, not by solely defeating enemies.
+Momenta is a **mission-structured** game. A campaign proceeds as a series of missions, with each mission involving a handful of combats and narrative scenes. Characters advance by completing **mission objectives**, not by solely defeating enemies.
 
 ### Mission Arcs, Objectives, and Clock
 
@@ -1841,16 +1983,9 @@ The GM frames each mission as a **mission arc** - a set of objectives the party 
 
 > **Design note:** The clock is a budget that the party manages. Parties can decide if they want to attempt everything and risk running short of clock, or focus on only what matters and bank it safely.
 
-### Encounter Objectives
-
-Combat encounters are a key part of gameplay. Every encounter will have:
-
-- A **main encounter objective** - This is the key set of conditions that must occur for the players to complete the encounter successfully. Encounter objectives may include defeating all enemies, but it doesn't always have to be. Completing a main encounter objective may be required for a **mission objective** to be achieved.
-- A number of optional **side encounter objectives** - These are also known as *encounter challenges*. Achieving encounter challenges help the party gain Valor.
-
 ### Campaign Difficulty
 
-There are three default **campaign difficulty levels** in Mantle - The GM can choose which difficulty level to use for their campaign. Most games are on the standard "Heroic" difficulty level. Difficulty levels will impact starting rank, rate of advancement, and encounter building guidelines.
+There are three default **campaign difficulty levels** in Momenta - The GM can choose which difficulty level to use for their campaign. Most games are on the standard "Heroic" difficulty level. Difficulty levels will impact starting rank, rate of advancement, and encounter building guidelines.
 
 | Campaign Difficulty | Feel   | Starting Character Rank (CR) | Rate of Advancement |
 | ------------------- | ------ | ---------------------------- | ------------------- |
@@ -1858,24 +1993,24 @@ There are three default **campaign difficulty levels** in Mantle - The GM can ch
 | "Heroic"            | Medium | 3                            | 5 merits / rank     |
 | "Ultra"             | Hard   | 3                            | 7 merits / rank     |
 
-> **Design note:** In Mantle, the default difficulty level is "Heroic", and all of the balance, encounter building, and adventure pacing are based on that. As a general pacing guide, at "Heroic" difficulty level, a party should clear roughly **one tier of play (six character ranks) for every four missions**, or about 1.5 character ranks per mission.
+> **Design note:** In Momenta, the default difficulty level is "Heroic", and all of the balance, encounter building, and adventure pacing are based on that. As a general pacing guide, at "Heroic" difficulty level, a party should clear roughly **one tier of play (six character ranks) for every five missions**, or about 1.2 character ranks per mission.
 
 ### Merits
 
-**Merits** are Mantle's coarse, event-based advancement currency, awarded on **objective completion**. Merits accumulate across the entire mission, and are converted to ranks for character advancement.
+**Merits** are Momenta's coarse, event-based advancement currency, awarded on **objective completion**. Merits accumulate across the entire mission, and are converted to ranks for character advancement.
 
 | Ways to earn merits                                          | Amount     |
 | ------------------------------------------------------------ | ---------- |
 | Achieving a main mission objective                           | 2-3 merits |
 | Achieving a side mission objective                           | 1 merit    |
-| Entering downtime with Valor greater or equal to half the party's Valor cap (minimum 1) | 1 merit    |
+| Entering downtime with Momentum greater than or equal to half the party's Max Momentum (minimum 1) | 1 merit    |
 | Discretionary reward for extraordinary play (GM discretion)  | 1 merit    |
 
-Merits can be banked for character advancement during **Downtime**. The number of merits needed to add one rank is based on the campaign's difficulty level. For a standard "Heroic" campaign, it takes 5 merits / rank.
+Merits can be banked for character advancement during **downtime**. The number of merits needed to add one rank is based on the campaign's difficulty level. For a standard "Heroic" campaign, it takes 5 merits / rank.
 
 ### Tiers of Play
 
-Mantle organizes 18 ranks of play (CR3 to CR20) plus open-ended Paragon play (CR21+) into four tiers of play:
+Momenta organizes 18 ranks of play (CR3 to CR20) plus open-ended Paragon play (CR21+) into four tiers of play:
 
 | Tier of Play | Character Ranks | Party Identity                                               | Typical Attack Pool |
 | ------------ | --------------- | ------------------------------------------------------------ | ------------------- |
@@ -1888,17 +2023,102 @@ Mantle organizes 18 ranks of play (CR3 to CR20) plus open-ended Paragon play (CR
 
 
 
-## 21. Encounter Building
+## 22. Narrative Play
 
-In Mantle, combat encounters are won by **completing their objectives**, and not by killing everything on the map. Sometimes the objective *is* to "defeat them all," but the moment it's anything else (e.g., protect the cart, hold the door, reach the ritual before it finishes, etc.), the fight changes shape, because the party can no longer solve it by focusing fire on one enemy at a time. Encounter difficulty in Mantle is an **attention economy**: rosters set the price, but objectives decide how the party is allowed to pay. Losing doesn't mean a TPK, but it usually means the objective died while the heroes lived, and they have to accept the consequences of the failure to the overall mission, as well as their Valor.
+### Using Clocks
 
-### "The Encounter Card"
+Besides the mission clock, the GM may make use of additional clocks to support narrative play:
+
+- **Project clocks** track long personal or party efforts (e.g., taking the Personal Project downtime action). General guidance: **4 beats** for modest goals, **6 beats** for serious ones, **8 beats** for campaign-scale ones.
+- **Pressure clocks** track a looming situation within a mission. Examples: the cult's ritual, the rising flood, the garrison's response. Pressure clocks can either be private (GM-only), or the GM can show a clock to the players whenever the characters could feel the pressure.
+
+### Interlude Scenes
+
+After the Respite phase in an interlude, every player can choose to participate in one interlude scene. This is usually a short scene with a small mechanical benefit, and if there is any narrative play that is required, the GM should limit action rolls to at most one roll. Scenes are optional - they are opportunities for the characters, not obligations.
+
+```
+[INTERLUDE SCENE] Bond Vignette
+
+Play out a short scene with the target of your Bond. If it resolves meaningfully (GM adjudication), gain 1 Strand towards the Bond, and both participants in the scene restores 1 Resolve.
+```
+
+```
+[INTERLUDE SCENE] Preparation
+
+Scout the ground, scheme, set a ritual, lay a trap. Resolve with a narrative action roll against stakes the GM frames. Success yields a concrete advantage in the next encounter, adjudicated within the fiction - a known Signature telegraph, a pre-positioned party, a weakened obstacle, a mapped escape route, etc.
+```
+
+```
+[INTERLUDE SCENE] Work a Lead
+
+Chase information between encounters - question a captive, decode the ledger, read the tracks. Resolve with a narrative action roll. Success answers questions about the mission's threats, layout, or actors (based on GM discretion).
+```
+
+```
+[INTERLUDE SCENE] Steel Yourself
+
+Spend the scene in quiet focus, prayer, or trusted company. Recover 2 Resolve.
+```
+
+GMs are free to introduce other interlude scenes as appropriate.
+
+### Downtime Actions
+
+After the Recovery phase during downtime, every player can choose to take up to two downtime actions.
+
+```
+[DOWNTIME ACTION] Retraining
+
+Retrain your mastery loadout and equipped Limit Breaks. If required, the GM will work with the player to come up with a plausible narrative reason for these changes in abilities. Take note that masteries with the Dedication tag will not be removable/retrainable, although they can be freely moved around on the mastery board during retraining if required.
+```
+
+```
+[DOWNTIME ACTION] Bond Montage
+
+Play out a scene with the target of your Bond. If it resolves meaningfully (GM adjudication), gain 2 Strands towards the Bond.
+```
+
+```
+[DOWNTIME ACTION] Work Contacts
+
+Reach into your network for information or favors bearing on the next part of the mission. Resolve with a narrative action roll. Success yields intel, an introduction, or a modest favor; costs on the ladder are social - obligations, rumors, debts.
+```
+
+```
+[DOWNTIME ACTION] Acquire & Craft
+
+Buy, commission, or craft equipment and consumables, per the Equipment Catalog and GM adjudication. Crafting something unusual may require a roll and a project clock.
+```
+
+```
+[DOWNTIME ACTION] Personal Project
+
+Start or advance a project clock - researching a ritual, building a workshop, apprenticing to a master — or living your way toward a new Thread. Resolve with a narrative action roll; Success advances the clock 1 beat (2 beats if the roll yielded a Success with a Bonus).
+```
+
+GMs are free to introduce other downtime actions as appropriate.
+
+
+
+## 23. Combat Encounters
+
+In Momenta, combat encounters are won by **completing their objectives**, and not by killing everything on the map. Sometimes the objective *is* to "defeat them all," but the moment it's anything else (e.g., protect the cart, hold the door, reach the ritual before it finishes, etc.), the fight changes shape, because the party can no longer solve it by focusing fire on one enemy at a time. Encounter difficulty in Momenta is an **attention economy**: rosters set the price, but objectives decide how the party is allowed to pay. Losing doesn't mean a TPK, but it usually means the objective died while the heroes lived, and they have to accept the consequences of the failure to the overall mission, as well as their Momentum.
+
+### Encounter Objectives
+
+Combat encounters are a key part of gameplay. Every encounter will have:
+
+- A **main encounter objective** - This is the key set of conditions that must occur for the players to complete the encounter successfully. Encounter objectives may include defeating all enemies, but it doesn't always have to be. Completing a main encounter objective may be required for a **mission objective** to be achieved.
+- A number of optional **side encounter objectives** - These are also known as *encounter challenges*. Achieving encounter challenges help the party gain Momentum.
+
+### Encounter Card
 
 Build out every encounter by filling out five lines:
 
 | Line                | Description                                                  |
 | ------------------- | ------------------------------------------------------------ |
 | **Difficulty**      | Trivial / Standard / Challenging / Boss                      |
+| **Scene**           | What the battlefield does at the end of every round          |
 | **Roster**          | Composition and setup of enemies (including anchors and fillers), and at which challenge classes |
 | **Behavior**        | One line per enemy group describing how they behave and fight in the combat |
 | **Main Objective**  | What "winning" means, and how durable / urgent that thing is |
@@ -1913,7 +2133,51 @@ Build out every encounter by filling out five lines:
 | **Challenging** | ~65% chance            | 4–6            | 2–3 Wounds + Burdens | ~30% chance |
 | **Boss**        | per design             | 5–7            | 3–5 Wounds + Burdens | >50% chance |
 
-### The Four Dials
+### Scene Actions
+
+A **Scene Action** is the battlefield itself taking a turn: fire spreading, a cart rolling, a blessed spring mending the wounded. Scene Actions are listed on the Encounter Card and **resolve at the end of every round, after every participant has already taken their turn**.
+
+Scene Actions have no rolls and no decisions; just follow the guidance faithfully and directly. If targeting creatures is part of the guidance, it should be clearly prescribed ("every creature in the smoke", "the nearest creature to the shrine").
+
+Notes on scene actions:
+
+- A Scene Action that makes an **attack** resolves like a Grunt's: no roll, a fixed success count stated by the entry (typically 1), mitigable by defenses according to its printed tags.
+- A Scene Action dealing **non-attack damage or Strain** follows environmental rules: Guard, resistances, and weaknesses do not apply.
+- Scene Actions may be **beneficial**, **flat** (simply happens each round), or **telegraphed**.
+
+### Telegraphed Attacks
+
+Some of the most dramatic moments in combat are attacks announced before they happen. These are called telegraphed events, and they follow a simple grammar: **Declare → Window → Resolve.**
+
+A telegraphed attack is a powerful, named ability printed in an enemy's stat block that carries the **Telegraphed** tag. For an enemy to use a telegraphed attack:
+
+1. **Declare:** Using a telegraphed attack consumes **one of the enemy's non-Move maneuvers** that turn; an enemy with only its Move remaining cannot declare. The GM announces it in the fiction and states the attack's **lock** and when it **resolves**. An enemy cannot make another telegraphed attack until the current one has already resolved.
+
+2. **Window:** Time passes. Everyone acts with full knowledge of what is coming.
+
+3. **Resolve:** The telegraphed attack executes exactly as declared. Resolving a pre-declared telegraphed attack does not cause a maneuver; it just happens.
+
+Each telegraphed attack declares one of three lock types:
+
+| Lock         | Declared as...                                               | Player's natural counterplay                                 |
+| ------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| **Area**     | Fixed squares, marked on the map                             | Leave the area                                               |
+| **Target**   | One or more designated creatures                             | Escape by becoming untargetable per the attack's defense profile (e.g., Hide, or become Defeated) |
+| **Behavior** | A rule ("the nearest creature", "one random adjacent enemy") | Make the behavior invalid (if no legal target exists at resolution time, then the attack fizzles) |
+
+Each telegraphed attack will declare a resolution timing, which is usually one of two standard timings:
+
+- Start of the enemy's next turn
+- Start of the enemy's first turn of the next round
+
+A pending telegraphed attack is cancelled (a.k.a. fizzled) if, before it resolves:
+
+- The enemy gains the **Broken** condition
+- The enemy loses the ability to take maneuvers when the resolution timing occurs
+- Its behavior lock becomes invalid
+- A **unique disruption** printed on the telegraphed attack's stat block is met.
+
+### The Five Dials
 
 1. **Composition** - Anchor + filler. The anchor (Elite or above) creates spike damage and the loss tail; filler creates tempo and attrition. Starting enemy rosters for a party of four Novices:
 
@@ -1924,13 +2188,15 @@ Build out every encounter by filling out five lines:
 | **Challenging** | 1 Elite + 4–5 Regulars, or 1 Champion + 2-3 Regulars        |
 | **Boss**        | 1 Champion or Nemesis + support, with an authored objective |
 
-> **Design note:** Defeating enemies only grants Valor at Elite and above. For combats with all Regulars and Grunts, consider adding side objectives to give the party opportunities to earn Valor.
+> **Design note:** Defeating enemies only grants Momentum at Elite and above. For combats with all Regulars and Grunts, consider adding side objectives to give the party opportunities to earn Momentum.
 
 2. **Behavior** - Identical rosters may vary up to 6x in number of Wounds dealt depending on how the enemies target. *Spread targeting* ("harries whoever is closest") is merciful; *focus targeting* ("finishes whoever is bleeding") is cruel. Write the Behavior line deliberately. It is a difficulty dial, not flavor. Every enemy stat block comes with a default behavior, but feel free to override freely. Multi-turn enemies (Champion and above) that focus every turn on one character are the deadliest version of this dial; use with intent.
 
 3. **Objective Shape** - "Kill" objectives collapse under focus fire; tension comes from objectives that **forbid focus**; i.e., protect something a filler enemy is attacking, holding two points on the map, extraction under pressure, etc. Split attention is a good way to make an otherwise Standard encounter into a Challenging one.
 
 4. **Objective Durability** - For protection objectives, give the protected thing roughly **7–8 Vitality per filler enemy** that will attack it. Less makes the fight desperate; more makes it safer.
+
+5. **Scene Actions** - A hostile Scene Action is unbudgeted pressure — expect roughly a half-step to a full step harder. Beneficial Scenes lower difficulty. Non-attack Scene damage bypasses all mitigation — keep it small. A dial, not a default.
 
 ### Reskinning Enemies
 
@@ -1941,23 +2207,21 @@ Feel free to reskin any enemy in the pre-generated enemy catalog. To turn the **
 | ENCOUNTER       | THE TOLL ROAD                                                |
 | --------------- | ------------------------------------------------------------ |
 | Difficulty      | Standard                                                     |
+| Scene           | -                                                            |
 | Roster          | 1x Bandit Captain (Elite)<br />2x Bandit Thugs (Regular)     |
 | Behavior        | Captain duels the strongest PC and telegraphs his Swing; Thugs (sharpened by his Commander aura) focus whoever is already bleeding. |
 | Main Objective  | Defeat them all - the road must be opened!                   |
 | Side Objectives | -                                                            |
 
-> ⚖ *Sim-stamped:* with 3 Thugs this measures ~4.7 rounds, ~2.6 Wounds, a PC down in half of all fights — the Challenging variant. Two Thugs is the Standard evening.
-
 | ENCOUNTER       | THE RELIQUARY CART                                           |
 | --------------- | ------------------------------------------------------------ |
 | Difficulty      | Challenging                                                  |
+| Scene           | At the end of every round, the reliquary cart moves 4 squares down the road automatically. |
 | Roster          | 1x Bandit Captain (Elite)<br />5x Bandit Thugs (Regular)     |
 | Behavior        | The Thugs ignore the party and hack at the cart; the Captain pins the rescuers, focusing on the wounded. |
 | Main Objective  | The reliquary cart (**Vitality 40**) must survive. If it reaches 0 Vitality, the fight may continue, but the objective is lost. |
 | Side Objectives | Challenge 1 - The party defeats all of the bandits<br />Challenge 2 - The reliquary cart manages to emerge combat unscathed (without damage) |
 
-> ⚖ *Sim-stamped:* ~75% objective success, ~5.8 rounds, ~2.3 Wounds, a PC down in 38% of fights. Drop the cart to 35 Vitality for a crueler night (~63%).
-
 ### List of Enemies
 
-For a full list of pre-generated enemies, refer to the separate document: `Mantle — Pre-Generated Enemies`. Additional rules on running enemies are also there.
+For a full list of pre-generated enemies, refer to the separate document: `Momenta — Pre-Generated Enemies`. Additional rules on running enemies are also there.

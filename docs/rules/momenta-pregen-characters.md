@@ -1,8 +1,8 @@
-# Mantle — Pre-Generated Characters
+# Momenta — Pre-Generated Characters
 
-**Version:** 0.21
+**Version:** 0.31
 
-Mantle is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This catalog contains ready-to-play pregenerated characters. It is intended to be used with the `Mantle - Quick Start Guide` document, which contains the core rules of Mantle.
+Momenta is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This catalog contains ready-to-play pregenerated characters. It is intended to be used with the `Momenta - Quick Start Guide` document, which contains the core rules of Momenta.
 
 All stat blocks are pre-computed: dice pools include all passive bonuses, and damage ladders are printed with all static riders applied.
 
@@ -14,6 +14,10 @@ All stat blocks are pre-computed: dice pools include all passive bonuses, and da
 
 ### Mira — Half-Elf, Agile Skirmisher Warrior
 
+| Concept Line                                                 |
+| ------------------------------------------------------------ |
+| An exiled princess of Exantria, hunting the ones who drove her family from the throne. |
+
 | Name | Character Rank | Tier of Play | Archetypes                              |
 | ---- | -------------- | ------------ | --------------------------------------- |
 | Mira | 3              | Novice       | Half-Elf (Rank 1)<br />Warrior (Rank 2) |
@@ -24,17 +28,17 @@ All stat blocks are pre-computed: dice pools include all passive bonuses, and da
 | MIND 1 | REA 0     | INS 1     |
 | SOUL 0 | PRE 0     | LUCK 0    |
 
-| SPD  | SEN  | SIZE | Languages Known |
-| ---- | ---- | ---- | --------------- |
-| 5    | 10   | 1M   | Common + 1      |
+| SPD  | SEN  | SIZE |
+| ---- | ---- | ---- |
+| 5    | 10   | 1M   |
 
 | Max Vitality | Wound Slots | Max Strain | Burden Slots | Resolve | Max Vigor        | Max Guard |
 | ------------ | ----------- | ---------- | ------------ | ------- | ---------------- | --------- |
-| 21           | 3           | 5          | 3            | 6       | 7<br />(+4/turn) | 4         |
+| 21           | 3           | 5          | 3            | 8       | 7<br />(+4/turn) | 4         |
 
 | Gear Slots | Wondrous Item Slots | Consumable Points |
 | ---------- | ------------------- | ----------------- |
-| 3          | 0                   | 🔴🔴 (2)            |
+| 3          | 1                   | 🔴🔴 (2)            |
 
 | Archetype | Rank | Abilities                                                    |
 | --------- | ---- | ------------------------------------------------------------ |
@@ -78,9 +82,11 @@ All stat blocks are pre-computed: dice pools include all passive bonuses, and da
 | ------------------------------------------------------------ |
 | **Overwatch** (Vigor 1) maneuver:<br />Declare a **Cone 5** area originating from your square as your Overwatch zone, persisting until the start of your next turn. When an enemy moves into the zone from outside it, you may make a **ranged Basic Attack** against them as a reaction (2 Vigor per reactive attack; ranged weapon required). Each enemy can be attacked this way at most once before the start of your next turn, no matter how many times they re-enter. When you are in Overwatch, you cannot **Move** or **Shift**.<br /><br />**Visualization**:<br />After rolling an attack, you may take **2 Strain** to re-roll. You must keep the re-roll. All modifiers that applied to the original roll apply equally to the re-roll. |
 
-| Narrative Skills                                             |
-| ------------------------------------------------------------ |
-| Climbing (Athletics)<br />Stealth (Subterfuge)<br />Tracking (Fieldcraft)<br />Bestiary (Knowledge)<br />Seduction (Influence)<br />Navigation (Fieldcraft) |
+| Threads (3)                                             | Bonds (3)                                                    |
+| ------------------------------------------------------- | ------------------------------------------------------------ |
+| Raised in the Pearl Court of Exantria.                  | [To Kira / Bond 2 / 3 Strands] I am forever indebted to him for saving my life during a moment of my weakness. |
+| Last student of the crown blademaster, Maestro Corvine. |                                                              |
+| Three years on the smugglers' roads under a false name. |                                                              |
 
 | Playstyle                                                    |
 | ------------------------------------------------------------ |
@@ -89,6 +95,10 @@ All stat blocks are pre-computed: dice pools include all passive bonuses, and da
 
 
 ### Kira — Dwarf, Raging Brute
+
+| Concept Line                                                 |
+| ------------------------------------------------------------ |
+| The last shieldbreaker of Kargen Deephold, drowning his grief in battle-fury. |
 
 | Name | Character Rank | Tier of Play | Archetypes                             |
 | ---- | -------------- | ------------ | -------------------------------------- |
@@ -100,13 +110,13 @@ All stat blocks are pre-computed: dice pools include all passive bonuses, and da
 | MIND 1 | REA 0     | INS 1     |
 | SOUL 1 | PRE 0     | LUCK 1    |
 
-| SPD                       | SEN  | SIZE | Languages Known |
-| ------------------------- | ---- | ---- | --------------- |
-| 4<br />(5 while Frenzied) | 12   | 1M   | Common + 1      |
+| SPD                      | SEN  | SIZE |
+| ------------------------ | ---- | ---- |
+| 4<br />(5 when Frenzied) | 12   | 1M   |
 
-| Max Vitality | Wound Slots | Max Strain | Burden Slots | Resolve | Max Vigor                                | Max Guard |
-| ------------ | ----------- | ---------- | ------------ | ------- | ---------------------------------------- | --------- |
-| 21           | 3           | 5          | 3            | 7       | 7<br />(+4/turn; +5/turn while Frenzied) | 3         |
+| Max Vitality | Wound Slots | Max Strain | Burden Slots | Resolve | Max Vigor        | Max Guard |
+| ------------ | ----------- | ---------- | ------------ | ------- | ---------------- | --------- |
+| 21           | 3           | 5          | 3            | 9       | 7<br />(+4/turn) | 3         |
 
 | Gear Slots | Wondrous Item Slots | Consumable Points |
 | ---------- | ------------------- | ----------------- |
@@ -122,7 +132,7 @@ All stat blocks are pre-computed: dice pools include all passive bonuses, and da
 
 | Body mastery slots (2)    | Mind mastery slots (1) | Soul mastery slots (1) | Wildcard slot (1) |
 | ------------------------- | ---------------------- | ---------------------- | ----------------- |
-| Bloodlust<br />Bloodfeast | Willpower              | Berserk                | Taunt             |
+| Bloodlust<br />Bloodfeast | Willpower              | Berserk                | Charging Frenzy   |
 
 | Limit Breaks       | Effect                                                       |
 | ------------------ | ------------------------------------------------------------ |
@@ -149,11 +159,13 @@ All stat blocks are pre-computed: dice pools include all passive bonuses, and da
 
 | Abilities                                                    |
 | ------------------------------------------------------------ |
-| **Enter Frenzy** (Vigor 0, 1/turn) maneuver:<br />Gain 1 stack of the **Frenzy** condition (max 3).<br /><br />**Frenzy** (stackable, max 3; cleared by Steady Yourself):<br />+1d per stack on all melee weapon attacks (including Intercept). Flat +1 Vigor refresh and +1 SPD. You cannot Brace, or use reactive defenses like Dodge. At the end of your turn, take Strain equal to your current Frenzy stacks.<br /><br />**Willpower**: +1d when using INS to oppose a roll.<br /><br />**Bloodfeast**: When you defeat a creature with a melee attack while Frenzied, regain 1 Vigor and gain +5 Guard (Over-Guard rules apply).<br /><br />**Surge**: once per turn, convert Strain into Vigor at **2 Strain per 1 Vigor**, up to BODY (2) Vigor (while Frenzied) or MIND (1) Vigor (while not Frenzied).<br /><br />**Taunt** (Vigor 2): Target one creature within 10 squares you can reasonably communicate with (Mindless creatures immune). PRE action roll opposed by target's INS; on 1+ net successes, target gains **Provoked** with you as source. |
+| **Enter Frenzy** (Vigor 1, 1/turn) maneuver:<br />Gain 1 stack of the **Frenzy** condition (max 3).<br /><br />**Frenzy** (stackable, max 3; cleared by Steady Yourself):<br />+1d per stack on all melee weapon attacks (including Intercept). Flat +1 SPD while Frenzied. You cannot Brace, or use reactive defenses like Dodge. At the end of your turn, take Strain equal to your current Frenzy stacks.<br /><br />**Willpower**: +1d when using INS to oppose a roll.<br /><br />**Bloodfeast**: When you defeat a creature with a melee attack while Frenzied, regain 1 Vigor and gain +5 Guard (Over-Guard rules apply).<br /><br />**Surge**: once per turn, convert Strain into Vigor at **2 Strain per 1 Vigor**, up to BODY (2) Vigor (while Frenzied) or MIND (1) Vigor (while not Frenzied).<br /><br />**Charging Frenzy**: When the Enter Frenzy maneuver takes you from 0 to 1 Frenzy stack, you may immediately take the **Move** maneuver at no Vigor cost. This is in addition to the free Move maneuver you get every turn. |
 
-| Narrative Skills                                             |
-| ------------------------------------------------------------ |
-| Lifting (Athletics)<br />Endurance (Athletics)<br />Coercion (Influence)<br />Smithing (Artisanry)<br />Tracking (Fieldcraft)<br />History (Knowledge) |
+| Threads (3)                                     | Bonds (4)                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------ |
+| Forged as a shieldbreaker of Kargen Deephold.   | [To Vera / Bond 2 / 3 Strands] I do not trust elves; she will be trouble. |
+| Twenty years cutting ore in the deep galleries. |                                                              |
+| Crowd favorite of the Emberlow fighting pits.   |                                                              |
 
 | Playstyle                                                    |
 | ------------------------------------------------------------ |
@@ -162,6 +174,10 @@ All stat blocks are pre-computed: dice pools include all passive bonuses, and da
 
 
 ### Maya — Human, Damage Caster
+
+| Concept Line                                                 |
+| ------------------------------------------------------------ |
+| A disgraced academy prodigy proving the theory they expelled her for. |
 
 | Name | Character Rank | Tier of Play | Archetypes                          |
 | ---- | -------------- | ------------ | ----------------------------------- |
@@ -173,30 +189,32 @@ All stat blocks are pre-computed: dice pools include all passive bonuses, and da
 | MIND 3 | REA 3     | INS 0     |
 | SOUL 1 | PRE 0     | LUCK 1    |
 
-| SPD  | SEN  | SIZE | Languages Known |
-| ---- | ---- | ---- | --------------- |
-| 5    | 10   | 1M   | Common + 4      |
+| SPD  | SEN  | SIZE |
+| ---- | ---- | ---- |
+| 5    | 10   | 1M   |
 
 | Max Vitality | Wound Slots | Max Strain | Burden Slots | Resolve | Max Vigor                     | Max Guard |
 | ------------ | ----------- | ---------- | ------------ | ------- | ----------------------------- | --------- |
-| 10           | 3           | 12        | 3            | 7       | 7<br />(+3/turn) | 2         |
+| 10           | 3           | 12        | 3            | 9      | 7<br />(+3/turn) | 2         |
 
 | Gear Slots | Wondrous Item Slots | Consumable Points |
 | ---------- | ------------------- | ----------------- |
-| 3          | 1                   | 🔴🔴 (2)            |
+| 3          | 3                   | 🔴🔴🔴🔴 (4)          |
 
 | Archetype | Rank | Abilities                                                    |
 | --------- | ---- | ------------------------------------------------------------ |
 | Human     | 1    | **Versatile** - +1 wildcard mastery slot (included below).   |
+| Human     | 1    | **Human Experience** - Gain **one additional Thread** (included below). |
 | Scholar   | 1    | **Spellcasting** - You may perform the **Cast a Spell** maneuver, using **REA** as the spellcasting attribute. |
 | Scholar   | 1    | **Starting Repertoire** - 3 bonus mastery slots (shown below), retrainable during Downtime. |
 | Scholar   | 1    | **Spell Focus** - Casting without a spell focus equipped incurs **-1d** on the spellcasting roll. |
 | Scholar   | 2    | **Detect Magic** - You have access to the **Detect Magic** maneuver (see Abilities). |
 | Scholar   | 2    | **Push the Craft** - When you cast a spell, you may take up to **MIND (3) Strain** before rolling; each Strain grants **+1d** on that spellcasting roll. |
+| Scholar   | 2    | **Magic Study** - Gain 1 bonus mastery slot (shown below)    |
 
-| Body mastery slots (0) | Mind mastery slots (3)                              | Soul mastery slots (1) | Wildcard slots (2)         | Repertoire slots (3)                           |
-| ---------------------- | --------------------------------------------------- | ---------------------- | -------------------------- | ---------------------------------------------- |
-| -                      | Mens Resonance<br />Cone Shaping<br />Arcane Shield | Improviser             | Bolster Art<br />Iron Will | Ignis Resonance<br />Rend Art<br />Afflict Art |
+| Body mastery slots (0) | Mind mastery slots (3)                              | Soul mastery slots (1) | Wildcard slots (2)       | Repertoire slots (4)                                         |
+| ---------------------- | --------------------------------------------------- | ---------------------- | ------------------------ | ------------------------------------------------------------ |
+| -                      | Mens Resonance<br />Cone Shaping<br />Arcane Shield | Storied Past           | Iron Will<br />Potpourri | Ignis Resonance<br />Rend Art<br />Afflict Art<br />Bolster Art |
 
 | Limit Breaks     | Effect                                                       |
 | ---------------- | ------------------------------------------------------------ |
@@ -237,11 +255,15 @@ Spell-shaping (pay extra Vigor when casting): Range +1 step per +1 Vigor (Touch 
 
 | Abilities                                                    |
 | ------------------------------------------------------------ |
-| **Detect Magic** (Vigor 2) maneuver:<br />Make a REA roll to sense magic within SEN (10) squares. 0s: presence only. 1s: Resonance and Art, for those you know. 2+: Resonance and Art of any detected magic.<br /><br />**Surge**: once per turn, convert Strain into Vigor at **2 Strain per 1 Vigor**, up to MIND (3) Vigor.<br /><br />**Improviser**: When the GM rules a task requires training you lack, you may attempt it anyway (no training bonus). |
+| **Detect Magic** (Vigor 2) maneuver:<br />Make a REA roll to sense magic within SEN (10) squares. 0s: presence only. 1s: Resonance and Art, for those you know. 2+: Resonance and Art of any detected magic.<br /><br />**Surge**: once per turn, convert Strain into Vigor at **2 Strain per 1 Vigor**, up to MIND (3) Vigor. |
 
-| Narrative Skills                                             |
-| ------------------------------------------------------------ |
-| Magic Theory (Knowledge)<br />Esoterica (Knowledge)<br />History (Knowledge)<br />Engineering (Knowledge)<br />Charm (Influence)<br />Read People (Influence)<br />Alchemy (Artisanry)<br />First Aid (Fieldcraft) |
+| Threads (5)                                                  | Bonds (4)                                                    |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Youngest-ever fellow of the Kolgrimm Athenaeum.              | [To Vera / Bond 2 / 3 Strands] I am in love; I have never seen anyone that is so pretty in real life. |
+| Expelled after the Emberfall Incident.                       |                                                              |
+| Summers apprenticed to her apothecary aunt.                  |                                                              |
+| Field cataloguer on the Threnody Expedition.                 |                                                              |
+| Keeps ciphered correspondence with a dozen dubious scholars. |                                                              |
 
 | Playstyle                                                    |
 | ------------------------------------------------------------ |
@@ -250,6 +272,10 @@ Spell-shaping (pay extra Vigor when casting): Range +1 step per +1 Vigor (Touch 
 
 
 ### Vera — Elf, Battle-Priest
+
+| Concept Line                                                 |
+| ------------------------------------------------------------ |
+| A lantern of the Dawnfather's faith, sent into the dark to find out why the light dims. |
 
 | Name | Character Rank | Tier of Play | Archetypes                            |
 | ---- | -------------- | ------------ | ------------------------------------- |
@@ -261,22 +287,22 @@ Spell-shaping (pay extra Vigor when casting): Range +1 step per +1 Vigor (Touch 
 | MIND 3 | REA 0     | INS 3     |
 | SOUL 0 | PRE 0     | LUCK 0    |
 
-| SPD  | SEN  | SIZE | Languages Known |
-| ---- | ---- | ---- | --------------- |
-| 6    | 15   | 1M   | Common + 1      |
+| SPD  | SEN  | SIZE |
+| ---- | ---- | ---- |
+| 6    | 15   | 1M   |
 
 | Max Vitality | Wound Slots | Max Strain | Burden Slots | Resolve | Max Vigor                     | Max Guard |
 | ------------ | ----------- | ---------- | ------------ | ------- | ----------------------------- | --------- |
-| 12           | 3           | 8          | 3            | 8       | 7<br />(+4/turn) | 2         |
+| 12           | 3           | 8          | 3            | 10     | 7<br />(+4/turn) | 2         |
 
 | Gear Slots | Wondrous Item Slots | Consumable Points |
 | ---------- | ------------------- | ----------------- |
-| 3          | 0                   | 🔴🔴 (2)            |
+| 3          | 3                   | 🔴🔴 (2)            |
 
 | Archetype | Rank | Abilities                                                    |
 | --------- | ---- | ------------------------------------------------------------ |
 | Elf       | 1    | **Low-Light Vision**                                         |
-| Elf       | 1    | **Elven Memories** - When making an action roll that can apply a skill from the **Knowledge** skill group, you may instead resolve it by **testing your luck**. You must take the results of the luck roll. |
+| Elf       | 1    | **Elven Memories** - Whenever a situation calls for having knowledge about a subject matter, you can spend **1 Strain** to upgrade your knowledge level by one step - from **Unfamiliar to Familiar**, or from **Familiar to Expert**. Only 1 Strain can be spent in this manner for each situation, and it only lasts for the duration of the current situation. |
 | Channeler | 1    | **Spellcasting** - You may perform the **Cast a Spell** maneuver, using **INS** as the spellcasting attribute. |
 | Channeler | 1    | **Starting Repertoire** - 3 bonus mastery slots (shown below), retrainable during Downtime. |
 | Channeler | 1    | **Spell Focus** - Casting without a spell focus equipped incurs **-1d** on the spellcasting roll. |
@@ -324,9 +350,11 @@ Spell-shaping (pay extra Vigor when casting): Range +1 step per +1 Vigor (Touch 
 | ------------------------------------------------------------ |
 | **Mending Spirit**: When you cast Mend, both you and the target gain **+5 Guard**, regardless of band or ladder. Can result in Over-Guard.<br /><br />**Beseech**: During Interlude, restore **1 spent Resolve** (once per Interlude).<br /><br />**Patron's Will** economics: your Max Strain is 8 — declaring 3 guaranteed successes costs 6 Strain. Use it when the heal *must* land.<br /><br />**Surge**: once per turn, convert Strain into Vigor at **2 Strain per 1 Vigor**, up to MIND (3) Vigor. |
 
-| Narrative Skills                                             |
-| ------------------------------------------------------------ |
-| Etiquette (Influence)<br />Charm (Influence)<br />Religion (Knowledge)<br />Herbalism (Fieldcraft)<br />Nature (Knowledge)<br />First Aid (Fieldcraft)<br />Politics (Knowledge)<br />Animal Handling (Fieldcraft) |
+| Threads (3)                                      | Bonds (3)                                                    |
+| ------------------------------------------------ | ------------------------------------------------------------ |
+| Novice-raised in the Cloister of First Light.    | [To Mira - Bond 1 / 1 Strand] Half-Elves are curious creatures to me. |
+| Walked the pilgrim roads as a lantern-bearer.    | [To Kira - Bond 1 / 1 Strand] Dwarves are curious creatures to me. |
+| Chosen as a Voice on the Night of Falling Stars. | [To Maya - Bond 1 / 1 Strand] Humans are curious creatures to me. |
 
 | Playstyle                                                    |
 | ------------------------------------------------------------ |

@@ -1,8 +1,8 @@
-# Mantle — Equipment Catalog
+# Momenta — Equipment Catalog
 
-**Version:** 0.21
+**Version:** 0.31
 
-Mantle is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This catalog contains the stat blocks for gear (weapons, armor, and spell foci). It is intended to be used with the `Mantle - Quick Start Guide` document, which contains the core rules of Mantle.
+Momenta is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This catalog contains the stat blocks for gear (weapons, armor, and spell foci). It is intended to be used with the `Momenta - Quick Start Guide` document, which contains the core rules of Momenta.
 
 All of the catalog examples are a *sample of the design space*, and not to be considered an exhaustive list.
 
@@ -35,10 +35,12 @@ Weapons are also assigned various weapon tags that describe the traits of the we
 | Reflexive    | This weapon can be used to make a **Forestall** reaction.    |
 | Penetrating  | This weapon **bypasses Guard** and hits Vitality directly.   |
 | Indefensible | This weapon cannot be mitigated by **reactive defenses**.    |
-| Imprecise    | This weapon **cannot target hit locations**. It can only target Mass. This means that an Imprecise ranged weapon cannot be used to attack a target that is behind cover (Melee weapons are not affected by cover). |
+| Imprecise    | This weapon **cannot target hit locations**. It can only target Mass. This means that an Imprecise ranged weapon cannot be used to attack a target that is behind cover (melee weapons are not affected by cover). |
 | Seeking      | This weapon is **not affected by cover**.                    |
 | Cumbersome   | Attacks with this weapon cost **3 Vigor** instead of 2. This includes reactive attacks like **Forestall**, **Intercept**, and **Counterattack**. |
 | Combo        | This weapon is part of a **combination weapon**, and it must be equipped with its other part(s). Together, the combination weapon costs **one fewer gear slot than the sum of its parts (minimum 1)**. |
+
+> **Design Note:** The **Deflect** and **Shield** tags mark weapons *capable* of deflecting. The **Deflect reaction** itself must be granted by an ability (e.g., Warrior Rank 1) — the tag alone does not grant it.
 
 
 
@@ -528,34 +530,34 @@ Effect: +3d to all spellcasting rolls. While this spell focus is equipped, you h
 
 ## Wondrous Items
 
-Wondrous items are unique, magical items that grant the wielder special abilities or bonuses. Wondrous items are unlike normal gear, and need to be equipped into a **wondrous item slot**. A character has a number of wondrous item slots equal to their SOUL value.
+Wondrous items are unique, magical items that grant the wielder special abilities or bonuses. Wondrous items are unlike normal gear, and need to be equipped into a **wondrous item slot**. A character has a number of wondrous item slots equal to their MIND value.
 
 ```
 [WONDROUS] Pathfinder's Compass
 Description: A brass compass whose needle points not north, but home.
 
-Effect: +1d to action rolls that can apply the character's trained Navigation skill.
+Effect: +1d to action rolls that apply to situations where navigation or tracking are involved.
 ```
 
 ```
 [WONDROUS] Spider-Grip Gloves
 Description: Supple leather gloves stitched with a faint, tacky resin that never seems to wear away.
 
-Effect: When climbing in combat, the wearer is considered as trained in the Climbing skill. In addition, while climbing, every square is not treated as difficult terrain, but as normal terrain instead.
+Effect: When climbing in combat, the wearer is considered as having the Athlete mastery. In addition, while climbing, every square is not treated as difficult terrain, but as normal terrain instead.
 ```
 
 ```
 [WONDROUS] Pendant of the Ox
 Description: A soapstone ox on a leather cord, worn smooth by generations of labourers' thumbs.
 
-Effect: The character is considered trained in the Lifting and Endurance skills. If the character is already trained in those skills, they get an additional +1d to action rolls when applying those skills.
+Effect: The character gains Resistance (Slashing), but suffers a -1 to SPD.
 ```
 
 
 
 ## Consumables
 
-Consumables are **single-use items** that can be used for healing, buffing, de-buffing, or even attacking. It is assumed that adventurers are generally well prepared and always in possession of a good mix of consumables for most situations. In Mantle, we do not track individual consumables, but instead use **consumable points**.
+Consumables are **single-use items** that can be used for healing, buffing, de-buffing, or even attacking. It is assumed that adventurers are generally well prepared and always in possession of a good mix of consumables for most situations. In Momenta, we do not track individual consumables, but instead use **consumable points**.
 
 To use a consumable, a character will mark off a consumable point, and they can apply the effect of any of the consumables that are on the common consumables catalog. It is assumed that adventurers will have access to all of the common consumables.
 
@@ -589,15 +591,22 @@ Effect:
 - 3+: 12 damage, target gains Wracked 1 (Fire)
 ```
 
-
-
-### Exotic Consumables
-
 ```
 [CONSUMABLE] Smoke Bomb
 Target: Self
 
 Effect: Target becomes Obscured from all enemies until the start of their next turn.
+```
+
+
+
+### Exotic Consumables
+
+```
+[CONSUMABLE] Phoenix Ember
+Target: Adjacent Ally
+
+Effect: Remove the target's Defeated condition.
 ```
 
 ```

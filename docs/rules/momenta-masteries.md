@@ -1,8 +1,8 @@
-# Mantle — Masteries Catalog
+# Momenta — Masteries Catalog
 
-**Version:** 0.21
+**Version:** 0.31
 
-Mantle is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This catalog contains the mastery and mastery set stat blocks. It is intended to be used with the `Mantle - Quick Start Guide` document, which contains the core rules of Mantle (see the quickstart's Masteries section for slot types, multi-slot payment, and retraining rules).
+Momenta is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This catalog contains the mastery and mastery set stat blocks. It is intended to be used with the `Momenta - Quick Start Guide` document, which contains the core rules of Momenta (see the quickstart's Masteries section for slot types, multi-slot payment, and retraining rules).
 
 All of the catalog examples are a *sample of the design space*, and not to be considered an exhaustive list.
 
@@ -16,20 +16,21 @@ All of the catalog examples are a *sample of the design space*, and not to be co
 | ------- | ------------------ | ---- | ----- | ------------------------------------------------------------ |
 | General | Abundance          | BODY | 1     | +1 Wondrous Item slot.                                       |
 | General | Alacrity           | BODY | 1     | +1 SPD.                                                      |
-| General | Cauterize          | SOUL | 1     | Gain the **Cauterize** maneuver (Vigor 2):<br />Remove one Wound from yourself by spending Resolve equal to the Wound's severity. You gain **Wracked 3 (Fire)**. |
+| General | Athlete            | BODY | 1     | When **climbing** or **swimming**, you can Move and Shift as per normal, but every square while climbing or swimming is treated as difficult terrain. When doing a **horizontal jump**, you can traverse obstacles up to a length of half your SPD. When doing a **vertical jump**, you can jump a number of squares equal to twice your SIZE. |
+| General | Cauterize          | SOUL | 1     | Gain the **Cauterize** maneuver (Vigor 2):<br />Spend 1 Resolve and remove one Wound. You gain **Wracked 3 (Fire)**. |
 | General | Composure          | MIND | 1     | +2 Resolve.                                                  |
-| General | Cosmopolitan       | SOUL | 1     | You learn 2 additional languages. Social action rolls involving any humanoid culture gain +1d. |
+| General | Creativity         | MIND | 1     | Increase your cap for Assists and Push Yourself during narrative play from +2d to +3d. |
 | General | Fireman            | BODY | 1     | Gain **Resistance (Fire)**.                                  |
-| General | Fleeting Spirit    | SOUL | 1     | If you are the first combatant to act in a round (before any allies or enemies), you gain +2d to the first attack you make on your turn. |
-| General | Fortune's Blessing | SOUL | 2     | *Prerequisite: LUCK 1*<br />At the start of each **Downtime**, gain blessings equal to your LUCK score (unspent blessings are lost and replaced). When you receive an undesirable luck roll result, spend a blessing to reroll. You must use the new result. |
-| General | Fortune's Escape   | SOUL | 1     | *Prerequisite: Fortune's Blessing*<br />You can spend a blessing to negate one consequence of a failure the GM agrees is plausibly luck-related. Cannot undo a Wound, a Burden, or the Defeated or Lost condition. |
-| General | Improviser         | SOUL | 1     | When the GM rules that a task requires training in a skill you lack, you may attempt it anyway (with no training bonus). The GM may still rule certain attempts implausible by fiction. |
+| General | Fleeting Spirit    | SOUL | 1     | If you are the first combatant to act in a round (before any allies or adversaries), you gain +2d to the first attack you make on your turn. |
+| General | Fortune's Blessing | SOUL | 2     | *Prerequisite: LUCK 2*<br />Instead of spending Momentum, you can choose to spend **1 Resolve** to activate a **Momentous Fortune** for yourself. |
+| General | Fortune's Escape   | SOUL | 1     | *Prerequisite: Fortune's Blessing*<br />When you activate a **Momentous Fortune** for yourself, you can choose to reroll twice, and choose the better result between the three rolls. |
 | General | Ironman            | BODY | 1     | +1 Wound slot.                                               |
 | General | Lightning Reflexes | BODY | 1     | When you **Dodge**, gain +1d on the opposing AGI roll.       |
 | General | Lone Wolf          | SOUL | 1     | If no allies are within SEN squares of you at the moment you roll, you gain +1d on that roll. Distance is checked at the moment the roll is made. |
 | General | Potpourri          | BODY | 1     | +2 consumable points.                                        |
 | General | Quick Mind         | MIND | 2     | When an ally finishes their turn, you may declare to take your own turn immediately after. This counts as one of your turns for the round, and is an exception to the usual alternating turn order. Your Vigor refresh at the start of this turn is capped at 1. |
-| General | Shared Fortune     | SOUL | 1     | *Prerequisite: Fortune's Blessing*<br />Spend a blessing on an ally's behalf to grant them a luck roll reroll. They must use the new result. |
+| General | Shared Fortune     | SOUL | 1     | *Prerequisite: Fortune's Blessing*<br />Instead of spending Momentum, you can choose to spend **1 Resolve** on behalf of an ally to activate a **Momentous Fortune** for them. |
+| General | Storied Past       | SOUL | 1     | *Dedication*<br />Gain one additional Thread.                |
 | General | Vigorous           | BODY | 1     | +1 Vigor refresh.                                            |
 | General | Willpower          | MIND | 1     | +1d when opposing rolls with INS.                            |
 
@@ -39,27 +40,31 @@ All of the catalog examples are a *sample of the design space*, and not to be co
 
 | Domain  | Mastery           | Type | Slots | Effect                                                       |
 | ------- | ----------------- | ---- | ----- | ------------------------------------------------------------ |
-| Martial | Bloodlust         | BODY | 1     | Your Slashing or Piercing melee weapon attacks gain the **Bloodlust (Triple)** pattern: Target gains **Wracked 1 (Bleeding)**. |
+| Martial | Bloodlust         | BODY | 1     | Your **Slashing** or **Piercing** melee weapon attacks gain the pattern:<br />**Bloodlust (Triple N)**: Target gains **Wracked 1 (Bleeding)**. |
 | Martial | Combat Reflexes   | BODY | 1     | All equipped melee weapons gain the **Reflexive** tag.       |
 | Martial | One Shot One Kill | MIND | 2     | If you defeat an enemy with an attack, you immediately regain 2 Vigor. |
-| Martial | Pulverize         | BODY | 1     | Your melee weapon attacks with a **Crushing** damage type gain the **Pulverize (Triple)** pattern: Target gains **Hindered 1**. |
+| Martial | Pulverize         | BODY | 1     | Your **Crushing** melee weapon attacks gain the pattern:<br />**Pulverize (Triple N)**: Target gains **Hindered**. |
 | Martial | Quartermaster     | BODY | 1     | +1 gear slot.                                                |
 
 
 
 ### Warrior
 
-| Domain  | Mastery               | Type | Slots | Effect                                                       |
-| ------- | --------------------- | ---- | ----- | ------------------------------------------------------------ |
-| Warrior | Battle Cry            | SOUL | 1     | Gain the **Battle Cry** maneuver (Vigor 2):<br />All allies (including yourself) within 5 squares who have the **Frightened** condition immediately clear it. You cannot use Battle Cry while you are Frightened. |
-| Warrior | Missile Parry         | BODY | 2     | You may **Deflect ranged attacks**, in addition to melee attacks. The weight class rule still applies (your Deflecting weapon's weight class must equal or exceed the attacker's); **Shield**-tagged weapons remain exempt from the weight class rule. |
-| Warrior | Overwatch             | MIND | 1     | Gain the **Overwatch** maneuver (Vigor 1):<br />Declare a **Cone 5** area originating from your square as your Overwatch zone, persisting until the start of your next turn. When an enemy moves into the zone from outside it, you may make a **ranged Basic Attack** against them as a reaction (2 Vigor per reactive attack; ranged weapon required). Each enemy can be attacked this way at most once before the start of your next turn, no matter how many times they re-enter. When you are in Overwatch, you cannot **Move** or **Shift**. |
-| Warrior | Shield Master         | BODY | 1     | **+1 gear slot**. When you Deflect with a Shield-tagged weapon and your Deflect roll scores 1+ successes and the attacker is within reach of your Shield, the attacker takes **2 damage**. |
-| Warrior | Spirit of the Warrior | SOUL | 1     | **+1d** when opposing rolls with REA, INS, or PRE.           |
-| Warrior | Steady Stance         | BODY | 1     | If you have not used the **Move** maneuver this turn, gain **+1 Guard**. This can result in Over-Guard. |
-| Warrior | Tactical Coordination | MIND | 1     | When you hit an enemy with a melee attack, the next ally to make an attack against that enemy before the start of your next turn gains **+1d** on that attack. |
-| Warrior | Visualization         | MIND | 1     | After rolling an attack, you may take **2 Strain** to re-roll. You must keep the re-roll. All modifiers that applied to the original roll apply equally to the re-roll. |
-| Warrior | Weapon Specialization | MIND | 1     | Pick one equipped weapon as your specialized weapon: attacks with that weapon gain **+1d**; attacks with any other weapon take **-1d**. You may change your specialized weapon during an Interlude. |
+| Domain  | Mastery                            | Type | Slots | Effect                                                       |
+| ------- | ---------------------------------- | ---- | ----- | ------------------------------------------------------------ |
+| Warrior | Battle Cry                         | SOUL | 1     | Gain the **Battle Cry** maneuver (Vigor 2):<br />All allies (including yourself) within 5 squares who have the **Frightened** condition immediately clear it. You cannot use Battle Cry while you are Frightened. |
+| Warrior | Delaying Strike                    | MIND | 1     | Your Focused Strike attacks gain the pattern:<br />**Delaying Strike (Triple N)**: The target gains the Slowed condition. |
+| Warrior | Missile Parry                      | BODY | 2     | You may **Deflect ranged attacks**, in addition to melee attacks. The weight class rule still applies (your Deflecting weapon's weight class must equal or exceed the attacker's); **Shield**-tagged weapons remain exempt from the weight class rule. |
+| Warrior | On Guard                           | MIND | 1     | Gain the **On Guard** maneuver (Vigor 1):<br />Restore Guard back to full. |
+| Warrior | Overwatch                          | MIND | 1     | Gain the **Overwatch** maneuver (Vigor 1):<br />Declare a **Cone 5** area originating from your square as your Overwatch zone, persisting until the start of your next turn. When an enemy moves into the zone from outside it, you may make a **ranged Basic Attack** against them as a reaction (2 Vigor per reactive attack; ranged weapon required). Each enemy can be attacked this way at most once before the start of your next turn, no matter how many times they re-enter. When you are in Overwatch, you cannot **Move** or **Shift**. |
+| Warrior | Resolute Strike                    | SOUL | 1     | Your Focused Strike attacks gain the pattern:<br />**Resolute Strike (Double N)**: Spend 1 Resolve to add **+8 damage**. |
+| Warrior | Shield Master                      | BODY | 1     | **+1 gear slot**. When you Deflect with a Shield-tagged weapon and your Deflect roll scores 1+ successes and the attacker is within reach of your Shield, the attacker takes **2 damage**. |
+| Warrior | Spirit of the Warrior              | SOUL | 1     | **+1d** when opposing rolls with REA, INS, or PRE.           |
+| Warrior | Steady Stance                      | BODY | 1     | At the **end of your turn**, if you did not use the **Move** maneuver this turn, gain **+1 Guard**. This can result in Over-Guard. |
+| Warrior | Tactical Coordination              | MIND | 1     | When you hit an enemy with a melee attack, the next ally to make an attack against that enemy before the start of your next turn gains **+1d** on that attack. |
+| Warrior | The Best Offense is a Good Defense | BODY | 1     | Your Focused Strike attacks gain the patterns:<br />**The Best Offense is a Good Defense (Double N)**: Add your current Guard value (including any Over-Guard) to your damage; your Guard becomes 0.<br />**The Best Offense is a Good Defense (Triple N)**: Add twice your current Guard value (including any Over-Guard) to your damage; your Guard becomes 0. |
+| Warrior | Visualization                      | MIND | 1     | After rolling an attack, you may take **2 Strain** to re-roll. You must keep the re-roll. All modifiers that applied to the original roll apply equally to the re-roll. |
+| Warrior | Weapon Specialization              | MIND | 1     | Pick one equipped weapon as your specialized weapon: attacks with that weapon gain **+1d**; attacks with any other weapon take **-1d**. You may change your specialized weapon during an Interlude. |
 
 
 
@@ -67,13 +72,13 @@ All of the catalog examples are a *sample of the design space*, and not to be co
 
 | Domain    | Mastery             | Type | Slots | Effect                                                       |
 | --------- | ------------------- | ---- | ----- | ------------------------------------------------------------ |
-| Barbarian | Battle Trance       | SOUL | 1     | While **Frenzied**, when you would take a **Wound**, you may take a **Burden** instead. Severity of the Burden is determined normally. |
+| Barbarian | Battle Trance       | SOUL | 1     | While **Frenzied**, when you would take a **Wound**, you may take a **Burden** instead. |
 | Barbarian | Berserk             | SOUL | 1     | Your maximum **Frenzy** stacks increase to **3** (from the default 1). |
 | Barbarian | Blood Scent         | SOUL | 1     | Creatures with 1+ stacks of **Wracked (Bleeding)** within SEN squares of you cannot be **Hidden** from you — treat them as **Obscured** at maximum, regardless of lighting, cover, or stealth. |
 | Barbarian | Bloodfeast          | BODY | 1     | When you defeat a creature with a melee attack while Frenzied, regain **1 Vigor** (up to your cap) and gain **+5 Guard**. This can result in Over-Guard. |
-| Barbarian | Bloody Armor        | SOUL | 1     | While you have 1+ stacks of **Wracked (Bleeding)** on yourself, gain **+1 Guard**. This can result in Over-Guard. |
+| Barbarian | Bloody Armor        | SOUL | 1     | At the start of your turn, gain an extra **+1 Guard** for every stack of **Wracked (Bleeding)** on yourself, after your Guard refreshes. This can result in Over-Guard. |
 | Barbarian | Charging Frenzy     | BODY | 1     | When the Enter Frenzy maneuver takes you from 0 to 1 Frenzy stack, you may immediately take the **Move** maneuver at no Vigor cost. This is in addition to the free Move maneuver you get every turn. |
-| Barbarian | Taunt               | SOUL | 1     | Gain the **Taunt** maneuver (Vigor 2):<br />Target one creature within 10 squares that you can reasonably communicate with (GM adjudicates; shared language is not required). Creatures with the Mindless tag cannot be taunted. Make a **PRE action roll opposed by the target's INS**. On 1+ net successes, the target gains the **Provoked** condition with you as its source. |
+| Barbarian | Taunt               | SOUL | 1     | Gain the **Taunt** maneuver (Vigor 2):<br />Target one creature within 10 squares that you can reasonably communicate with (GM adjudicates; shared language is not required). Creatures with the Mindless tag cannot be taunted. Make a **POW action roll opposed by the target's INS**. On 1+ net successes, the target gains the **Provoked** condition with you as its source. |
 | Barbarian | Terrifying Presence | SOUL | 1     | When you use the Enter Frenzy maneuver, make a **PRE action roll opposed by the target's INS** for each enemy within 5 squares. Each enemy you beat with 1+ net successes gains the **Frightened** condition, with you as the source. |
 | Barbarian | Wild Swing          | BODY | 1     | Gain the **Wild Swing** maneuver (Vigor 5):<br />Make a melee attack against **every creature within your melee weapon's range — enemy and ally alike**. Each attack uses the same weapon and rolls its own pool at **-1d**. Allies may use reactive defenses against these attacks as normal. |
 
@@ -117,7 +122,7 @@ All of the catalog examples are a *sample of the design space*, and not to be co
 | Channeler | Beseech             | SOUL | 1     | During Interlude, you may beseech your patron to restore **1 spent Resolve**. This can only be done once per Interlude. |
 | Channeler | Patron's Mark       | MIND | 1     | When you cast a spell on a creature, it gains your **Patron's Mark** (only one creature carries the Mark at a time; casting on a different creature moves it). When you cast a spell on the Marked creature: the spellcasting roll gains **+1d**. The Mark is then consumed. |
 | Channeler | Mending Spirit      | MIND | 1     | When you cast **Mend**, both you (the caster) and the target gain **+5 Guard**, regardless of the band rolled or which effect ladder the Mend uses. This can result in Over-Guard. |
-| Channeler | Smite of the Patron | SOUL | 1     | Once per Interlude, when a **Rend** you cast lands 1+ successes, you may spend **1 Resolve** to add **+8 damage** (Vitality-ladder Rend) or **+4 Strain** (Strain-ladder Rend) to the result. The bonus carries the Rend's own tags — your patron empowers the strike without reshaping its nature. |
+| Channeler | Smite of the Patron | SOUL | 1     | Your Rend attacks gain the pattern:<br />**Smite of the Patron (Double N)**: Spend 1 Resolve to add **+8 damage** (Vitality-ladder Rend) or **+3 Strain** (Strain-ladder Rend). |
 
 
 
@@ -132,7 +137,6 @@ All of the catalog examples are a *sample of the design space*, and not to be co
 | Human  | Open Mind        | MIND | 1     | Gain +1 SOUL mastery slot.                                   |
 | Human  | Self-Examination | BODY | 1     | Gain +1 SOUL mastery slot.                                   |
 | Human  | Sophistry        | SOUL | 1     | Gain +1 MIND mastery slot.                                   |
-| Human  | Well-Rounded     | MIND | 1     | +2 narrative skills from any group. These two skills may be swapped for any other skills during Downtime. |
 
 
 
@@ -167,7 +171,7 @@ All of the catalog examples are a *sample of the design space*, and not to be co
 
 | Set                  | Masteries                                                    | Set Bonus                                                    |
 | -------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| Overflowing Fortune  | Fortune's Blessing, Shared Fortune, Fortune's Escape         | The **Cursed** condition does not affect your own luck rolls. If you use Shared Fortune, the ally rerolls as if they did not have the Cursed condition. |
+| Overflowing Fortune  | Fortune's Blessing, Shared Fortune, Fortune's Escape         | The **Cursed** condition does not affect your own luck rolls. |
 | Benkei               | Quartermaster, Shield Master, Weapon Specialization, Abundance | **+3 gear slots**.                                           |
 | Shukuchi             | Lightning Reflexes, Alacrity, Quick Mind, Fleeting Spirit    | **+2 SPD**.                                                  |
 | Peak Human Condition | Aggression, Mind Over Matter, Open Mind, Self-Examination    | Gain **+1 Vitality** per Human-domain mastery equipped.      |

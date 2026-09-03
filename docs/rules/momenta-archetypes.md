@@ -1,8 +1,8 @@
-# Mantle — Archetypes Catalog
+# Momenta — Archetypes Catalog
 
-**Version:** 0.21
+**Version:** 0.31
 
-Mantle is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This catalog contains the archetype stat blocks. It is intended to be used with the `Mantle - Quick Start Guide` document, which contains the core rules of Mantle.
+Momenta is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This catalog contains the archetype stat blocks. It is intended to be used with the `Momenta - Quick Start Guide` document, which contains the core rules of Momenta.
 
 All of the catalog examples are a *sample of the design space*, and not to be considered an exhaustive list.
 
@@ -23,13 +23,13 @@ All of the catalog examples are a *sample of the design space*, and not to be co
 > - **Bonuses:** +1 Max Vitality, +1 Max Strain
 > - **Abilities:**
 >   - **Versatile** - Gain an additional **1 wildcard mastery slot**.
->   - **Skill Training** - Receive training in **4 narrative skills** from any group.
+>   - **Human Experience** - Gain **one additional Thread**.
 
 > **RANK 2**
 >
 > - **Bonuses:** +1 Max Vitality, +1 Max Strain
 > - **Abilities**:
->   - **Mental Resilience** - When you take the **Steady Yourself** maneuver, you can spend Resolve to **clear one Burden**. The amount of Resolve you need to spend is equal to the Burden's severity.
+>   - **Mental Resilience** - When you take the **Steady Yourself** maneuver, you can spend 1 Resolve to **clear one Burden**.
 
 > **RANK 3**
 >
@@ -50,19 +50,18 @@ All of the catalog examples are a *sample of the design space*, and not to be co
 > - **Bonuses:** +1 Max Vitality, +1 Max Strain
 > - **Abilities:**
 >   - **Low-Light Vision**
->   - **Skill Training** - Receive training in **4 narrative skills** from any group.
 
 > **RANK 2**
 >
 > - **Bonuses:** +1 Max Vitality, +1 Max Strain
 > - **Abilities**:
->   - **Elven Memories** - When making an action roll that can apply a skill from the **Knowledge skill group**, you may instead resolve it by **testing your luck**. You must take the results of the luck roll.
+>   - **Elven Memories** - Whenever a situation calls for having knowledge about a subject matter, you can spend **1 Strain** to upgrade your knowledge level by one step - from **Unfamiliar to Familiar**, or from **Familiar to Expert**. Only 1 Strain can be spent in this manner for each situation, and it only lasts for the duration of the current situation.
 
 > **RANK 3**
 >
 > - **Bonuses:** +1 Max Vitality, +1 Max Strain
 > - **Abilities**:
->   - **Cultural Fluency** - Gain a **+1d bonus** for all action rolls that apply a skill from the **Influence skill group**, as long as it either involves Humans, Elves, or Half-Elves (GM adjudicates).
+>   - **Cultural Fluency** - Gain a **+1d bonus** for all action rolls that involve performance, influence, intimidation, or persuasion as long as it either involves Humans, Elves, or Half-Elves (GM adjudicates).
 >   - **Adaptability** - During an Interlude, you may **retrain one equipped mastery** for another mastery that you qualify for.
 
 
@@ -78,8 +77,7 @@ All of the catalog examples are a *sample of the design space*, and not to be co
 > - **Bonuses:** +2 Max Strain
 > - **Abilities:**
 >   - **Low-Light Vision**
->   - **Elven Memories** - When making an action roll that can apply a skill from the **Knowledge skill group**, you may instead resolve it by **testing your luck**. You must take the results of the luck roll.
->   - **Skill Training** - Receive training in **4 narrative skills** from any group.
+>   - **Elven Memories** - Whenever a situation calls for having knowledge about a subject matter, you can spend **1 Strain** to upgrade your knowledge level by one step - from **Unfamiliar to Familiar**, or from **Familiar to Expert**. Only 1 Strain can be spent in this manner for each situation, and it only lasts for the duration of the current situation.
 
 > **RANK 2**
 >
@@ -107,7 +105,6 @@ All of the catalog examples are a *sample of the design space*, and not to be co
 > - **Bonuses:** +2 Max Vitality
 > - **Abilities:**
 >   - **Darkvision**
->   - **Skill Training** - Receive training in **4 narrative skills** from any group.
 
 > **RANK 2**
 >
@@ -138,11 +135,10 @@ All of the catalog examples are a *sample of the design space*, and not to be co
 > - **Bonuses:** +2 Max Vitality
 > - **Abilities:**
 >   - **Martial Training** - You may equip **Medium**, **Heavy**, and **Superheavy** weapons, and **Martial** armor.
->   - **Skill Training** - Receive training in **2 narrative skills** from the **Athletics** or **Fieldcraft** skill groups.
 >   - **Enter Frenzy** - You have access to the **Enter Frenzy** maneuver to gain the **Frenzy** condition. Your maximum number of Frenzy stacks cannot exceed 1 (this limit can be increased with the **Berserk** mastery).
 
 ```
-[MANEUVER] Enter Frenzy (Vigor 0, 1/turn)
+[MANEUVER] Enter Frenzy (Vigor 1, 1/turn)
 
 Effect: Gain 1 stack of the Frenzy condition.
 ```
@@ -154,7 +150,7 @@ Clear Type: Persistent
 
 Effect: The character is in a state of mounting battle-rage. While Frenzied...
 - You gain +1d bonus per stack on all melee weapon attacks. This also applies to reactive attacks.
-- You gain a flat +1 to your Vigor refresh per turn and +1 SPD.
+- You gain a +1 to your SPD.
 - You cannot Brace, or use any reactive defenses.
 - At the end of your turn, you take Strain equal to your current number of Frenzy stacks.
 
@@ -188,7 +184,6 @@ The Frenzy condition is cleared when you take the Steady Yourself maneuver.
 > - **Bonuses:** +1 Max Vitality, +1 Max Guard
 > - **Abilities:**
 >   - **Martial Training** - You may equip **Medium**, **Heavy**, and **Superheavy** weapons, and **Martial** armor.
->   - **Skill Training** - Receive training in **2 narrative skills** from the **Athletics** or **Subterfuge** skill groups.
 >   - **Deflect** - You have access to the **Deflect** reactive defense.
 
 > **RANK 2**
@@ -220,7 +215,6 @@ The Frenzy condition is cleared when you take the Steady Yourself maneuver.
 >   - **Spellcasting** - You may perform the **Cast a Spell** maneuver, and use REA as the spellcasting attribute.
 >   - **Starting Repertoire** - You get **3 bonus mastery slots** that must be filled with **Resonances** and **Arts**. You must have at least 1 Resonance and 1 Art in those 3 slots.
 >   - **Spell Focus** - You may use your gear slots to equip spell focus. Attempting to cast a spell without a spell focus equipped will incur a **-1d penalty** on the spellcasting roll.
->   - **Skill Training** - Receive training in the **Magic Theory** narrative skill, and **3 additional narrative skills** from the **Knowledge** skill group.
 
 > **RANK 2**
 >
@@ -228,6 +222,7 @@ The Frenzy condition is cleared when you take the Steady Yourself maneuver.
 > - **Abilities:**
 >   - **Detect Magic** - You have access to the **Detect Magic** maneuver.
 >   - **Push the Craft** - When you cast a spell, you may take up to MIND Strain. For each Strain taken, the cast gains +1d bonus. This has to be declared *before* rolling.
+>   - **Magic Study** - Gain **1 additional bonus mastery slot** that must be filled with **Resonances** and **Arts**.
 
 ```
 [MANEUVER] Detect Magic (Vigor 2)
@@ -243,7 +238,7 @@ Effect: Make a REA action roll to sense magic within SEN squares.
 > - **Bonuses:** +1 Max Strain
 > - **Abilities:**
 >   - **Long Casting** - When casting a spell, you may spread the Vigor cost of the spell across two turns: half on the current turn, and half at the start of your next turn (if the Vigor cost is odd, the one extra Vigor is spent on this turn). The spell resolves with its spellcasting roll on the second turn when the full Vigor cost is paid. During the holding period, you cannot take reactions (your concentration is locked on the casting), but you may take maneuvers if you have enough Vigor. If for some reason the full Vigor cost cannot be paid, or if you cannot take maneuvers at the start of the second turn, the spell fizzles out, and the Vigor spent in the previous turn is wasted.
->   - **Magic Expertise** - All Resonance and Art masteries have their cost reduced by 1 slot (minimum 1).
+>   - **Magic Expertise** - Gain **1 additional bonus mastery slot** that must be filled with **Resonances** and **Arts**.
 
 
 
@@ -260,14 +255,13 @@ Effect: Make a REA action roll to sense magic within SEN squares.
 >   - **Spellcasting** - You may perform the **Cast a Spell** maneuver, and use INS as the spellcasting attribute.
 >   - **Starting Repertoire** - You get **3 bonus mastery slots** that must be filled with **Resonances** and **Arts**. You must have at least 1 Resonance and 1 Art in those 3 slots.
 >   - **Spell Focus** - You may use your gear slots to equip spell focus. Attempting to cast a spell without a spell focus equipped will incur a **-1d penalty** on the spellcasting roll.
->   - **Skill Training** - Receive training in **2 narrative skills** from the **Influence** skill group, and **2 narrative skills** from any skill group.
 
 > **RANK 2**
 >
 > - **Bonuses:** +1 Resolve
 > - **Abilities:**
 >   - **Patron's Aura** - You project an aura of divine protection covering all squares within 5 squares of you. You also have access to the **Helping Hand** reaction.
->   - **Patron's Will** - When you cast a spell, you may **bypass the spellcasting roll** entirely and declare a number of successes by paying Strain. **Every success costs 2 Strain**. Since there was no roll, no bonuses and penalty modifiers apply. Patron's Will must be used before the roll is made, and the caster must declare how many successes they want to pay for before resolving any opposed rolls.
+>   - **Patron's Will** - When you cast a spell, you may **bypass the spellcasting roll** entirely and declare a number of successes by paying Strain. **Every success costs 2 Strain**. Since there was no roll, no bonuses and penalty modifiers apply, and no patterns apply. Patron's Will must be used before the roll is made, and the caster must declare how many successes they want to pay for before resolving any opposed rolls.
 
 ```
 [REACTION] Helping Hand (variable cost)
@@ -280,7 +274,7 @@ Effect: You can cast a Mend Art spell on that ally immediately. The spell resolv
 >
 > - **Bonuses:** +1 Resolve
 > - **Abilities:**
->   - **Patron's Aegis** - When you would take a Wound from incoming damage, you may **spend 2 Resolve** to **prevent the Wound** entirely, regardless of the severity. The damage is absorbed by your patron's intervention. All of the other damage rules apply; your Vitality is restored to full as if a Wound was inflicted, even if no Wound was actually inflicted. This ability can only be used once per combat encounter.
+>   - **Patron's Aegis** - When you would take a Wound from incoming damage, you may **spend 1 Resolve** to **prevent the Wound** entirely. The damage is absorbed by your patron's intervention. All of the other damage rules apply; your Vitality is restored to full as if a Wound was inflicted, even if no Wound was actually inflicted. This ability can only be used once per combat encounter.
 >   - **Patron's Gift** - Patron's Will has a reduced cost: 1 success costs 1 Strain; 2 successes costs 2 Strain; beyond that, every extra success costs 2 Strain as per normal.
 
 

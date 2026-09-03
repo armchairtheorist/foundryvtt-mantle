@@ -1,8 +1,8 @@
-# Mantle — Spellcasting Catalog
+# Momenta — Spellcasting Catalog
 
-**Version:** 0.21
+**Version:** 0.31
 
-Mantle is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This catalog contains the Art and Resonance stat blocks. It is intended to be used with the `Mantle - Quick Start Guide` document, which contains the core rules of Mantle.
+Momenta is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This catalog contains the Art and Resonance stat blocks. It is intended to be used with the `Momenta - Quick Start Guide` document, which contains the core rules of Momenta.
 
 All of the catalog examples are a *sample of the design space*, and not to be considered an exhaustive list.
 
@@ -81,7 +81,7 @@ Effect (Strain):
 
 If the [Resonance-defined condition] is non-stackable, the condition will just be applied at 2 and 3+ successes.
 
-Default attack tags: "Melee 1", "Range N" (N = spell range), "Imprecise" + "Seeking" if area effect.
+Default attack tags: "Melee 1" when delivered at Touch, otherwise "Range N" (N = spell range); "Imprecise" + "Seeking" if area effect.
 ```
 
 
@@ -111,7 +111,7 @@ If the [Resonance-defined condition] is non-stackable, the condition will just b
 
 Afflict ends immediately if the caster is Defeated.
 
-Default attack tags: "Melee 1", "Range N" (N = spell range) if applicable, "Imprecise" + "Seeking" if area effect.
+Default attack tags: "Melee 1" when delivered at Touch, otherwise "Range N" (N = spell range); "Imprecise" + "Seeking" if area effect.
 ```
 
 
@@ -226,7 +226,7 @@ Additional attack tags: "Fire", "Indefensible", "Imprecise", "Seeking". Conditio
 Bolster Effect: +2 Fire damage on melee weapon attacks. Qualifying rolls: Melee weapon attacks.
 
 [Mend]
-Heals Vitality. Bonus Effect: The caster may further choose to spend extra Resolve to heal one Wound on the target. The amount of Resolve needed is equal to the Wound's severity. The Resolve cost may be paid by the caster, the target, or split between them in any combination (caster's choice). The target then gains the Wracked 3 (Fire) condition.
+Heals Vitality. Bonus Effect: The caster may further choose to spend 1 Resolve to heal one Wound on the target. The Resolve cost may be paid by the caster or the target (caster's choice). The target then gains the Wracked 3 (Fire) condition.
 ```
 
 
@@ -272,7 +272,7 @@ Additional attack tags: "Mental", "Indefensible", "Imprecise", "Seeking". Condit
 Bolster Effect: +2d on REA and INS rolls made to oppose another roll. Qualifying rolls: All other REA and INS rolls.
 
 [Mend]
-Heals Strain. Bonus Effect: The target is cleansed of the Frightened condition. The caster may further choose to spend extra Resolve to heal one Burden on the target. The amount of Resolve needed is equal to the Burden's severity. The Resolve cost may be paid by the caster, the target, or split between them in any combination (caster's choice).
+Heals Strain. Bonus Effect: The target is cleansed of the Frightened condition. The caster may further choose to spend 1 Resolve to heal one Burden on the target. The Resolve cost may be paid by the caster or the target (caster's choice).
 ```
 
 

@@ -1,8 +1,8 @@
-# Mantle — Limit Breaks Catalog
+# Momenta — Limit Breaks Catalog
 
-**Version:** 0.21
+**Version:** 0.31
 
-Mantle is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This catalog contains the Limit Breaks stat blocks. It is intended to be used with the `Mantle - Quick Start Guide` document, which contains the core rules of Mantle.
+Momenta is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This catalog contains the Limit Breaks stat blocks. It is intended to be used with the `Momenta - Quick Start Guide` document, which contains the core rules of Momenta.
 
 All of the catalog examples are a *sample of the design space*, and not to be considered an exhaustive list.
 
@@ -46,10 +46,11 @@ Because a Limit Break is a full-turn maneuver, free maneuvers that accompany cas
 [LIMIT BREAK] Undying Vow
 Prerequisite: MIND 2
 
-Effect: Every ally within SEN squares (including yourself) restores Vitality equal to half their Max Vitality at no Resolve cost, then chooses one of the following:
+Effect: Every non-Defeated ally within SEN squares (including yourself) restores Vitality equal to half their Max Vitality at no Resolve cost, then chooses one of the following:
 
 - Clear Strain equal to half their Max Strain; or
-- Clear one condition on themselves that is auto-clear or roll-to-clear.
+- Clear one condition on themselves that is auto-clear or roll-to-clear; or
+- Clear either the Faltering or Unraveling condition
 ```
 
 ```
@@ -74,5 +75,11 @@ Effect: For every ally within SEN squares: Each ally may take a free Move or Shi
 [LIMIT BREAK] Inazuma Crash
 Prerequisite: Warrior Realized
 
-Effect: Double your SPD for this turn. Choose one equipped melee weapon. For every enemy that enters your weapon's melee range during your turn, make one Basic Attack against it; on 3 or more successes the enemy disregards the attack's normal effects and instead takes a Wound. Each enemy can only be struck once this turn in this manner.
+Effect: Double your SPD for this turn. Choose one equipped melee weapon. As you move, make one Basic Attack with that weapon against each enemy that comes within the weapon's reach at any point during your movement this turn (each enemy can only be struck once this way). On 3 or more successes, the enemy disregards the attack's normal effects and instead takes a Wound (if the enemy has no Wound slots, they become Defeated).
 ```
+
+
+
+## Combo Limit Breaks
+
+Combo Limit Breaks require mutual Bond 4+; see **Bonds in Combat** in the quickstart. Entries to follow.
