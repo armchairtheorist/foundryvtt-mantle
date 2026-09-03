@@ -98,6 +98,22 @@
     opacity: 0.5;
   }
 
+  /* Disabled equipment is still worn and still listed: it reads as struck
+     through rather than faded, so it cannot be mistaken for something merely
+     left in the pack. */
+  .entry.disabled {
+    .name,
+    .effect,
+    .ladder {
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+
+    .control.disable {
+      color: var(--mantle-warning);
+    }
+  }
+
   .entry {
     display: flex;
     flex-wrap: wrap;

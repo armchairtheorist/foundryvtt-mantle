@@ -71,6 +71,18 @@ function equippable() {
   return { equipped: new fields.BooleanField({ initial: false }) };
 }
 
+/**
+ * Fields for equipment that an ability or event can disable.
+ *
+ * Disabled equipment stays on the sheet — that is the point of the rule, and
+ * the reason it is a flag rather than an unequip. It simply cannot be used
+ * until whatever disabled it is rectified. Only the five kinds of gear the
+ * rules name carry this; masteries, Arts and Limit Breaks do not.
+ */
+function disableable() {
+  return { disabled: new fields.BooleanField({ initial: false }) };
+}
+
 /* -------------------------------------------- */
 /*  Archetypes                                   */
 /* -------------------------------------------- */
@@ -226,6 +238,7 @@ export class WeaponData extends TypeDataModel {
     return {
       ...common(),
       ...equippable(),
+      ...disableable(),
 
       /**
        * An intrinsic weapon is part of the body rather than part of the
@@ -291,6 +304,7 @@ export class ArmorData extends TypeDataModel {
     return {
       ...common(),
       ...equippable(),
+      ...disableable(),
       armorClass: choice(MANTLE.armorClasses, "standard"),
       guard: count(1),
       /** Dice penalty the armor imposes, e.g. -1 on all AGI action rolls. */
@@ -309,6 +323,7 @@ export class FocusData extends TypeDataModel {
     return {
       ...common(),
       ...equippable(),
+      ...disableable(),
       /** Basic foci simply enable casting at full effectiveness. */
       exotic: new fields.BooleanField({ initial: false }),
       effect: text()
@@ -322,7 +337,7 @@ export class FocusData extends TypeDataModel {
 
 export class WondrousData extends TypeDataModel {
   static defineSchema() {
-    return { ...common(), ...equippable(), effect: text() };
+    return { ...common(), ...equippable(), ...disableable(), effect: text() };
   }
 }
 
@@ -330,6 +345,7 @@ export class ConsumableData extends TypeDataModel {
   static defineSchema() {
     return {
       ...common(),
+      ...disableable(),
       /** Common consumables are always available; exotic ones must be found. */
       category: options(CONSUMABLE_CATEGORIES, "common"),
       target: text(),

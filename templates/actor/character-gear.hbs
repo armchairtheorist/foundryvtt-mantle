@@ -53,7 +53,7 @@
     {{/unless}}
 
     {{#each items.weapons as |weapon|}}
-      <div class="entry weapon {{#if weapon.system.intrinsic}}intrinsic{{/if}} {{#unless weapon.system.equipped}}unequipped{{/unless}}" data-item-id="{{weapon.id}}">
+      <div class="entry weapon {{#if weapon.system.intrinsic}}intrinsic{{/if}} {{#unless weapon.system.equipped}}unequipped{{/unless}} {{#if weapon.system.disabled}}disabled{{/if}}" data-item-id="{{weapon.id}}">
         <div class="entry-head">
           {{#if weapon.system.intrinsic}}
             <i class="fa-solid fa-hand-fist intrinsic-icon"
@@ -80,6 +80,10 @@
             <a class="control forestall" data-action="rollForestall"
                data-tooltip="{{localize 'MANTLE.Reaction.forestallHint'}}"><i class="fa-solid fa-hand"></i></a>
           {{/if}}
+          <a class="control disable" data-action="toggleDisabled"
+             data-tooltip="{{localize 'MANTLE.Item.disableHint'}}">
+            <i class="fa-solid {{#if weapon.system.disabled}}fa-ban{{else}}fa-circle-check{{/if}}"></i>
+          </a>
           <a class="control" data-action="deleteItem"><i class="fa-solid fa-trash"></i></a>
         </div>
 
@@ -111,7 +115,7 @@
   <div class="section armor">
     <h3>{{localize "MANTLE.Sheet.armor"}}</h3>
     {{#each items.armor as |armor|}}
-      <div class="entry {{#unless armor.system.equipped}}unequipped{{/unless}}" data-item-id="{{armor.id}}">
+      <div class="entry {{#unless armor.system.equipped}}unequipped{{/unless}} {{#if armor.system.disabled}}disabled{{/if}}" data-item-id="{{armor.id}}">
         <a class="equip-toggle" data-action="toggleEquipped">
           <i class="fa-solid {{#if armor.system.equipped}}fa-square-check{{else}}fa-square{{/if}}"></i>
         </a>
@@ -121,6 +125,10 @@
         {{#if armor.system.penalty}}
           <span class="penalty">{{armor.system.penalty}}d {{armor.system.penaltyApplies}}</span>
         {{/if}}
+        <a class="control disable" data-action="toggleDisabled"
+           data-tooltip="{{localize 'MANTLE.Item.disableHint'}}">
+          <i class="fa-solid {{#if armor.system.disabled}}fa-ban{{else}}fa-circle-check{{/if}}"></i>
+        </a>
         <a class="control" data-action="deleteItem"><i class="fa-solid fa-trash"></i></a>
       </div>
     {{else}}
@@ -131,12 +139,16 @@
   <div class="section foci">
     <h3>{{localize "MANTLE.Sheet.foci"}}</h3>
     {{#each items.foci as |focus|}}
-      <div class="entry {{#unless focus.system.equipped}}unequipped{{/unless}}" data-item-id="{{focus.id}}">
+      <div class="entry {{#unless focus.system.equipped}}unequipped{{/unless}} {{#if focus.system.disabled}}disabled{{/if}}" data-item-id="{{focus.id}}">
         <a class="equip-toggle" data-action="toggleEquipped">
           <i class="fa-solid {{#if focus.system.equipped}}fa-square-check{{else}}fa-square{{/if}}"></i>
         </a>
         <span class="name" data-action="editItem">{{focus.name}}</span>
         <span class="effect">{{#if focus.system.effect}}{{focus.system.effect}}{{else}}{{localize "MANTLE.Sheet.basicFocus"}}{{/if}}</span>
+        <a class="control disable" data-action="toggleDisabled"
+           data-tooltip="{{localize 'MANTLE.Item.disableHint'}}">
+          <i class="fa-solid {{#if focus.system.disabled}}fa-ban{{else}}fa-circle-check{{/if}}"></i>
+        </a>
         <a class="control" data-action="deleteItem"><i class="fa-solid fa-trash"></i></a>
       </div>
     {{else}}
@@ -147,7 +159,7 @@
   <div class="section wondrous">
     <h3>{{localize "MANTLE.Sheet.wondrous"}}</h3>
     {{#each items.wondrous as |item|}}
-      <div class="entry {{#unless item.system.equipped}}unequipped{{/unless}}" data-item-id="{{item.id}}">
+      <div class="entry {{#unless item.system.equipped}}unequipped{{/unless}} {{#if item.system.disabled}}disabled{{/if}}" data-item-id="{{item.id}}">
         <a class="equip-toggle" data-action="toggleEquipped">
           <i class="fa-solid {{#if item.system.equipped}}fa-square-check{{else}}fa-square{{/if}}"></i>
         </a>
@@ -155,6 +167,10 @@
         <span class="effect">{{item.system.effect}}</span>
         <a class="control use" data-action="useItem"
            data-tooltip="{{localize 'MANTLE.Item.useHint'}}"><i class="fa-solid fa-hand-sparkles"></i></a>
+        <a class="control disable" data-action="toggleDisabled"
+           data-tooltip="{{localize 'MANTLE.Item.disableHint'}}">
+          <i class="fa-solid {{#if item.system.disabled}}fa-ban{{else}}fa-circle-check{{/if}}"></i>
+        </a>
         <a class="control" data-action="deleteItem"><i class="fa-solid fa-trash"></i></a>
       </div>
     {{else}}
@@ -168,12 +184,16 @@
   <div class="section consumables">
     <h3>{{localize "MANTLE.Sheet.consumables"}}</h3>
     {{#each items.consumables as |item|}}
-      <div class="entry" data-item-id="{{item.id}}">
+      <div class="entry {{#if item.system.disabled}}disabled{{/if}}" data-item-id="{{item.id}}">
         <span class="name" data-action="editItem">{{item.name}}</span>
         <span class="category">{{item.system.category}}</span>
         <span class="effect">{{item.system.effect}}</span>
         <a class="control use" data-action="useItem"
            data-tooltip="{{localize 'MANTLE.Item.useConsumableHint'}}"><i class="fa-solid fa-flask"></i></a>
+        <a class="control disable" data-action="toggleDisabled"
+           data-tooltip="{{localize 'MANTLE.Item.disableHint'}}">
+          <i class="fa-solid {{#if item.system.disabled}}fa-ban{{else}}fa-circle-check{{/if}}"></i>
+        </a>
         <a class="control" data-action="deleteItem"><i class="fa-solid fa-trash"></i></a>
       </div>
     {{else}}

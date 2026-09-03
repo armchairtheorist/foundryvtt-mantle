@@ -26,6 +26,12 @@ import { build as buildMasteries } from "../src/content/masteries.mjs";
 import { build as buildAdversaries } from "../src/content/adversaries.mjs";
 import { build as buildPregens } from "../src/content/pregens.mjs";
 import { bondCapacity, bondIntensity } from "../module/rules/bonds.mjs";
+import {
+  DISABLEABLE,
+  countsAsFocus,
+  penalizes,
+  protects
+} from "../module/rules/equipment.mjs";
 import { deriveCores, deriveMaxBonds } from "../module/data/derive.mjs";
 import { MANTLE } from "../module/config.mjs";
 
@@ -684,6 +690,70 @@ describe("the Bond tables", () => {
 
   test("character creation grants three Strands", () => {
     assert.match(quickstart, /you start with \*\*3 Strands\*\*/);
+  });
+});
+
+/* -------------------------------------------- */
+
+describe("disabling equipment", () => {
+  const quickstart = rules("quickstart");
+
+  // "- Disabled **weapons** cannot be used for attacks…", one bullet per kind,
+  // except consumables, whose bullet is phrased the other way round.
+  const bullets = [
+    ...quickstart.matchAll(/^- (?:Disabled|If a character's) \*\*([^*]+)\*\*/gm)
+  ].map((match) => match[1].toLowerCase());
+
+  /**
+   * The item type each printed phrase names. Spelled out rather than derived:
+   * "wondrous items" and "spell focus" do not reduce to their item type by any
+   * rule worth writing, and an explicit map is the honest translation.
+   */
+  const TYPES = {
+    weapons: "weapon",
+    armor: "armor",
+    "spell focus": "focus",
+    "wondrous items": "wondrous",
+    consumables: "consumable"
+  };
+
+  test("the rules name five kinds of gear", () => {
+    assert.equal(bullets.length, 5, `found: ${bullets.join(", ")}`);
+  });
+
+  test("each printed kind is one the map knows", () => {
+    // A rules edit that renames a bullet fails here rather than silently
+    // dropping that kind out of the comparison below.
+    assert.deepEqual([...bullets].sort(), Object.keys(TYPES).sort());
+  });
+
+  test("each is a kind the code can disable", () => {
+    assert.deepEqual(
+      bullets.map((printed) => /** @type {Record<string, string>} */ (TYPES)[printed]).sort(),
+      [...DISABLEABLE].sort()
+    );
+  });
+
+  test("an interlude restores what was disabled", () => {
+    assert.match(quickstart, /Restore any disabled equipment, unless the disabling effect states otherwise/);
+  });
+
+  test("armor keeps its penalty while disabled", () => {
+    // Every other bullet is a plain "no"; this is the one that carves out an
+    // exception, and the one the code could most easily get backwards.
+    assert.match(
+      quickstart,
+      /Disabled \*\*armor\*\*[^\n]*armor penalty \(if it exists\) still applies/
+    );
+    assert.equal(penalizes({ equipped: true, disabled: true }), true);
+    assert.equal(protects({ equipped: true, disabled: true }), false);
+  });
+
+  test("a missing focus costs a die, so a disabled one does too", () => {
+    const printed = quickstart.match(/without a spell focus equipped[^\n]*?\*\*-(\d)d penalty\*\*/);
+    assert.ok(printed, "the no-focus penalty is printed");
+    assert.equal(MANTLE.noFocusPenalty, -Number(printed[1]));
+    assert.equal(countsAsFocus({ equipped: true, disabled: true }), false);
   });
 });
 

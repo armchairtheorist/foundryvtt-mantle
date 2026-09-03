@@ -24,6 +24,7 @@ import {
 } from "../rules/rest.mjs";
 import { limitBreakRoutes } from "../rules/momentum.mjs";
 import { bondManeuvers, mutualBond } from "../rules/bonds.mjs";
+import { isUsable } from "../rules/equipment.mjs";
 import { castTemplate, isMultiTarget } from "../rules/templates.mjs";
 import { pairingEffects, rangeAtStep } from "../rules/shaping.mjs";
 import { placeSpellTemplate } from "../canvas/spell-template.mjs";
@@ -125,9 +126,15 @@ export default class MantleActor extends Actor {
     return this.items.find((i) => i.type === "archetype" && i.system.kind === "ancestry") ?? null;
   }
 
-  /** Equipped weapons, in sheet order. */
+  /**
+   * Equipped weapons that can actually be used, in sheet order.
+   *
+   * A disabled weapon is still worn and still on the gear tab — it just cannot
+   * be attacked or deflected with — so it is filtered out here rather than
+   * from the sheet's own list.
+   */
   get weapons() {
-    return this.items.filter((i) => i.type === "weapon" && i.system.equipped);
+    return this.items.filter((i) => i.type === "weapon" && isUsable(i.system));
   }
 
   /**
@@ -854,7 +861,11 @@ export default class MantleActor extends Actor {
    * @param {object} maneuver
    */
   async #useConsumable(maneuver) {
-    const known = this.items.filter((item) => item.type === "consumable");
+    // A consumable is never "equipped" — a point buys any entry the character
+    // knows about — so only the disabling stops it appearing here.
+    const known = this.items.filter(
+      (item) => item.type === "consumable" && isUsable(item.system, { needsEquipping: false })
+    );
 
     const chosen = known.length > 0
       ? await this.#pickItem(game.i18n.localize("MANTLE.Item.whichConsumable"), known, {
@@ -888,6 +899,16 @@ export default class MantleActor extends Actor {
    */
   async useItem(item, { maneuver = null, gated = false } = {}) {
     if (!gated && !(await this.#allowedToAct())) return null;
+
+    // Disabled equipment stays on the sheet and stays unusable. A wondrous
+    // item grants neither its active nor its passive benefit while disabled,
+    // and a disabled consumable cannot be what a point is spent on.
+    if (item?.system?.disabled) {
+      ui.notifications.warn(
+        game.i18n.format("MANTLE.Item.disabledHint", { name: item.name })
+      );
+      return null;
+    }
 
     if (item?.type === "limitbreak") {
       return this.#limitBreak(MANTLE.maneuvers.limitBreak, item);
@@ -1392,12 +1413,37 @@ export default class MantleActor extends Actor {
         })
       );
     }
+    const restored = await this.#restoreDisabledEquipment();
+    if (restored > 0) {
+      lines.push(game.i18n.format("MANTLE.Rest.equipmentRestored", { count: restored }));
+    }
+
     // The Crisis route into a Limit Break refreshes here rather than at the
     // start of a turn — it is once per combat.
     await this.unsetFlag("mantle", "crisisLimitBreakUsed");
 
     lines.push(...(await this.#spendResolveOnRecovery()));
     return lines;
+  }
+
+  /**
+   * Bring back everything an ability or event disabled.
+   *
+   * "Unless the disabling effect states otherwise" — so this restores
+   * everything and leaves the exception to the table, which is the only end
+   * of it that knows what did the disabling.
+   *
+   * @returns {Promise<number>} How many pieces came back
+   */
+  async #restoreDisabledEquipment() {
+    const disabled = this.items.filter((item) => item.system?.disabled === true);
+    if (disabled.length === 0) return 0;
+
+    await this.updateEmbeddedDocuments(
+      "Item",
+      disabled.map((item) => ({ _id: item.id, "system.disabled": false }))
+    );
+    return disabled.length;
   }
 
   /**
@@ -1436,6 +1482,11 @@ export default class MantleActor extends Actor {
       } else {
         lines.push(game.i18n.localize("MANTLE.Rest.harmKept"));
       }
+    }
+
+    const restored = await this.#restoreDisabledEquipment();
+    if (restored > 0) {
+      lines.push(game.i18n.format("MANTLE.Rest.equipmentRestored", { count: restored }));
     }
 
     await this.unsetFlag("mantle", "crisisLimitBreakUsed");

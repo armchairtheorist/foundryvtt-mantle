@@ -18,6 +18,7 @@ import {
 } from "./derive.mjs";
 import { fields, count, text, resource, track, bonuses, affinities } from "./_fields.mjs";
 import { bondCapacity, bondIntensity } from "../rules/bonds.mjs";
+import { countsAsFocus, protects } from "../rules/equipment.mjs";
 
 export default class CharacterData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
@@ -163,8 +164,11 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
       masteries: this.parent.items
         .filter((i) => i.type === "mastery" && i.system.equipped)
         .map((i) => i.system.bonuses ?? {}),
+      // Disabled armor grants no protection. Its penalty still applies, but
+      // the penalty is shown on the sheet and applied at the table rather than
+      // derived, so there is nothing to keep here.
       armor: this.parent.items
-        .filter((i) => i.type === "armor" && i.system.equipped)
+        .filter((i) => i.type === "armor" && protects(i.system))
         .map((i) => ({ guard: i.system.guard ?? 0 })),
       conditions: this.#conditionBonuses()
     });
@@ -268,7 +272,9 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
     this.combatReflexes = equippedMasteries.some((i) => i.name === "Combat Reflexes");
 
     // Casting without a focus costs a die, unless Inner Focus covers it.
-    this.hasFocus = this.parent.items.some((i) => i.type === "focus" && i.system.equipped);
+    this.hasFocus = this.parent.items.some(
+      (i) => i.type === "focus" && countsAsFocus(i.system)
+    );
     this.innerFocus = this.parent.items.some(
       (i) => i.type === "mastery" && i.system.equipped && i.name === "Inner Focus"
     );

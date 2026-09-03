@@ -35,6 +35,7 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
       loseStrand: MantleCharacterSheet.#onLoseStrand,
       deleteThread: MantleCharacterSheet.#onDeleteThread,
       toggleEquipped: MantleCharacterSheet.#onToggleEquipped,
+      toggleDisabled: MantleCharacterSheet.#onToggleDisabled,
       cycleBoard: MantleCharacterSheet.#onCycleBoard,
       takeWound: MantleCharacterSheet.#onTakeWound,
       takeBurden: MantleCharacterSheet.#onTakeBurden,
@@ -528,6 +529,24 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     const item = this.#itemFor(target);
     if (!item) return;
     await item.update({ "system.equipped": !item.system.equipped });
+  }
+
+  /**
+   * Disable or restore a piece of equipment.
+   *
+   * Disabling is a general mechanic in v0.31 — abilities and events do it —
+   * rather than something any one effect owns, so it is a switch the table
+   * throws rather than a consequence anything here calculates. An interlude
+   * restores everything disabled, which is handled with the rest of the rest.
+   *
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onToggleDisabled(_event, target) {
+    const item = this.#itemFor(target);
+    if (!item) return;
+    await item.update({ "system.disabled": !item.system.disabled });
   }
 
   /**
