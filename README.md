@@ -4,15 +4,15 @@ A game system implementing [Momenta](https://armchairtheorist.com) — a tactica
 cinematic fantasy TTRPG built around modular archetypes and slottable masteries.
 
 Roll a pool of d6. Count 5s and 6s as successes to find your result band, then
-read the dice a second time for patterns — doubles, triples, and sequences — the
+read the dice a second time for patterns — doubles, triples, and quads — the
 way you would a Yahtzee hand. This system carries that arithmetic so the table
 can stay in the fiction.
 
-> **Status: feature-complete for playtest.** Targeting Foundry VTT v14. Every
-> phase in [docs/PLAN.md](docs/PLAN.md) is implemented: character and adversary
-> sheets, the dice and pattern engine, damage, Wounds and Burdens, spellcasting,
-> conditions, the Valor tracker, and seven compendium packs including four
-> ready-to-play characters and eleven enemies.
+> **Status: feature-complete for playtest, tracking rules v0.31.** Targeting
+> Foundry VTT v14. Character and adversary sheets, the dice and pattern engine,
+> damage, Wounds and Burdens, spellcasting, conditions, Threads and Bonds, the
+> Momentum tracker, and eight compendium packs including four ready-to-play
+> characters and eleven enemies.
 
 ## Installing
 
@@ -77,10 +77,10 @@ Everything the table needs is in the **Momenta** compendium folder.
 
 A few things worth knowing before the first session:
 
-- **The Party actor holds Valor.** Create one, add the party (select their tokens
-  and press **+**), and give every player **Owner** permission on it. Valor is
-  the table's resource, and routing every spend through the GM makes it feel like
-  the GM's.
+- **The Party actor holds Momentum.** Create one, add the party (select their
+  tokens and press **+**), and give every player **Owner** permission on it.
+  Momentum is the table's resource, and routing every spend through the GM makes
+  it feel like the GM's.
 - **Nothing is applied to a character without a click.** A roll card shows the
   result and offers **Apply**; a hit that owes a Wound offers **Take a Wound**.
   The net-success stepper on every card absorbs opposed rolls, Heroic Feats, and
@@ -99,6 +99,13 @@ A few things worth knowing before the first session:
 - **Feint, Shove, and Grab are attacks.** They roll like one, the defender may
   answer with a reactive defense, and what they land is applied from the card
   *after* the net-success stepper — so a fully dodged Feint applies nothing.
+- **Hex maps are supported.** The rules count squares; the system reads that as
+  spaces, so an "Area 3 (5x5 squares)" blast lands on hexes as a burst reaching
+  two spaces in every direction. Turning on Foundry's own **Grid-Aligned
+  Templates** core setting snaps the burst's outline to the hexes underneath it;
+  without it the shape is right but drawn as a smooth circle, and the first cast
+  on a hex scene says so. Cones, lines and walls are a reach and a spread rather
+  than a lattice, and need nothing.
 
 ## Developing
 
@@ -125,7 +132,7 @@ nothing is compiled.
 system.json              manifest
 mantle.mjs               entry point
 module/
-  config.mjs             CONFIG.MANTLE — attributes, skills, conditions, tags
+  config.mjs             CONFIG.MANTLE — attributes, conditions, tags, tables
   data/                  data models (TypeDataModel subclasses)
   documents/             Actor and Item subclasses
   dice/                  pool building, pattern detection, MantleRoll

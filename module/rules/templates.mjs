@@ -3,11 +3,16 @@
 /**
  * The shape a shaped spell puts on the map.
  *
- * Mantle describes its areas in squares — "Area 2 (5x5 squares)", "a triangle
+ * Momenta describes its areas in squares — "Area 2 (5x5 squares)", "a triangle
  * N squares deep and N wide at the base" — and Foundry describes templates in
  * scene units with a type, a distance and an angle. This module does that
  * translation and nothing else: it returns a *descriptor* in squares, and the
  * canvas layer converts and places it.
+ *
+ * "Square" in the rules means a space on the grid, and plenty of tables play
+ * Momenta on hexes. A square area has no hex equivalent that is also a square,
+ * so `forGrid` restates one as the burst it actually describes — N spaces in
+ * every direction — which is the same region a 5x5 marks out on squares.
  *
  * Pure geometry, no Foundry. Every figure is from the Area Shaping and Special
  * Area Shapes tables in section 9.
@@ -25,7 +30,16 @@ import { MANTLE } from "../config.mjs";
  * @property {"caster"|"chosen"} anchor - Where the template's origin sits
  * @property {boolean} aimed - Whether the caster picks a direction
  * @property {string} label
- * @property {string} [note] - A rule the template cannot express on its own
+ * @property {string[]} notes - Rules the template cannot express on its own
+ */
+
+/**
+ * The kinds of grid a scene can use, as far as a shape is concerned.
+ *
+ * The four hex orientations differ in how they tile, not in what a burst of N
+ * spaces means, so they are one kind here.
+ *
+ * @typedef {"square"|"hex"|"gridless"} GridKind
  */
 
 /**
@@ -49,7 +63,38 @@ function square(side, emanation, label) {
     anchor: emanation ? "caster" : "chosen",
     aimed: false,
     label,
-    note: emanation ? "MANTLE.Template.emanationNote" : undefined
+    notes: emanation ? ["MANTLE.Template.emanationNote"] : []
+  };
+}
+
+/**
+ * The same shape, drawn the way the scene's grid can actually draw it.
+ *
+ * Only the square areas change. A cone, a line and a wall are described by a
+ * depth and a spread rather than by a lattice, so they mean the same thing on
+ * any grid and are handed back untouched.
+ *
+ * A square of side N reaches (N-1)/2 spaces from its centre in every direction.
+ * On hexes that is a burst of that radius: 19 hexes where the rules print a
+ * 5x5, against 25 squares. Fewer spaces, the same reach — which is the half of
+ * the shape the rules were actually describing, since an axis-aligned box drawn
+ * over hexes lines up with nothing at all.
+ *
+ * @param {TemplateDescriptor|null} descriptor
+ * @param {GridKind} kind
+ * @returns {TemplateDescriptor|null}
+ */
+export function forGrid(descriptor, kind) {
+  if (!descriptor || kind !== "hex" || descriptor.t !== "rect") return descriptor;
+
+  const radius = ((descriptor.side ?? 1) - 1) / 2;
+
+  return {
+    ...descriptor,
+    t: "circle",
+    distance: radius,
+    side: undefined,
+    notes: [...descriptor.notes, "MANTLE.Template.hexNote"]
   };
 }
 
@@ -85,7 +130,8 @@ export function castTemplate({ areaStep, special = null, specialSize = 1, rangeS
         angle: Math.round(2 * Math.atan(0.5) * (180 / Math.PI) * 100) / 100,
         anchor: "caster",
         aimed: true,
-        label: "MANTLE.Shape.cone"
+        label: "MANTLE.Shape.cone",
+        notes: []
       };
 
     case "line":
@@ -96,7 +142,8 @@ export function castTemplate({ areaStep, special = null, specialSize = 1, rangeS
         width: 2,
         anchor: "caster",
         aimed: true,
-        label: "MANTLE.Shape.line"
+        label: "MANTLE.Shape.line",
+        notes: []
       };
 
     case "wall":
@@ -109,7 +156,7 @@ export function castTemplate({ areaStep, special = null, specialSize = 1, rangeS
         anchor: "chosen",
         aimed: true,
         label: "MANTLE.Shape.wall",
-        note: "MANTLE.Template.wallNote"
+        notes: ["MANTLE.Template.wallNote"]
       };
 
     default:
@@ -120,6 +167,32 @@ export function castTemplate({ areaStep, special = null, specialSize = 1, rangeS
   if (!rung?.size) return null;
 
   return square(rung.size, emanation, rung.label);
+}
+
+/**
+ * The next direction a turn of the wheel should land on.
+ *
+ * Snapping rather than adding: a template nudged to 17 degrees and then turned
+ * by 15 would sit at 32 and stay off the lattice forever. Turning always lands
+ * on the next multiple of the step *in the direction of travel*, so a shape can
+ * always be brought back onto a facing.
+ *
+ * `phase` is what makes hexes work. Pointy-top hexes have neighbours due east
+ * and west, so their six facings are multiples of 60 from zero; flat-top hexes
+ * have neighbours due north and south, and theirs are offset by 30.
+ *
+ * @param {number} direction - Current direction, in degrees
+ * @param {object} input
+ * @param {number} input.step - Degrees per turn
+ * @param {number} [input.phase] - Degrees the lattice is offset by
+ * @param {number} input.sign - +1 or -1
+ * @returns {number}
+ */
+export function turnDirection(direction, { step, phase = 0, sign }) {
+  const units = (direction - phase) / step;
+  const next = sign > 0 ? Math.floor(units) + 1 : Math.ceil(units) - 1;
+
+  return next * step + phase;
 }
 
 /**

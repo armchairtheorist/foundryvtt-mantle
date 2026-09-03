@@ -610,6 +610,8 @@
   "MANTLE.Template.aimHint": "Scroll to aim, Shift-scroll for a finer turn. Click to confirm, right-click to cancel.",
   "MANTLE.Template.emanationNote": "The caster is the centre of an emanation and is not caught by it.",
   "MANTLE.Template.failed": "The spell's area could not be drawn. The spell still resolves — place the template by hand if you need it.",
+  "MANTLE.Template.hexAlignNote": "Turn on Foundry's core Grid-Aligned Templates setting to snap this burst's outline to the hexes underneath it.",
+  "MANTLE.Template.hexNote": "On a hex grid this Area is drawn as a burst reaching the same number of spaces in every direction.",
   "MANTLE.Template.noScene": "No scene is active, so there is nowhere to put the spell's area.",
   "MANTLE.Template.noToken": "This caster has no token on the scene, so an emanation has no centre.",
   "MANTLE.Template.placeHint": "Click to place the area. Scroll to turn it, Shift-scroll for a finer turn. Right-click to cancel.",

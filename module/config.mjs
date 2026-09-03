@@ -526,6 +526,13 @@ MANTLE.templateBorderColor = "#7a4fa8";
 MANTLE.templateRotation = 15;
 MANTLE.templateFineRotation = 5;
 
+/**
+ * The same, on a hex grid. A hex has six neighbours, so one click of the wheel
+ * is one facing; Shift still nudges, for lining a cone up on something that is
+ * not a hex row.
+ */
+MANTLE.templateHexRotation = 60;
+
 /* -------------------------------------------- */
 /*  Conditions                                   */
 /* -------------------------------------------- */
