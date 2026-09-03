@@ -70,14 +70,26 @@ describe("gatherBonuses", () => {
 
   test("adds the flat riders a condition carries", () => {
     const totals = gatherBonuses({ conditions: [MANTLE.conditionBonuses.frenzy] });
-    assert.equal(totals.vigorRefresh, 1);
     assert.equal(totals.spd, 1);
   });
 
+  test("Frenzy no longer pays part of its own Vigor", () => {
+    // Through v0.21 it granted +1 Vigor refresh as well as +1 SPD. v0.31 left
+    // only the SPD, so the rage stopped partly funding itself.
+    //
+    // The cast is deliberate: the typechecker already proves the property is
+    // gone from the table, and reading it without one is an error. Asserting it
+    // at runtime too pins the *behaviour* — that nothing downstream resurrects
+    // a refresh bonus from somewhere else.
+    const frenzy = /** @type {Record<string, number|undefined>} */ (MANTLE.conditionBonuses.frenzy);
+    assert.equal(frenzy.vigorRefresh, undefined);
+    assert.equal(gatherBonuses({ conditions: [MANTLE.conditionBonuses.frenzy] }).vigorRefresh, 0);
+  });
+
   test("every source stacks rather than one winning", () => {
-    // Frenzy's rider is flat and sits on top of everything else, which is what
-    // makes a Frenzied Barbarian with Vigorous refresh two more than a calm one
-    // without it.
+    // Every source is summed rather than the largest winning, which is what
+    // lets a mastery, an archetype feature and a condition all contribute to
+    // the same stat at once.
     const totals = gatherBonuses({
       masteries: [{ vigorRefresh: 1 }],
       conditions: [{ vigorRefresh: 1 }]
@@ -224,14 +236,14 @@ describe("Vigor refresh", () => {
     assert.equal(refresh(0, { vigorRefresh: 2 }), 5);
   });
 
-  test("Kira refreshes 4 calm and 5 Frenzied", () => {
-    // BODY 2 is 3 + 1 = 4. Frenzy's flat +1 rides on top of the new base rather
-    // than being folded into it, so the two still differ by exactly one.
+  test("Kira refreshes 4 whether calm or Frenzied", () => {
+    // BODY 2 is 3 + 1 = 4. Frenzy used to add one on top; v0.31 took that away,
+    // so the rage now costs Vigor and Strain without returning any.
     const kira = { body: 2, mind: 1, soul: 1 };
     const calm = gatherBonuses({});
     const frenzied = gatherBonuses({ conditions: [MANTLE.conditionBonuses.frenzy] });
 
     assert.equal(deriveVigorRefresh(kira, calm), 4);
-    assert.equal(deriveVigorRefresh(kira, frenzied), 5);
+    assert.equal(deriveVigorRefresh(kira, frenzied), 4);
   });
 });

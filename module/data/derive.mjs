@@ -48,6 +48,7 @@ import { MANTLE } from "../config.mjs";
  * @property {number} [burdenSlots]
  * @property {number} [gearSlots]
  * @property {number} [wondrousSlots]
+ * @property {number} [maxBonds]
  * @property {number} [consumablePoints]
  * @property {number} [languages]
  * @property {number} [masteryBody]
@@ -70,7 +71,7 @@ export const floor = Math.floor;
 export const BONUS_KEYS = Object.freeze([
   "vitality", "strain", "resolve", "guard", "vigorRefresh", "vigorCap",
   "spd", "sen", "woundSlots", "burdenSlots", "gearSlots", "wondrousSlots",
-  "consumablePoints", "languages",
+  "consumablePoints", "languages", "maxBonds",
   "masteryBody", "masteryMind", "masterySoul", "masteryWildcard", "masteryRepertoire"
 ]);
 
@@ -244,13 +245,30 @@ export function deriveMaxStrain(cores, bonuses = {}) {
 }
 
 /**
- * Resolve = SOUL + 6, plus bonuses.
+ * Resolve = SOUL + 8, plus bonuses.
+ *
+ * The flat part rose from 6 to 8 in v0.31, which matters more than it looks:
+ * Resolve is what Bonds are invoked with, and Bonds spend it constantly.
  *
  * @param {Cores} cores
  * @param {Bonuses} [bonuses]
  */
 export function deriveResolve(cores, bonuses = {}) {
-  return cores.soul + 6 + (bonuses.resolve ?? 0);
+  return cores.soul + 8 + (bonuses.resolve ?? 0);
+}
+
+/**
+ * Max Bonds = SOUL + 3, plus bonuses.
+ *
+ * Derived here ahead of the Bonds subsystem itself: the formula belongs with
+ * the formulas, and an Unbreakable Bond stops counting against this cap, which
+ * is the Bond layer's business rather than this one's.
+ *
+ * @param {Cores} cores
+ * @param {Bonuses} [bonuses]
+ */
+export function deriveMaxBonds(cores, bonuses = {}) {
+  return cores.soul + 3 + (bonuses.maxBonds ?? 0);
 }
 
 /**
@@ -376,6 +394,7 @@ export function deriveCharacter({ attributes, characterRank, bonuses = {}, ances
     maxVitality: deriveMaxVitality(cores, bonuses),
     maxStrain: deriveMaxStrain(cores, bonuses),
     maxResolve: deriveResolve(cores, bonuses),
+    maxBonds: deriveMaxBonds(cores, bonuses),
     maxGuard: baseline.maxGuard + (bonuses.guard ?? 0),
     maxVigor: deriveMaxVigor(characterRank, bonuses),
     vigorRefresh: deriveVigorRefresh(cores, bonuses),
@@ -384,7 +403,9 @@ export function deriveCharacter({ attributes, characterRank, bonuses = {}, ances
       wound: baseline.woundSlots + (bonuses.woundSlots ?? 0),
       burden: baseline.burdenSlots + (bonuses.burdenSlots ?? 0),
       gear: baseline.gearSlots + (bonuses.gearSlots ?? 0),
-      wondrous: cores.soul + (bonuses.wondrousSlots ?? 0),
+      // Wondrous items moved from SOUL to MIND in v0.31, along with the core
+      // responsibilities: SOUL now answers for Momentum, Resolve and Bonds.
+      wondrous: cores.mind + (bonuses.wondrousSlots ?? 0),
       consumable: baseline.consumablePoints + (bonuses.consumablePoints ?? 0),
       mastery: deriveMasterySlots(cores, characterRank, bonuses)
     },

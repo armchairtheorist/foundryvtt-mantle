@@ -143,7 +143,7 @@ describe("end to end, content through to derived stats", () => {
 
     assert.equal(derived.maxVitality, 21);
     assert.equal(derived.maxStrain, 5);
-    assert.equal(derived.maxResolve, 6);
+    assert.equal(derived.maxResolve, 8, "SOUL 0 + 8");
     assert.equal(derived.maxGuard, 4);
     assert.equal(derived.vigorRefresh, 4, "3 + BODY 3 / 2, with no mastery help");
   });

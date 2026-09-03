@@ -15,12 +15,17 @@ import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import {
   deriveCharacter,
+  deriveMaxBonds,
+  deriveMaxStrain,
+  deriveMaxVitality,
+  deriveResolve,
   gatherBonuses,
   countSlotUsage,
   isInCrisis,
   isStressed,
   checkEquilibrium
 } from "../module/data/derive.mjs";
+import { MANTLE } from "../module/config.mjs";
 import { build as buildPregens } from "../src/content/pregens.mjs";
 import { build as buildMasteries } from "../src/content/masteries.mjs";
 import { build as buildEquipment } from "../src/content/equipment.mjs";
@@ -58,16 +63,16 @@ describe("Mira — Half-Elf R1 / Warrior R2", () => {
   test("derived stats match the printed stat block", () => {
     expectStats(
       mira,
-      { maxVitality: 21, maxStrain: 5, maxResolve: 6, maxGuard: 4, spd: 5, sen: 10, languagesKnown: 1 },
+      { maxVitality: 21, maxStrain: 5, maxResolve: 8, maxGuard: 4, spd: 5, sen: 10, languagesKnown: 1 },
       "Mira"
     );
     // 3 + BODY 3 / 2 = 4, with nothing on top: Combat Reflexes replaced her
-    // Vigorous, and the new formula reaches the same number without it.
+    // Vigorous, and the formula reaches the same number without it.
     expectStats(mira, { maxVigor: 7, vigorRefresh: 4 }, "Mira vigor");
   });
 
   test("slots", () => {
-    expectStats(mira.slots, { wound: 3, burden: 3, gear: 3, wondrous: 0, consumable: 2 }, "Mira slots");
+    expectStats(mira.slots, { wound: 3, burden: 3, gear: 3, wondrous: 1, consumable: 2 }, "Mira slots");
     expectStats(mira.slots.mastery, { body: 3, mind: 1, soul: 0, wildcard: 1 }, "Mira mastery slots");
   });
 });
@@ -92,7 +97,7 @@ describe("Kira — Dwarf R1 / Barbarian R2", () => {
   test("derived stats match the printed stat block", () => {
     expectStats(
       kira,
-      { maxVitality: 21, maxStrain: 5, maxResolve: 7, maxGuard: 3, spd: 4, sen: 12, languagesKnown: 1 },
+      { maxVitality: 21, maxStrain: 5, maxResolve: 9, maxGuard: 3, spd: 4, sen: 12, languagesKnown: 1 },
       "Kira"
     );
     expectStats(kira, { maxVigor: 7, vigorRefresh: 4 }, "Kira vigor"); // 3 + BODY 2 / 2
@@ -124,7 +129,7 @@ describe("Maya — Human R1 / Scholar R2", () => {
   test("derived stats match the printed stat block", () => {
     expectStats(
       maya,
-      { maxVitality: 10, maxStrain: 12, maxResolve: 7, maxGuard: 2, languagesKnown: 4 },
+      { maxVitality: 10, maxStrain: 12, maxResolve: 9, maxGuard: 2, languagesKnown: 4 },
       "Maya"
     );
   });
@@ -161,15 +166,17 @@ describe("Vera — Elf R1 / Channeler R2", () => {
   test("derived stats match the printed stat block", () => {
     expectStats(
       vera,
-      { maxVitality: 12, maxStrain: 8, maxResolve: 8, maxGuard: 2, spd: 6, sen: 15, languagesKnown: 1 },
+      { maxVitality: 12, maxStrain: 8, maxResolve: 10, maxGuard: 2, spd: 6, sen: 15, languagesKnown: 1 },
       "Vera"
     );
     // 3 + BODY 1 / 2 = 3, and Vigorous — which she keeps — makes it 4.
     expectStats(vera, { maxVigor: 7, vigorRefresh: 4 }, "Vera vigor");
   });
 
-  test("SOUL 0 means no wondrous item slots", () => {
-    expectStats(vera.slots, { wondrous: 0 }, "Vera slots");
+  test("wondrous item slots follow MIND, not SOUL", () => {
+    // v0.31 moved them. Vera is the clearest case in the catalog: SOUL 0 with
+    // MIND 3, so she went from no wondrous slots to three.
+    expectStats(vera.slots, { wondrous: 3 }, "Vera slots");
   });
 });
 
@@ -365,10 +372,10 @@ describe("the pregens ship as ready-to-play actors", () => {
     // Maya's Max Strain is 12 rather than the catalog's printed 10: she traded
     // Vigorous for Iron Will, which is +2 Max Strain.
     const printed = {
-      Mira: { maxVitality: 21, maxStrain: 5, maxResolve: 6, maxGuard: 4, spd: 5, sen: 10 },
-      Kira: { maxVitality: 21, maxStrain: 5, maxResolve: 7, maxGuard: 3, spd: 4, sen: 12 },
-      Maya: { maxVitality: 10, maxStrain: 12, maxResolve: 7, maxGuard: 2, spd: 5, sen: 10 },
-      Vera: { maxVitality: 12, maxStrain: 8, maxResolve: 8, maxGuard: 2, spd: 6, sen: 15 }
+      Mira: { maxVitality: 21, maxStrain: 5, maxResolve: 8, maxGuard: 4, spd: 5, sen: 10 },
+      Kira: { maxVitality: 21, maxStrain: 5, maxResolve: 9, maxGuard: 3, spd: 4, sen: 12 },
+      Maya: { maxVitality: 10, maxStrain: 12, maxResolve: 9, maxGuard: 2, spd: 5, sen: 10 },
+      Vera: { maxVitality: 12, maxStrain: 8, maxResolve: 10, maxGuard: 2, spd: 6, sen: 15 }
     };
 
     for (const [name, expected] of Object.entries(printed)) {
@@ -499,5 +506,37 @@ describe("the pregens ship as ready-to-play actors", () => {
         assert.equal(item.system.equipped, true, `${actor.name}: ${item.name}`);
       }
     }
+  });
+});
+
+describe("the v0.31 formula changes", () => {
+  test("Resolve is SOUL + 8", () => {
+    assert.equal(deriveResolve({ body: 0, mind: 0, soul: 0 }), 8);
+    assert.equal(deriveResolve({ body: 0, mind: 0, soul: 2 }), 10);
+  });
+
+  test("Max Bonds is SOUL + 3", () => {
+    // Derived ahead of the Bonds subsystem: the formula belongs with the
+    // formulas. Unbreakable Bonds stop counting against it, which is the Bond
+    // layer's business rather than this one's.
+    assert.equal(deriveMaxBonds({ body: 0, mind: 0, soul: 0 }), 3);
+    assert.equal(deriveMaxBonds({ body: 0, mind: 0, soul: 3 }), 6);
+  });
+
+  test("every formula the rules print is the one the code computes", () => {
+    // Quoted from the v0.31 stat table, so a rules edit that moves any of them
+    // fails here rather than at the table.
+    const cores = { body: 2, mind: 1, soul: 1 };
+
+    assert.equal(deriveMaxVitality(cores), (cores.body + 3) * 3, "(BODY + 3) x 3");
+    assert.equal(deriveMaxStrain(cores), cores.mind + cores.soul + 3, "MIND + SOUL + 3");
+    assert.equal(deriveResolve(cores), cores.soul + 8, "SOUL + 8");
+    assert.equal(deriveMaxBonds(cores), cores.soul + 3, "SOUL + 3");
+    assert.equal(MANTLE.baseline.maxVigor, 7, "Max Vigor = 7");
+    assert.equal(MANTLE.baseline.maxGuard, 0, "Max Guard = 0");
+    assert.equal(MANTLE.baseline.woundSlots, 3, "Wound Slots = 3");
+    assert.equal(MANTLE.baseline.burdenSlots, 3, "Burden Slots = 3");
+    assert.equal(MANTLE.baseline.gearSlots, 3, "Gear Slots = 3");
+    assert.equal(MANTLE.baseline.consumablePoints, 2, "Consumable Points = 2");
   });
 });

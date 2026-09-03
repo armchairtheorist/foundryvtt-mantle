@@ -421,8 +421,11 @@ MANTLE.reactions = {
 // Attack, Shove, and whatever the stat block defines — and Feint is universal
 // by design ruling, so it joins them.
 MANTLE.maneuvers = {
-  move: { label: "MANTLE.Maneuver.move", vigor: 1, kind: "simple", firstFree: true, enemy: true },
-  shift: { label: "MANTLE.Maneuver.shift", vigor: 1, kind: "simple", enemy: true },
+  // v0.31 doubled the price of movement: a Move after the first costs 2, as
+  // does a Shift. Against a Max Vigor of 7 and a Basic Attack at 2, that is
+  // roughly three actions a turn instead of five.
+  move: { label: "MANTLE.Maneuver.move", vigor: 2, kind: "simple", firstFree: true, enemy: true },
+  shift: { label: "MANTLE.Maneuver.shift", vigor: 2, kind: "simple", enemy: true },
 
   // Each rolls an attack that deals no damage and lands an effect scaled to net
   // successes, capped at 3. Shove and Grab use the Unarmed Attack specifically;
@@ -441,7 +444,7 @@ MANTLE.maneuvers = {
     vigor: 2,
     kind: "attack",
     weapon: "unarmed",
-    applies: "hindered",
+    applies: "grabbed",
     max: 3,
     enemy: true
   },
@@ -461,7 +464,7 @@ MANTLE.maneuvers = {
     label: "MANTLE.Maneuver.shakeItOff",
     vigor: 2,
     kind: "clearCondition",
-    clears: ["hindered", "exhausted"]
+    clears: ["exhausted", "grabbed", "hindered", "vulnerable"]
   },
 
   // The three full-turn maneuvers. Taking one costs no Vigor but locks out
@@ -657,9 +660,12 @@ MANTLE.visibilityMarkers = {
  * pipeline, and the pipeline takes flat bonuses — not stack counts. Frenzy is
  * the only one so far: its riders are flat regardless of how many stacks are
  * held, while its per-stack +1d on melee attacks is applied on the roll.
+ *
+ * v0.31 took Frenzy's Vigor refresh away and left only the SPD, so the rage no
+ * longer partly pays for itself.
  */
 MANTLE.conditionBonuses = {
-  frenzy: { vigorRefresh: 1, spd: 1 }
+  frenzy: { spd: 1 }
 };
 
 /* -------------------------------------------- */

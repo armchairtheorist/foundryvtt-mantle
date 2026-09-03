@@ -315,3 +315,61 @@ describe("affinities from content", () => {
     assert.equal(ironWill.system.bonuses.strain, 2);
   });
 });
+
+describe("the v0.31 action economy", () => {
+  /** @type {Record<string, any>} */
+  const table = MANTLE.maneuvers;
+
+  test("movement costs 2 Vigor, and the first Move is still free", () => {
+    // Doubled from 1. Against Max Vigor 7 and a Basic Attack at 2, a turn is
+    // about three actions instead of five.
+    assert.equal(table.move.vigor, 2);
+    assert.equal(table.move.firstFree, true);
+    assert.equal(table.shift.vigor, 2);
+  });
+
+  test("nothing else changed price", () => {
+    assert.equal(table.shove.vigor, 2);
+    assert.equal(table.grab.vigor, 2);
+    assert.equal(table.feint.vigor, 2);
+    assert.equal(table.useConsumable.vigor, 1);
+    assert.equal(table.hide.vigor, 1);
+    assert.equal(table.shakeItOff.vigor, 2);
+  });
+
+  test("the full-turn maneuvers still cost no Vigor", () => {
+    for (const id of ["catchYourBreath", "steadyYourself", "limitBreak"]) {
+      assert.equal(table[id].vigor, 0, id);
+      assert.equal(table[id].fullTurn, true, id);
+    }
+  });
+
+  test("Grab lands Grabbed, not Hindered", () => {
+    // Hindered stopped stacking, and Grab scales with net successes — so the
+    // stacks moved to a condition that can hold them.
+    assert.equal(table.grab.applies, "grabbed");
+    assert.equal(table.grab.max, 3);
+  });
+
+  test("Shake It Off clears four conditions now", () => {
+    assert.deepEqual(table.shakeItOff.clears, [
+      "exhausted",
+      "grabbed",
+      "hindered",
+      "vulnerable"
+    ]);
+  });
+
+  test("every condition Shake It Off names is real, and clearing one is worth a maneuver", () => {
+    for (const id of table.shakeItOff.clears) {
+      assert.ok(id in MANTLE.conditions, id);
+    }
+  });
+
+  test("every maneuver that applies a condition applies one that exists", () => {
+    for (const [id, maneuver] of Object.entries(table)) {
+      if (!maneuver.applies) continue;
+      assert.ok(maneuver.applies in MANTLE.conditions, `${id} applies ${maneuver.applies}`);
+    }
+  });
+});
