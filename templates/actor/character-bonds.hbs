@@ -1,0 +1,78 @@
+{{!--
+  Bonds tab.
+
+  A Bond is one-directional: this list is what *this* character feels, and may
+  not be returned. Where it is returned at a high enough intensity, the pair
+  unlock Tandem maneuvers — which is why a Bond links an actor where it can.
+--}}
+<section class="tab bonds {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+
+  <div class="section bonds-list">
+    <h3>
+      {{localize "MANTLE.Sheet.bonds"}}
+      <span class="slots">{{system.bondCapacity.counted}} / {{system.maxBonds}}</span>
+      <a class="control add" data-action="addBond"
+         data-tooltip="{{localize 'MANTLE.Sheet.addBondHint'}}"><i class="fa-solid fa-plus"></i></a>
+    </h3>
+
+    {{#each bonds as |bond index|}}
+      <div class="entry bond intensity-{{bond.intensity}}" data-index="{{index}}">
+        <div class="entry-head">
+          {{#if bond.linked}}
+            <a class="who linked" data-action="openBond"
+               data-tooltip="{{localize 'MANTLE.Sheet.openBondHint'}}">{{bond.who}}</a>
+          {{else}}
+            <input type="text" class="who" name="system.bonds.{{index}}.name" value="{{bond.name}}"
+                   placeholder="{{localize 'MANTLE.Sheet.bondTargetPlaceholder'}}"
+                   {{#unless ../editable}}disabled{{/unless}}>
+          {{/if}}
+          <a class="control" data-action="linkBond"
+             data-tooltip="{{localize 'MANTLE.Sheet.linkBondHint'}}"><i class="fa-solid fa-link"></i></a>
+          <span class="intensity" data-tooltip="{{localize 'MANTLE.Sheet.bondIntensityHint'}}">
+            {{localize bond.label}}
+          </span>
+          {{#if bond.mutual}}
+            <span class="mutual" data-tooltip="{{localize 'MANTLE.Sheet.mutualHint'}}">
+              <i class="fa-solid fa-link"></i> {{bond.mutual}}
+            </span>
+          {{/if}}
+          <span class="strands">
+            <a class="control" data-action="loseStrand" data-tooltip="{{localize 'MANTLE.Sheet.loseStrandHint'}}">&minus;</a>
+            {{bond.strands}}
+            <a class="control" data-action="gainStrand" data-tooltip="{{localize 'MANTLE.Sheet.gainStrandHint'}}">+</a>
+          </span>
+          <a class="control" data-action="strainBond"
+             data-tooltip="{{localize 'MANTLE.Sheet.strainBondHint'}}"><i class="fa-solid fa-heart-crack"></i></a>
+          <a class="control" data-action="releaseBond"
+             data-tooltip="{{localize 'MANTLE.Sheet.releaseBondHint'}}"><i class="fa-solid fa-xmark"></i></a>
+        </div>
+
+        <input type="text" name="system.bonds.{{index}}.descriptor" value="{{bond.descriptor}}"
+               placeholder="{{localize 'MANTLE.Sheet.bondPlaceholder'}}"
+               {{#unless ../editable}}disabled{{/unless}}>
+
+        {{#if bond.maneuvers.length}}
+          <div class="bond-maneuvers">
+            {{#each bond.maneuvers as |maneuver|}}
+              <button type="button" data-action="bondManeuver" data-maneuver="{{maneuver.id}}"
+                      {{#unless maneuver.available}}disabled
+                      data-tooltip="{{localize maneuver.reason}}"{{/unless}}>
+                {{localize maneuver.label}}
+              </button>
+            {{/each}}
+          </div>
+        {{/if}}
+
+        {{#if bond.unlocks.length}}
+          <div class="unlocks">
+            {{#each bond.unlocks as |unlock|}}<span class="tag">{{localize unlock}}</span>{{/each}}
+          </div>
+        {{/if}}
+      </div>
+    {{else}}
+      <p class="empty">{{localize "MANTLE.Sheet.noBonds"}}</p>
+    {{/each}}
+
+    <p class="hint">{{localize "MANTLE.Sheet.bondsHint"}}</p>
+  </div>
+</section>

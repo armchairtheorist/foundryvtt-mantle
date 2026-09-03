@@ -564,6 +564,109 @@
   }
 }
 
+/* -------------------------------------------- */
+
+/* Bonds carry more per row than any other list: who it points at, what it has
+   reached, its Strands, and the maneuvers it unlocks. The head is one line of
+   controls, the descriptor a full-width field under it. */
+.mantle .bonds-list {
+  .entry.bond {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    padding: 6px;
+  }
+
+  .entry.bond .who {
+    flex: 1 1 auto;
+    font-weight: 600;
+    min-width: 0;
+  }
+
+  a.who.linked {
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  input.who {
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--mantle-border);
+    border-radius: 0;
+    color: inherit;
+    padding: 2px 3px;
+
+    &:disabled {
+      border-bottom-style: dotted;
+    }
+  }
+
+  .intensity {
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--mantle-muted);
+    flex: 0 0 auto;
+  }
+
+  /* A returned Bond is the whole reason Bonds link an actor, so the marker is
+     the one thing in the row that is not muted. */
+  .mutual {
+    font-size: 0.8em;
+    color: var(--mantle-soul);
+    flex: 0 0 auto;
+  }
+
+  .strands {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+    font-variant-numeric: tabular-nums;
+  }
+
+  input[type="text"][name$="descriptor"] {
+    width: 100%;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--mantle-border);
+    border-radius: 0;
+    color: inherit;
+    font-size: 0.95em;
+    font-style: italic;
+    padding: 2px 3px;
+
+    &:disabled {
+      border-bottom-style: dotted;
+    }
+  }
+
+  /* Sized like the maneuver bar's buttons: two lines rather than one cramped
+     line, since these labels are sentences with punctuation in them. */
+  .bond-maneuvers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9em, 1fr));
+    gap: 4px;
+
+    button {
+      height: auto;
+      min-height: 2.4em;
+      line-height: 1.15;
+      white-space: normal;
+      font-size: 0.85em;
+    }
+  }
+
+  .unlocks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+}
+
 /* The knowledge note is guidance, not a control: no rolls, no stored state. */
 .mantle .knowledge .hint {
   margin: 0;

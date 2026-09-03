@@ -24,6 +24,9 @@ import { fileURLToPath } from "node:url";
 import { build as buildEquipment } from "../src/content/equipment.mjs";
 import { build as buildMasteries } from "../src/content/masteries.mjs";
 import { build as buildAdversaries } from "../src/content/adversaries.mjs";
+import { build as buildPregens } from "../src/content/pregens.mjs";
+import { bondCapacity, bondIntensity } from "../module/rules/bonds.mjs";
+import { deriveCores, deriveMaxBonds } from "../module/data/derive.mjs";
 import { MANTLE } from "../module/config.mjs";
 
 /**
@@ -478,3 +481,227 @@ describe("adversaries match the Pre-Generated Enemies catalog", () => {
     }
   });
 });
+
+/* -------------------------------------------- */
+
+describe("the pregens' Bonds", () => {
+  // The catalog prints each Bond inside its Threads/Bonds table, bracketed:
+  // "[To Kira / Bond 2 / 3 Strands] I am forever indebted to him…". Both the
+  // slash and the dash forms appear, and the unit is singular at one Strand.
+  const PRINTED =
+    /\[To ([A-Z][a-z]+)\s*[/-]\s*Bond (\d+)\s*[/-]\s*(\d+) Strands?\]\s*([^|]+?)\s*\|/g;
+
+  const printed = [...rules("pregen-characters").matchAll(PRINTED)].map((match) => ({
+    target: match[1],
+    intensity: Number(match[2]),
+    strands: Number(match[3]),
+    descriptor: match[4]
+  }));
+
+  test("the catalog prints six Bonds", () => {
+    // One each for Mira, Kira and Maya; three for Vera. If the catalog gains a
+    // Bond and the pack does not, this is where it shows.
+    assert.equal(printed.length, 6);
+  });
+
+  test("every printed intensity is the one its Strands buy", () => {
+    for (const bond of printed) {
+      assert.equal(
+        bondIntensity(bond.strands),
+        bond.intensity,
+        `To ${bond.target}: ${bond.strands} Strands is not Bond ${bond.intensity}`
+      );
+    }
+  });
+
+  test("each pregen ships the Bonds their block prints", () => {
+    const built = new Map(buildPregens().map((doc) => [doc.name, doc.system.bonds]));
+    const owners = ownersOfPrintedBonds();
+
+    for (const [owner, expected] of owners) {
+      const bonds = built.get(owner);
+      assert.ok(bonds, `${owner} is a pregen`);
+      assert.equal(bonds.length, expected.length, `${owner}: Bond count`);
+
+      expected.forEach((want, index) => {
+        assert.equal(bonds[index].name, want.target, `${owner}: Bond ${index} target`);
+        assert.equal(bonds[index].strands, want.strands, `${owner}: Bond ${index} Strands`);
+        assert.equal(bonds[index].descriptor, want.descriptor, `${owner}: Bond ${index} text`);
+      });
+    }
+  });
+
+  test("nobody starts over their Bond cap", () => {
+    for (const doc of buildPregens()) {
+      const cap = deriveMaxBonds(deriveCores(doc.system.attributes));
+      assert.ok(
+        doc.system.bonds.length <= cap,
+        `${doc.name}: ${doc.system.bonds.length} Bonds against a cap of ${cap}`
+      );
+    }
+  });
+
+  test("everyone spends the three Strands character creation grants", () => {
+    for (const doc of buildPregens()) {
+      const spent = doc.system.bonds.reduce(
+        (/** @type {number} */ total, /** @type {{strands: number}} */ bond) =>
+          total + bond.strands,
+        0
+      );
+      assert.equal(spent, 3, `${doc.name}: Strands allocated`);
+    }
+  });
+
+  /**
+   * The printed Bonds grouped under the pregen whose block they appear in.
+   *
+   * The catalog gives each character one Threads/Bonds table, so a Bond
+   * belongs to whichever name heading precedes it in the document.
+   *
+   * @returns {Map<string, typeof printed>}
+   */
+  function ownersOfPrintedBonds() {
+    const document = rules("pregen-characters");
+    const headings = [...document.matchAll(/^#+\s+(?:\d+\.\s*)?([A-Z][a-z]+)\b[^\n]*$/gm)].map(
+      (match) => ({ name: match[1], at: match.index ?? 0 })
+    );
+
+    const owners = new Map();
+    for (const match of document.matchAll(PRINTED)) {
+      const at = match.index ?? 0;
+      const owner = [...headings].reverse().find((heading) => heading.at < at);
+      assert.ok(owner, `no heading precedes "${match[0]}"`);
+
+      if (!owners.has(owner.name)) owners.set(owner.name, []);
+      owners.get(owner.name).push({
+        target: match[1],
+        intensity: Number(match[2]),
+        strands: Number(match[3]),
+        descriptor: match[4]
+      });
+    }
+    return owners;
+  }
+});
+
+/* -------------------------------------------- */
+
+describe("the Bond tables", () => {
+  const quickstart = rules("quickstart");
+
+  test("the intensity thresholds are the ones the table prints", () => {
+    // "| 1 - Fleeting | 1 | …" through "| 5 - Unbreakable | 15+ | …". The
+    // fifth row prints a "+" because Strands keep accruing past it.
+    const rows = [
+      ...quickstart.matchAll(/^\|\s*(\d)\s*-\s*\w+\s*\|\s*(\d+)\+?\s*\|/gm)
+    ];
+    assert.equal(rows.length, 5, "five intensity rows");
+
+    const printed = Object.fromEntries(rows.map((row) => [row[1], Number(row[2])]));
+    assert.deepEqual(
+      Object.fromEntries(Object.entries(MANTLE.bondIntensities).map(([k, v]) => [k, v])),
+      printed
+    );
+  });
+
+  test("the labels are the ones the table prints", () => {
+    const rows = [...quickstart.matchAll(/^\|\s*(\d)\s*-\s*(\w+)\s*\|\s*\d+\+?\s*\|/gm)];
+
+    for (const [, level, label] of rows) {
+      const key = /** @type {Record<string, string>} */ (MANTLE.bondLabels)[level];
+      assert.ok(key, `Bond ${level} has a label`);
+      assert.equal(
+        english(key),
+        label,
+        `Bond ${level}: "${english(key)}" against the printed "${label}"`
+      );
+    }
+  });
+
+  test("the Bond maneuvers cost what the table prints", () => {
+    // "| **Invoke** | Bond 1+ toward the target | 1 Resolve | …" — and Come
+    // Back to Me! is the one that says "Mutual Bond 4+".
+    const rows = [
+      ...quickstart.matchAll(
+        /^\|\s*\*\*(Invoke|Stay With Me!|Come Back to Me!)\*\*\s*\|\s*(Mutual )?Bond (\d)\+[^|]*\|\s*([^|]+?)\s*\|/gm
+      )
+    ];
+    assert.equal(rows.length, 3, "three Bond maneuvers");
+
+    // The config table is an object literal, so its inferred type is a union
+    // of one shape per entry rather than one shape with optional fields.
+    /** @type {Record<string, any>} */
+    const table = MANTLE.bondManeuvers;
+    const byLabel = new Map(
+      Object.values(table).map((maneuver) => [english(maneuver.label), maneuver])
+    );
+
+    for (const [, label, mutual, intensity, cost] of rows) {
+      const maneuver = byLabel.get(label);
+      assert.ok(maneuver, `${label} is in the table`);
+      assert.equal(maneuver.intensity, Number(intensity), `${label}: intensity`);
+      assert.equal(Boolean(maneuver.mutual), Boolean(mutual), `${label}: mutual`);
+      assert.match(cost, /1 Resolve/, `${label}: costs Resolve`);
+      assert.equal(maneuver.resolve, 1, `${label}: Resolve cost`);
+
+      // Both of the reaching maneuvers take the whole turn; Invoke does not,
+      // because it rides on a roll you were making anyway.
+      assert.equal(Boolean(maneuver.fullTurn), /Full turn/.test(cost), `${label}: full turn`);
+    }
+  });
+
+  test("Invoke is worth the dice the table says", () => {
+    const row = quickstart.match(/\*\*Invoke\*\*[\s\S]{0,400}?gains \*\*\+(\d)d\*\*/);
+    assert.ok(row, "the Invoke row states its bonus");
+    assert.equal(MANTLE.bondManeuvers.invoke.bonus, Number(row[1]));
+  });
+
+  test("tandem and Combo Limit Breaks unlock at the printed intensities", () => {
+    assert.match(quickstart, /mutual Bond 3\*\*[^|]*Tandem Maneuvers/);
+    assert.equal(MANTLE.bondUnlocks.tandem, 3);
+
+    assert.match(quickstart, /mutual Bond 4\*\*[^|]*Combo Limit Breaks/);
+    assert.equal(MANTLE.bondUnlocks.comboLimitBreak, 4);
+  });
+
+  test("tandem reactions cost the Vigor the table prints", () => {
+    // Tandem Defense's cell reads "As per the chosen defense", which is why it
+    // carries null rather than a number.
+    assert.match(quickstart, /\*\*Tandem Strike\*\*[^|]*\|[^|]*\|\s*2\s*\|/);
+    assert.equal(MANTLE.tandemReactions.tandemStrike.vigor, 2);
+
+    assert.match(quickstart, /\*\*Tandem Advance\*\*[^|]*\|[^|]*\|\s*2\s*\|/);
+    assert.equal(MANTLE.tandemReactions.tandemAdvance.vigor, 2);
+
+    assert.match(quickstart, /\*\*Tandem Defense\*\*[^|]*\|[^|]*\|\s*As per the chosen defense\s*\|/);
+    assert.equal(MANTLE.tandemReactions.tandemDefense.vigor, null);
+  });
+
+  test("the Bond cap is SOUL + 3", () => {
+    assert.match(quickstart, /\*\*SOUL \+ 3 Bonds\*\*/);
+    assert.equal(deriveMaxBonds({ body: 0, mind: 0, soul: 2 }), 5);
+  });
+
+  test("character creation grants three Strands", () => {
+    assert.match(quickstart, /you start with \*\*3 Strands\*\*/);
+  });
+});
+
+/**
+ * The English string a localization key stands for.
+ *
+ * The rules print "Fleeting"; the code stores "MANTLE.Bond.fleeting". Comparing
+ * them means going through lang/en.json, which is the file a rename would have
+ * to touch anyway.
+ *
+ * @param {string} key
+ * @returns {string}
+ */
+function english(key) {
+  return LANG[key] ?? key;
+}
+
+/** @type {Record<string, string>} */
+const LANG = JSON.parse(
+  readFileSync(fileURLToPath(new URL("../lang/en.json", import.meta.url)), "utf8")
+);

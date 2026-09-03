@@ -17,6 +17,7 @@ import {
   BONUS_KEYS
 } from "./derive.mjs";
 import { fields, count, text, resource, track, bonuses, affinities } from "./_fields.mjs";
+import { bondCapacity, bondIntensity } from "../rules/bonds.mjs";
 
 export default class CharacterData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
@@ -78,6 +79,25 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
        * Expert/Familiar framework Threads answer, with no number to store.
        */
       threads: new fields.ArrayField(new fields.StringField({ blank: false })),
+
+      /**
+       * Bonds, one-directional and measured only in Strands — intensity is
+       * derived from the count rather than stored, so the two can never
+       * disagree.
+       *
+       * `target` links the actor a Bond points at, which is what makes mutual
+       * Bonds detectable and so Tandem maneuvers possible. It is nullable
+       * because the rules also allow a Bond toward an institution, a place or
+       * a treasured object, none of which is an actor; `name` carries those.
+       */
+      bonds: new fields.ArrayField(
+        new fields.SchemaField({
+          target: new fields.DocumentUUIDField({ type: "Actor", nullable: true, required: false }),
+          name: text(),
+          descriptor: text(),
+          strands: count(0)
+        })
+      ),
 
       /**
        * Damage affinities. Characters gain these from masteries and gear;
@@ -170,6 +190,12 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
     this.sen = derived.sen;
     this.size = derived.size;
     this.maxThreads = derived.maxThreads;
+    this.maxBonds = derived.maxBonds;
+
+    // Intensity is read off Strands every time rather than stored, so a Bond
+    // cannot drift out of step with what it has earned.
+    this.bondCapacity = bondCapacity(this.bonds, this.maxBonds);
+    for (const bond of this.bonds) bond.intensity = bondIntensity(bond.strands);
     this.characterRank = characterRank;
 
     // Attach maxima to the resources so token bars and the sheet can read

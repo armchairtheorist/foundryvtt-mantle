@@ -46,6 +46,11 @@ const CATALOG = new Map(
  *   System fields to change on this character's copy of a piece of gear
  * @property {string[]} limitBreaks
  * @property {string[]} threads - Free-text provenance phrases, as printed
+ * @property {Array<{name: string, descriptor: string, strands: number}>} bonds
+ *   The starting Bonds as printed, each naming its target rather than linking
+ *   one. A compendium UUID would not survive the import into a world — the
+ *   copies are new documents with new ids — so the link is left for the GM to
+ *   make on the sheet, one click per Bond, and is correct from then on.
  * @property {string} playstyle
  */
 
@@ -59,6 +64,14 @@ const PREGENS = [
       "Raised in the Pearl Court of Exantria.",
       "Last student of the crown blademaster, Maestro Corvine.",
       "Three years on the smugglers' roads under a false name."
+    ],
+    bonds: [
+      {
+        name: "Kira",
+        descriptor:
+          "I am forever indebted to him for saving my life during a moment of my weakness.",
+        strands: 3
+      }
     ],
     archetypes: [["Half-Elf", 1], ["Warrior", 2]],
     masteries: {
@@ -79,6 +92,9 @@ const PREGENS = [
       "Forged as a shieldbreaker of Kargen Deephold.",
       "Twenty years cutting ore in the deep galleries.",
       "Crowd favorite of the Emberlow fighting pits."
+    ],
+    bonds: [
+      { name: "Vera", descriptor: "I do not trust elves; she will be trouble.", strands: 3 }
     ],
     archetypes: [["Dwarf", 1], ["Barbarian", 2]],
     masteries: {
@@ -103,6 +119,14 @@ const PREGENS = [
       "Field cataloguer on the Threnody Expedition.",
       "Keeps ciphered correspondence with a dozen dubious scholars."
     ],
+    bonds: [
+      {
+        name: "Vera",
+        descriptor:
+          "I am in love; I have never seen anyone that is so pretty in real life.",
+        strands: 3
+      }
+    ],
     archetypes: [["Human", 1], ["Scholar", 2]],
     masteries: {
       mind: ["Mens Resonance", "Cone Shaping", "Arcane Shield"],
@@ -123,6 +147,11 @@ const PREGENS = [
       "Novice-raised in the Cloister of First Light.",
       "Walked the pilgrim roads as a lantern-bearer.",
       "Chosen as a Voice on the Night of Falling Stars."
+    ],
+    bonds: [
+      { name: "Mira", descriptor: "Half-Elves are curious creatures to me.", strands: 1 },
+      { name: "Kira", descriptor: "Dwarves are curious creatures to me.", strands: 1 },
+      { name: "Maya", descriptor: "Humans are curious creatures to me.", strands: 1 }
     ],
     archetypes: [["Elf", 1], ["Channeler", 2]],
     masteries: {
@@ -219,7 +248,7 @@ export function build() {
       system: {
         attributes: pregen.attributes,
         threads: pregen.threads,
-        languages: [],
+        bonds: pregen.bonds.map((bond) => ({ target: null, ...bond })),
 
         // Every track starts full. A pregen handed to a player at the table
         // should be ready to fight, not ready to be filled in — and the

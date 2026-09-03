@@ -80,5 +80,22 @@ export function prepareManeuvers(actor) {
       affordable: affordable(reaction.vigorCost ?? 0)
     }));
 
+  // Tandem reactions appear only for someone who actually has a partner —
+  // a mutual Bond 3, which most characters will never have with anyone. They
+  // sit in the same row because they are reactions, and they cost Vigor like
+  // reactions; the Bond is what unlocks them, not what pays for them.
+  /** @type {Record<string, any>} */
+  const tandemTable = MANTLE.tandemReactions;
+  if (actor.tandemPartners?.length > 0) {
+    for (const [id, reaction] of Object.entries(tandemTable)) {
+      reactions.push({
+        id,
+        label: reaction.label,
+        vigor: reaction.vigor ?? 0,
+        affordable: affordable(reaction.vigor ?? 0)
+      });
+    }
+  }
+
   return { basicManeuvers, reactions };
 }

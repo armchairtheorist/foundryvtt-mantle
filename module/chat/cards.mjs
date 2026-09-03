@@ -325,6 +325,12 @@ export function activateCardListeners(message, html) {
     button.addEventListener("click", () => takeHarm(button));
   }
 
+  // A Bond maneuver reaches a character its invoker may not own, so the relief
+  // waits on a card until somebody who can apply it presses the button.
+  for (const button of html.querySelectorAll(".mantle-harm-card [data-bond-relief]")) {
+    button.addEventListener("click", () => relieveWithBond(button));
+  }
+
   const card = html.querySelector(".mantle-roll-card");
   if (!card) return;
 
@@ -582,6 +588,46 @@ async function takeHarm(button) {
         )}</p>
         <p class="what">${what}</p>
         <p class="notes">${notes.join(" · ")}</p>
+      </div>`,
+    speaker: ChatMessage.getSpeaker({ actor })
+  });
+}
+
+/* -------------------------------------------- */
+
+/**
+ * Clear what a Bond maneuver reached for.
+ *
+ * The conditions come from the maneuver rather than the button, so a card
+ * posted before a rules change still clears what the rules now say — and a
+ * doctored `data-` attribute cannot clear something the maneuver never did.
+ *
+ * @param {HTMLElement} button
+ */
+async function relieveWithBond(button) {
+  /** @type {Record<string, any>} */
+  const table = MANTLE.bondManeuvers;
+  const maneuver = table[button.dataset.bondRelief ?? ""];
+  const actor = game.actors.get(button.dataset.actor ?? "");
+  if (!maneuver?.clears || !actor) return;
+
+  button.disabled = true;
+
+  const cleared = [];
+  for (const id of maneuver.clears) {
+    if (actor.conditionStacks(id) === 0) continue;
+    await actor.clearCondition(id);
+    cleared.push(game.i18n.localize(MANTLE.conditions[id].label));
+  }
+
+  await ChatMessage.create({
+    content: `<div class="mantle mantle-harm-card">
+        <p><strong>${actor.name}</strong> — ${game.i18n.localize(maneuver.label)}</p>
+        <p class="what">${
+          cleared.length
+            ? game.i18n.format("MANTLE.Bond.relieved", { conditions: cleared.join(", ") })
+            : game.i18n.localize("MANTLE.Bond.nothingToRelieve")
+        }</p>
       </div>`,
     speaker: ChatMessage.getSpeaker({ actor })
   });

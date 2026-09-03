@@ -13,6 +13,7 @@ import { fileURLToPath } from "node:url";
 import { describe, test } from "node:test";
 
 import { prepareManeuvers } from "../module/apps/sheets/_maneuvers-context.mjs";
+import { MANTLE } from "../module/config.mjs";
 
 /** @param {string} path - Repo-relative. */
 function read(path) {
@@ -46,6 +47,9 @@ const character = {
 
 /** An adversary: no Vigor, no reactions, only the maneuvers enemies can take. */
 const adversary = { type: "adversary", system: {} };
+
+/** A character with a tandem partner, which is the only thing that unlocks them. */
+const paired = { ...character, tandemPartners: [{ actor: { name: "Kira" }, mutual: 3 }] };
 
 describe("the maneuver bar", () => {
   const partial = read("templates/parts/maneuvers.hbs");
@@ -82,5 +86,52 @@ describe("the conditions tray", () => {
     // prepareConditions needs a live actor's effects, so this checks the
     // template's side alone: one context key, named for what the sheets set.
     assert.deepEqual(iteratedContextKeys(read("templates/parts/conditions.hbs")), ["conditions"]);
+  });
+});
+
+describe("tandem reactions", () => {
+  /** @param {any} actor */
+  const reactionsOf = (actor) =>
+    /** @type {{id: string, label: string, vigor: number, affordable: boolean}[]} */ (
+      prepareManeuvers(actor).reactions
+    );
+
+  /** @param {any} actor */
+  const ids = (actor) => reactionsOf(actor).map((reaction) => reaction.id);
+
+  test("are absent without a partner", () => {
+    for (const id of Object.keys(MANTLE.tandemReactions)) {
+      assert.ok(!ids(character).includes(id), `${id} without a partner`);
+    }
+  });
+
+  test("appear once a mutual Bond 3 exists", () => {
+    for (const id of Object.keys(MANTLE.tandemReactions)) {
+      assert.ok(ids(paired).includes(id), `${id} with a partner`);
+    }
+  });
+
+  test("carry the same shape as the reactions beside them", () => {
+    // They share the row and the partial, so a missing key here renders a
+    // blank button rather than throwing — the exact failure this file exists
+    // to catch.
+    const [ordinary] = reactionsOf(character);
+    for (const reaction of reactionsOf(paired)) {
+      assert.deepEqual(Object.keys(reaction).sort(), Object.keys(ordinary).sort(), reaction.id);
+    }
+  });
+
+  test("Tandem Defense shows no cost of its own", () => {
+    // It costs whatever the chosen defense costs, so the table carries null
+    // and the bar prints an em dash rather than a zero.
+    const defense = reactionsOf(paired).find((r) => r.id === "tandemDefense");
+    assert.equal(defense?.vigor, 0);
+  });
+
+  test("adversaries never get them", () => {
+    // An enemy has no Bonds field at all, but the guard is the early return
+    // for anything that does not track Vigor — worth pinning either way.
+    const enemy = { ...adversary, tandemPartners: [{ actor: { name: "Mira" }, mutual: 5 }] };
+    assert.deepEqual(prepareManeuvers(enemy).reactions, []);
   });
 });

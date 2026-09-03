@@ -9,6 +9,7 @@
  */
 
 import { MANTLE } from "../../config.mjs";
+import { bondIntensity, bondManeuvers, mutualBond, strainBond } from "../../rules/bonds.mjs";
 import { prepareConditions } from "./_conditions-context.mjs";
 import { prepareManeuvers } from "./_maneuvers-context.mjs";
 
@@ -24,6 +25,14 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     form: { submitOnChange: true },
     actions: {
       addThread: MantleCharacterSheet.#onAddThread,
+      addBond: MantleCharacterSheet.#onAddBond,
+      bondManeuver: MantleCharacterSheet.#onBondManeuver,
+      linkBond: MantleCharacterSheet.#onLinkBond,
+      openBond: MantleCharacterSheet.#onOpenBond,
+      releaseBond: MantleCharacterSheet.#onReleaseBond,
+      strainBond: MantleCharacterSheet.#onStrainBond,
+      gainStrand: MantleCharacterSheet.#onGainStrand,
+      loseStrand: MantleCharacterSheet.#onLoseStrand,
       deleteThread: MantleCharacterSheet.#onDeleteThread,
       toggleEquipped: MantleCharacterSheet.#onToggleEquipped,
       cycleBoard: MantleCharacterSheet.#onCycleBoard,
@@ -59,6 +68,7 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     gear: { template: "systems/mantle/templates/actor/character-gear.hbs", scrollable: [""] },
     magic: { template: "systems/mantle/templates/actor/character-magic.hbs", scrollable: [""] },
     threads: { template: "systems/mantle/templates/actor/character-threads.hbs", scrollable: [""] },
+    bonds: { template: "systems/mantle/templates/actor/character-bonds.hbs", scrollable: [""] },
     bio: { template: "systems/mantle/templates/actor/character-bio.hbs", scrollable: [""] }
   };
 
@@ -104,6 +114,7 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     context.canDeflect = this.document.deflectWeapons.length > 0;
     context.canForestall = this.document.reflexiveWeapons.length > 0;
 
+    context.bonds = this.#prepareBonds();
     context.conditions = prepareConditions(this.document);
     Object.assign(context, prepareManeuvers(this.document));
 
@@ -138,6 +149,7 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
       gear: "MANTLE.Tab.gear",
       magic: "MANTLE.Tab.magic",
       threads: "MANTLE.Tab.threads",
+      bonds: "MANTLE.Tab.bonds",
       bio: "MANTLE.Tab.bio"
     };
 
@@ -262,6 +274,229 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
    * @this {MantleCharacterSheet}
    * @param {PointerEvent} _event
    * @param {HTMLElement} target
+   */
+  /**
+   * Each Bond with its intensity resolved, who it points at, and whether the
+   * other side holds one back.
+   *
+   * The mutual check is the reason Bonds link an actor rather than naming one:
+   * Tandem maneuvers need the Bond in both directions, which cannot be read
+   * off a free-text name.
+   */
+  #prepareBonds() {
+    return this.document.system.bonds.map((bond) => {
+      const target = bond.target ? fromUuidSync(bond.target) : null;
+      const theirs = target?.system?.bonds?.find(
+        (back) => back.target === this.document.uuid
+      );
+
+      const shared = mutualBond(bond.strands, theirs?.strands ?? 0);
+      const unlocks = [];
+      if (shared.tandem) unlocks.push("MANTLE.Bond.tandem");
+      if (shared.comboLimitBreaks) unlocks.push("MANTLE.Bond.comboLimitBreaks");
+
+      // Invoke is left out: it is priced inside the action roll dialog, where
+      // the roll it buys dice for is assembled. What remains are the two that
+      // resolve on their own.
+      const maneuvers = bondManeuvers({
+        strands: bond.strands,
+        theirStrands: theirs?.strands ?? 0,
+        resolve: this.document.system.resolve?.value ?? 0,
+        incapacitated: MANTLE.incapacitated.some((id) => this.document.conditionStacks(id) > 0)
+      })
+        .filter((entry) => MANTLE.bondManeuvers[entry.id].clears)
+        .map((entry) => ({
+          ...entry,
+          label: MANTLE.bondManeuvers[entry.id].label,
+          // A Bond that reaches nobody in particular cannot strip conditions
+          // from them, so the buttons need the link as well as the intensity.
+          available: entry.available && Boolean(bond.target)
+        }));
+
+      return {
+        ...bond,
+        who: target?.name ?? bond.name ?? "",
+        linked: Boolean(bond.target),
+        label: MANTLE.bondLabels[bond.intensity] ?? "MANTLE.Bond.none",
+        mutual: shared.mutual || null,
+        maneuvers,
+        unlocks
+      };
+    });
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * @this {MantleCharacterSheet}
+   */
+  static async #onAddBond() {
+    const bonds = [...this.document.system.bonds.map((b) => ({ ...b })),
+      { target: null, name: "", descriptor: "", strands: 1 }];
+    await this.document.update({ "system.bonds": bonds });
+  }
+
+  /**
+   * Point a Bond at an actor, or cut it loose to be named in free text.
+   *
+   * Linking is what makes a mutual Bond detectable, so it is offered as a
+   * picker rather than left to a name matching by spelling. The unlinked
+   * option stays because the rules allow a Bond toward an institution, a place
+   * or a treasured object — none of which is an actor.
+   *
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onLinkBond(_event, target) {
+    const index = Number(target.closest("[data-index]")?.getAttribute("data-index"));
+    if (!Number.isInteger(index)) return;
+
+    const bond = this.document.system.bonds[index];
+    const candidates = game.actors
+      .filter((actor) => actor.id !== this.document.id)
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const options = [
+      `<option value="">${game.i18n.localize("MANTLE.Sheet.bondUnlinked")}</option>`,
+      ...candidates.map(
+        (actor) =>
+          `<option value="${actor.uuid}"${actor.uuid === bond.target ? " selected" : ""}>${
+            foundry.utils.escapeHTML(actor.name)
+          }</option>`
+      )
+    ].join("");
+
+    const picked = await foundry.applications.api.DialogV2.prompt({
+      window: { title: game.i18n.localize("MANTLE.Sheet.linkBondHint") },
+      classes: ["mantle"],
+      content: `<div class="form-group"><label>${game.i18n.localize(
+        "MANTLE.Sheet.bondTarget"
+      )}</label><select name="target">${options}</select></div>`,
+      ok: {
+        label: game.i18n.localize("MANTLE.Sheet.link"),
+        callback: (_ev, button) =>
+          /** @type {HTMLSelectElement} */ (button.form.elements.namedItem("target")).value
+      },
+      rejectClose: false,
+      modal: true
+    });
+    if (picked === null || picked === undefined) return;
+
+    // The name is kept alongside the link, not replaced by it: unlinking later
+    // should leave the Bond still pointing at somebody rather than at nothing.
+    const name = picked ? (fromUuidSync(picked)?.name ?? bond.name) : bond.name;
+    const bonds = this.document.system.bonds.map((entry, at) =>
+      at === index ? { ...entry, target: picked || null, name } : { ...entry }
+    );
+    await this.document.update({ "system.bonds": bonds });
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onOpenBond(_event, target) {
+    const index = Number(target.closest("[data-index]")?.getAttribute("data-index"));
+    const uuid = this.document.system.bonds[index]?.target;
+    if (!uuid) return;
+
+    const actor = await fromUuid(uuid);
+    actor?.sheet?.render(true);
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onReleaseBond(_event, target) {
+    const index = Number(target.closest("[data-index]")?.getAttribute("data-index"));
+    if (!Number.isInteger(index)) return;
+
+    const bond = this.document.system.bonds[index];
+    const intensity = bondIntensity(bond?.strands ?? 0);
+
+    // "Releasing a Bond 3 or higher will require a narrative scene" — so the
+    // heavier ones are confirmed rather than clicked away, and the Strands are
+    // lost either way.
+    if (intensity >= 3) {
+      const sure = await foundry.applications.api.DialogV2.confirm({
+        window: { title: game.i18n.localize("MANTLE.Sheet.bonds") },
+        classes: ["mantle"],
+        content: `<p>${game.i18n.format("MANTLE.Sheet.releaseConfirm", {
+          descriptor: bond.descriptor || bond.name,
+          strands: bond.strands
+        })}</p>`,
+        rejectClose: false,
+        modal: true
+      });
+      if (!sure) return;
+    }
+
+    const bonds = this.document.system.bonds.filter((_, at) => at !== index);
+    await this.document.update({ "system.bonds": bonds });
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onBondManeuver(_event, target) {
+    const index = Number(target.closest("[data-index]")?.getAttribute("data-index"));
+    const id = target.dataset.maneuver;
+    if (!Number.isInteger(index) || !id) return;
+
+    await this.document.useBondManeuver(index, id);
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onStrainBond(_event, target) {
+    await this.#adjustBond(target, (bond) => strainBond(bond.strands).strands);
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onGainStrand(_event, target) {
+    await this.#adjustBond(target, (bond) => bond.strands + 1);
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onLoseStrand(_event, target) {
+    await this.#adjustBond(target, (bond) => Math.max(0, bond.strands - 1));
+  }
+
+  /**
+   * Set one Bond's Strands from a function of its current count.
+   *
+   * @param {HTMLElement} target
+   * @param {(bond: any) => number} next
+   */
+  async #adjustBond(target, next) {
+    const index = Number(target.closest("[data-index]")?.getAttribute("data-index"));
+    if (!Number.isInteger(index)) return;
+
+    const bonds = this.document.system.bonds.map((bond, at) =>
+      at === index ? { ...bond, strands: next(bond) } : { ...bond }
+    );
+    await this.document.update({ "system.bonds": bonds });
+  }
+
+  /**
+   * @this {MantleCharacterSheet}
    */
   static async #onAddThread() {
     // Added blank for the player to write into. Threads are earned in play, so
@@ -596,6 +831,8 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
   static async #onUseReaction(_event, target) {
     const id = target.dataset.reaction;
     const actor = this.document;
+
+    if (id in MANTLE.tandemReactions) return void (await actor.rollTandem(id));
 
     if (id === "dodge") await actor.rollDodge();
     else if (id === "brace") await actor.rollBrace();

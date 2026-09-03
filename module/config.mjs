@@ -665,6 +665,72 @@ MANTLE.momentumCosts = {
 MANTLE.momentousFeatMaxSuccesses = 3;
 
 /* -------------------------------------------- */
+/*  Bonds                                        */
+/* -------------------------------------------- */
+
+/**
+ * Strands needed to reach each Bond intensity.
+ *
+ * Totals rather than costs, and deliberately uneven: Rooted to Enduring is
+ * three Strands, Profound to Unbreakable is five.
+ */
+MANTLE.bondIntensities = { 1: 1, 2: 3, 3: 6, 4: 10, 5: 15 };
+
+/** What each intensity is called. */
+MANTLE.bondLabels = {
+  1: "MANTLE.Bond.fleeting",
+  2: "MANTLE.Bond.rooted",
+  3: "MANTLE.Bond.enduring",
+  4: "MANTLE.Bond.profound",
+  5: "MANTLE.Bond.unbreakable"
+};
+
+/** The mutual intensities that unlock shared play. */
+MANTLE.bondUnlocks = { tandem: 3, comboLimitBreak: 4 };
+
+/**
+ * Being out of the fight. Defeated and Lost stop a character invoking a Bond,
+ * and are what Come Back to Me! reaches through — one list, read from both
+ * ends.
+ */
+MANTLE.incapacitated = ["defeated", "lost"];
+
+/**
+ * Bond maneuvers. `mutual` means the intensity must be held in both
+ * directions. Resolve is the currency here, not Vigor — only the maneuvers a
+ * Bond *unlocks* cost Vigor.
+ */
+MANTLE.bondManeuvers = {
+  invoke: { label: "MANTLE.Bond.invoke", intensity: 1, resolve: 1, bonus: 2 },
+  stayWithMe: {
+    label: "MANTLE.Bond.stayWithMe",
+    intensity: 2,
+    resolve: 1,
+    fullTurn: true,
+    clears: ["faltering", "unraveling"]
+  },
+  comeBackToMe: {
+    label: "MANTLE.Bond.comeBackToMe",
+    intensity: 4,
+    resolve: 1,
+    fullTurn: true,
+    mutual: true,
+    clears: MANTLE.incapacitated,
+
+    // Both sides test their luck and either one landing is enough, so the
+    // Resolve is spent only on success — the failed attempt costs the turn.
+    luck: true
+  }
+};
+
+/** Tandem reactions, unlocked by a mutual Bond 3. These cost Vigor as normal. */
+MANTLE.tandemReactions = {
+  tandemStrike: { label: "MANTLE.Bond.tandemStrike", vigor: 2, bonus: 1 },
+  tandemDefense: { label: "MANTLE.Bond.tandemDefense", vigor: null },
+  tandemAdvance: { label: "MANTLE.Bond.tandemAdvance", vigor: 2 }
+};
+
+/* -------------------------------------------- */
 /*  Rest                                         */
 /* -------------------------------------------- */
 
@@ -676,9 +742,6 @@ MANTLE.interludeConsumableRestock = 1;
 
 /** Resolve to heal one Wound or Burden at an interlude. Flat since v0.31. */
 MANTLE.healResolveCost = 1;
-
-/** A Momentous Feat can add at most this many successes to a single roll. */
-MANTLE.momentousFeatMaxSuccesses = 3;
 
 /* -------------------------------------------- */
 /*  Adversaries                                  */

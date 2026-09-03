@@ -291,8 +291,8 @@ describe("derived output shape", () => {
     "consumables",
     "wounds",
     "burdens",
-    "skills",
-    "languages",
+    "threads",
+    "bonds",
     "bonuses",
     "biography",
     "notes"

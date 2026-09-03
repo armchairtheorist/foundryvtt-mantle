@@ -191,7 +191,6 @@ export function bonuses() {
     gearSlots: modifier(),
     wondrousSlots: modifier(),
     consumablePoints: modifier(),
-    languages: modifier(),
     masteryBody: modifier(),
     masteryMind: modifier(),
     masterySoul: modifier(),

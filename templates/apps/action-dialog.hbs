@@ -34,6 +34,29 @@
     <p class="hint">{{localize "MANTLE.Action.noThreads"}}</p>
   {{/unless}}
 
+  {{!-- Invoking a Bond costs 1 Resolve and requires roleplay: say how the Bond
+        drives what you do. At most one invocation per roll, and never on a luck
+        roll — the dropdown empties itself when LUCK is the attribute chosen. --}}
+  {{#if bonds.length}}
+    <label class="row bond-invoke">
+      {{localize "MANTLE.Bond.invoke"}}
+      <select name="bond" {{#unless canInvoke}}disabled{{/unless}}>
+        <option value="">{{localize "MANTLE.Field.none"}}</option>
+        {{#each bonds as |bond|}}
+          <option value="{{bond.key}}">{{bond.label}} (+{{../bondBonus}}d)</option>
+        {{/each}}
+      </select>
+    </label>
+
+    <p class="hint bond-hint">
+      {{#if canInvoke}}
+        {{localize "MANTLE.Action.invokeHint"}}
+      {{else}}
+        {{localize "MANTLE.Action.noResolve"}}
+      {{/if}}
+    </p>
+  {{/if}}
+
   <label class="row">
     {{localize "MANTLE.Condition.impaired"}}
     <input type="number" name="impaired" value="{{impaired}}" min="0" max="10"

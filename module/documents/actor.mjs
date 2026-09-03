@@ -23,6 +23,7 @@ import {
   interludeRestore
 } from "../rules/rest.mjs";
 import { limitBreakRoutes } from "../rules/momentum.mjs";
+import { bondManeuvers, mutualBond } from "../rules/bonds.mjs";
 import { castTemplate, isMultiTarget } from "../rules/templates.mjs";
 import { pairingEffects, rangeAtStep } from "../rules/shaping.mjs";
 import { placeSpellTemplate } from "../canvas/spell-template.mjs";
@@ -198,6 +199,39 @@ export default class MantleActor extends Actor {
     return this.meleeWeapons.filter((weapon) => toArray(weapon.system.tags).includes("reflexive"));
   }
 
+  /**
+   * The characters this one is tandem partners with.
+   *
+   * Tandem needs the Bond at intensity 3 in *both* directions, so an unlinked
+   * Bond can never qualify however many Strands it carries — there is nobody
+   * on the other end to read a Bond back from.
+   *
+   * @returns {{actor: any, mutual: number, comboLimitBreaks: boolean}[]}
+   */
+  get tandemPartners() {
+    const partners = [];
+
+    for (const bond of this.system.bonds ?? []) {
+      if (!bond.target) continue;
+
+      const other = fromUuidSync(bond.target);
+      const theirs = other?.system?.bonds?.find(
+        (/** @type {{target: string|null}} */ back) => back.target === this.uuid
+      );
+
+      const shared = mutualBond(bond.strands, theirs?.strands ?? 0);
+      if (shared.tandem) {
+        partners.push({
+          actor: other,
+          mutual: shared.mutual,
+          comboLimitBreaks: shared.comboLimitBreaks
+        });
+      }
+    }
+
+    return partners;
+  }
+
   /* -------------------------------------------- */
 
   /** Every condition this actor carries, as id to stacks. */
@@ -364,6 +398,10 @@ export default class MantleActor extends Actor {
       modifiers.push({ label: "MANTLE.Condition.vulnerable", value: vulnerable });
     }
 
+    // Dice the caller brings — a Tandem Strike's +1d — added after the dialog
+    // so the player sees them on the card rather than folded into the pool.
+    if (options.bonus) modifiers.push(options.bonus);
+
     return this.rollAction({
       attribute,
       title: options.title ?? weapon.name,
@@ -521,6 +559,11 @@ export default class MantleActor extends Actor {
   async rollAttributeAction(attribute) {
     const choice = await promptAction(this, { attribute });
     if (!choice) return null;
+
+    // Invoking a Bond is the one thing this dialog can charge for. It is paid
+    // before the roll, and the roll is abandoned if the Resolve is not there —
+    // the dialog's own check can be a turn stale by the time Roll is clicked.
+    if (choice.resolveSpent && !(await this.#spendResolve(choice.resolveSpent))) return null;
 
     return this.rollAction({
       attribute: choice.attribute,
@@ -1157,6 +1200,134 @@ export default class MantleActor extends Actor {
     });
   }
 
+  /* -------------------------------------------- */
+
+  /**
+   * A tandem reaction: acting out of turn alongside a partner.
+   *
+   * Tandem maneuvers grant no extra action economy — everything costs its
+   * usual Vigor — so each of these routes to the ordinary method and only
+   * changes what the card says it was. Whether the trigger actually happened
+   * is the table's call, as it is for every other reaction.
+   *
+   * @param {string} id - A key of MANTLE.tandemReactions
+   * @returns {Promise<ChatMessage|null|void>}
+   */
+  async rollTandem(id) {
+    /** @type {Record<string, any>} */
+    const table = MANTLE.tandemReactions;
+    const reaction = table[id];
+    if (!reaction) return null;
+
+    const partners = this.tandemPartners;
+    if (partners.length === 0) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Bond.noTandemPartner"));
+      return null;
+    }
+
+    if (!(await this.#allowedToAct(reaction))) return null;
+
+    const partner =
+      partners.length === 1
+        ? partners[0]
+        : await this.#pickTandemPartner(reaction, partners);
+    if (!partner) return null;
+
+    const with_ = game.i18n.format("MANTLE.Bond.withPartner", { partner: partner.actor.name });
+
+    if (id === "tandemStrike") return this.#tandemStrike(reaction, with_);
+    if (id === "tandemDefense") return this.#tandemDefense(with_);
+
+    // Tandem Advance is a Move taken at the same time as the partner's: the
+    // Vigor is spent and the card says so, and the token is dragged by hand
+    // like every other Move.
+    if (!(await this.#spendVigor(reaction.vigor))) return null;
+    return this.#report(reaction, with_);
+  }
+
+  /**
+   * Tandem Strike: a Basic Attack with +1d against the target your partner is
+   * already attacking, melee or ranged.
+   *
+   * @param {object} reaction
+   * @param {string} detail
+   * @returns {Promise<ChatMessage|null|void>}
+   */
+  async #tandemStrike(reaction, detail) {
+    const available = [...this.weapons, this.unarmedAttack];
+    const weapon =
+      available.length === 1
+        ? available[0]
+        : await this.#pickWeapon(game.i18n.localize(reaction.label), available);
+    if (!weapon) return null;
+
+    return this.attackWith(weapon, {
+      title: game.i18n.localize(reaction.label),
+      subtitle: `${weapon.name} · ${detail}`,
+      vigorCost: reaction.vigor,
+      bonus: { label: reaction.label, value: reaction.bonus }
+    });
+  }
+
+  /**
+   * Tandem Defense: Dodge or Deflect on your partner's behalf.
+   *
+   * It costs whatever the chosen defense costs, which is why nothing is
+   * deducted here — the defense charges for itself.
+   *
+   * @param {string} detail
+   * @returns {Promise<ChatMessage|null|void>}
+   */
+  async #tandemDefense(detail) {
+    const choices = [{ value: "dodge", label: game.i18n.localize(MANTLE.reactions.dodge.label) }];
+    if (this.deflectWeapons.length > 0) {
+      choices.push({ value: "deflect", label: game.i18n.localize(MANTLE.reactions.deflect.label) });
+    }
+
+    const chosen =
+      choices.length === 1
+        ? choices[0].value
+        : await this.#pickOption(game.i18n.localize("MANTLE.Bond.tandemDefense"), choices);
+    if (!chosen) return null;
+
+    // The damage that gets through is still suffered by the partner, so the
+    // card has to name whose defense this was — otherwise the successes look
+    // like they were spent on the defender's own hide.
+    ui.notifications.info(detail);
+
+    return chosen === "dodge" ? this.rollDodge() : this.rollDeflect(this.deflectWeapons[0]);
+  }
+
+  /**
+   * @param {object} reaction
+   * @param {{actor: any}[]} partners
+   * @returns {Promise<{actor: any}|null>}
+   */
+  async #pickTandemPartner(reaction, partners) {
+    const chosen = await this.#pickOption(
+      game.i18n.localize(reaction.label),
+      partners.map((partner, index) => ({ value: String(index), label: partner.actor.name }))
+    );
+
+    return chosen === null ? null : partners[Number(chosen)];
+  }
+
+  /**
+   * @param {string} title
+   * @param {any[]} weapons
+   * @returns {Promise<any|null>}
+   */
+  async #pickWeapon(title, weapons) {
+    const chosen = await this.#pickOption(
+      title,
+      weapons.map((weapon, index) => ({ value: String(index), label: weapon.name }))
+    );
+
+    return chosen === null ? null : weapons[Number(chosen)];
+  }
+
+  /* -------------------------------------------- */
+
   /**
    * Brace: free, but it makes you Broken.
    *
@@ -1407,6 +1578,27 @@ export default class MantleActor extends Actor {
 
   /* -------------------------------------------- */
 
+  /**
+   * Deduct Resolve, refusing rather than going negative.
+   *
+   * @param {number} cost
+   * @returns {Promise<boolean>}
+   */
+  async #spendResolve(cost) {
+    if (!cost) return true;
+
+    const available = this.system.resolve?.value ?? 0;
+    if (cost > available) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Bond.needsResolve"));
+      return false;
+    }
+
+    await this.update({ "system.resolve.value": available - cost });
+    return true;
+  }
+
+  /* -------------------------------------------- */
+
   async #spendVigor(cost) {
     if (!cost) return true;
 
@@ -1423,6 +1615,145 @@ export default class MantleActor extends Actor {
 
     await this.update({ "system.vigor.value": available - cost });
     return true;
+  }
+
+  /* -------------------------------------------- */
+
+  /**
+   * Take a Bond maneuver toward one of this character's Bonds.
+   *
+   * Both of these reach *into* someone else — clearing conditions on a target
+   * this character may well not own — so nothing is applied here. The Resolve
+   * is spent on this sheet, and the relief is posted as a card with a button
+   * for whoever can press it. That is the same assisted shape harm already
+   * uses, and it is the only shape that works across a table's permissions.
+   *
+   * @param {number} index - Which Bond, by position
+   * @param {string} id - A key of MANTLE.bondManeuvers
+   * @returns {Promise<ChatMessage|null>}
+   */
+  async useBondManeuver(index, id) {
+    /** @type {Record<string, any>} */
+    const table = MANTLE.bondManeuvers;
+    const maneuver = table[id];
+    const bond = this.system.bonds?.[index];
+    if (!maneuver || !bond) return null;
+
+    // Invoke is priced into the action roll dialog, where the roll it boosts
+    // is assembled. There is nothing for a button to do here.
+    if (!maneuver.clears) return null;
+
+    const target = bond.target ? await fromUuid(bond.target) : null;
+    if (!target) {
+      ui.notifications.warn(game.i18n.localize("MANTLE.Bond.needsLinkedTarget"));
+      return null;
+    }
+
+    const theirs = target.system?.bonds?.find(
+      (/** @type {{target: string|null}} */ back) => back.target === this.uuid
+    );
+
+    const offered = bondManeuvers({
+      strands: bond.strands,
+      theirStrands: theirs?.strands ?? 0,
+      resolve: this.system.resolve?.value ?? 0,
+      // Defeated and Lost stop *this* character invoking anything, whatever
+      // the maneuver happens to clear on the other end.
+      incapacitated: MANTLE.incapacitated.some(
+        (/** @type {string} */ condition) => this.conditionStacks(condition) > 0
+      )
+    });
+
+    const entry = offered.find((option) => option.id === id);
+    if (!entry?.available) {
+      ui.notifications.warn(game.i18n.localize(entry?.reason || "MANTLE.Bond.needsIntensity"));
+      return null;
+    }
+
+    return maneuver.luck
+      ? this.#comeBackToMe(id, maneuver, target)
+      : this.#reachForBond(id, maneuver, target);
+  }
+
+  /**
+   * Stay With Me!: spend the turn and 1 Resolve to strip Faltering and
+   * Unraveling from someone you hold a Bond toward.
+   *
+   * Range and line of sight are the table's to judge, so they are stated on
+   * the card rather than measured.
+   *
+   * @param {string} id
+   * @param {object} maneuver
+   * @param {any} target
+   * @returns {Promise<ChatMessage|null>}
+   */
+  async #reachForBond(id, maneuver, target) {
+    if (!(await this.#spendResolve(maneuver.resolve))) return null;
+    return this.#postBondRelief(id, maneuver, target, "");
+  }
+
+  /**
+   * Come Back to Me!: both of you test your luck, and either one landing is
+   * enough to bring them back.
+   *
+   * The Resolve is spent only on success — a failed attempt costs the turn and
+   * nothing else — so the two rolls happen before anything is paid.
+   *
+   * @param {string} id
+   * @param {object} maneuver
+   * @param {any} target
+   * @returns {Promise<ChatMessage|null>}
+   */
+  async #comeBackToMe(id, maneuver, target) {
+    const reason = game.i18n.localize(maneuver.label);
+    const mine = await this.testLuck(reason);
+    const theirs = await target.testLuck(reason);
+
+    const successes = [mine, theirs].reduce((best, message) => {
+      const roll = message?.rolls?.[0];
+      return Math.max(best, roll instanceof MantleRoll ? roll.resolve().successes : 0);
+    }, 0);
+
+    if (successes < 1) {
+      return this.#report(maneuver, game.i18n.localize("MANTLE.Bond.reachFailed"));
+    }
+
+    if (!(await this.#spendResolve(maneuver.resolve))) return null;
+    return this.#postBondRelief(id, maneuver, target, game.i18n.localize("MANTLE.Bond.reachHeld"));
+  }
+
+  /**
+   * Post the card that carries the relief, with the button that applies it.
+   *
+   * @param {string} id
+   * @param {object} maneuver
+   * @param {any} target
+   * @param {string} detail
+   * @returns {Promise<ChatMessage|null>}
+   */
+  async #postBondRelief(id, maneuver, target, detail) {
+    /** @type {Record<string, any>} */
+    const conditions = MANTLE.conditions;
+    const named = maneuver.clears
+      .map((/** @type {string} */ key) => game.i18n.localize(conditions[key].label))
+      .join(", ");
+
+    const notes = [detail, game.i18n.localize("MANTLE.Maneuver.fullTurn")].filter(Boolean);
+
+    return ChatMessage.create({
+      content: `<div class="mantle mantle-harm-card">
+          <p><strong>${this.name}</strong> — ${game.i18n.localize(maneuver.label)}</p>
+          <p class="what">${game.i18n.format("MANTLE.Bond.reaches", {
+            target: target.name,
+            conditions: named
+          })}</p>
+          <p class="notes">${notes.join(" · ")}</p>
+          <button type="button" data-bond-relief="${id}" data-actor="${target.id}">
+            ${game.i18n.localize("MANTLE.Bond.applyRelief")}
+          </button>
+        </div>`,
+      speaker: ChatMessage.getSpeaker({ actor: this })
+    });
   }
 
   /* -------------------------------------------- */
