@@ -1,6 +1,6 @@
-# Mantle for Foundry VTT
+# Momenta for Foundry VTT
 
-A game system implementing [Mantle](https://armchairtheorist.com) — a tactical,
+A game system implementing [Momenta](https://armchairtheorist.com) — a tactical,
 cinematic fantasy TTRPG built around modular archetypes and slottable masteries.
 
 Roll a pool of d6. Count 5s and 6s as successes to find your result band, then
@@ -25,9 +25,17 @@ Once a release exists, install it from inside Foundry:
    https://github.com/armchairtheorist/foundryvtt-mantle/releases/latest/download/system.json
    ```
 
-3. **Install**, then create a world using the Mantle system.
+3. **Install**, then create a world using the Momenta system.
 
 Only the person hosting the game installs the system. Players just join the world.
+
+> **On the name.** The game is Momenta; the system's internal id is still
+> `mantle`, from its earlier name. That id is what Foundry keys an installed
+> world to, so changing it would orphan every actor and item in an existing
+> world — it stays until there is a reason to run that migration. Expect to see
+> `mantle` in the repository name, the manifest URL, the `systems/mantle/`
+> paths and the `MANTLE.*` localization keys. Nothing a player reads says
+> Mantle.
 
 ### Recommended modules
 
@@ -36,16 +44,16 @@ Neither is required — the system works without them, and degrades gracefully.
 | Module | What it adds |
 |---|---|
 | [Status Icon Counters](https://gitlab.com/woodentavern/status-icon-counters) | Stack counts on token status icons, so `Impaired 3` and `Wracked 2` read at a glance |
-| [Lancer Initiative](https://codeberg.org/Bolts/lancer-initiative) | Popcorn/activation initiative, a close fit for Mantle's side-alternating zipper turn order and for multi-turn Champions and Nemeses |
+| [Lancer Initiative](https://codeberg.org/Bolts/lancer-initiative) | Popcorn/activation initiative, a close fit for Momenta's side-alternating zipper turn order and for multi-turn Champions and Nemeses |
 | Dice So Nice | 3D dice. Works automatically — no system configuration needed |
 
-**Status Icon Counters.** Mantle's conditions stack and Foundry's status effects
+**Status Icon Counters.** Momenta's conditions stack and Foundry's status effects
 do not, so stack counts live on the effect in `flags.statuscounter.value` — the
 flag this module reads to draw the number on the token. Without it the counts are
 still tracked and still shown on both actor sheets; only the token badge is
 missing.
 
-**Lancer Initiative.** Mantle resolves turn order by side-alternating zipper
+**Lancer Initiative.** Momenta resolves turn order by side-alternating zipper
 rather than by a rolled formula, which is why the system deliberately registers
 no `CONFIG.Combat.initiative`. Lancer Initiative's activation model is the
 closest fit, and it handles the multi-turn Champions and Nemeses — a Nemesis
@@ -54,7 +62,7 @@ tracker also works: add each combatant once per turn they take.
 
 ## Running a game
 
-Everything the table needs is in the **Mantle** compendium folder.
+Everything the table needs is in the **Momenta** compendium folder.
 
 | Pack | What is in it |
 |---|---|
@@ -159,5 +167,5 @@ git push origin v0.1.0
 
 ## Licence
 
-MIT for the system code. The Mantle game rules and setting are the property of
+MIT for the system code. The Momenta game rules and setting are the property of
 their author and are not covered by that licence.

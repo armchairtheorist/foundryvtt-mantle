@@ -1,8 +1,8 @@
 {
   "id": "mantle",
-  "title": "Mantle",
+  "title": "Momenta",
   "description": "A tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. Roll pools of d6, read them twice \u2014 once for successes, once for patterns.",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "compatibility": {
     "minimum": "14",
     "verified": "14.366"
@@ -29,7 +29,7 @@
   "packs": [
     {
       "name": "archetypes",
-      "label": "Mantle: Archetypes",
+      "label": "Momenta: Archetypes",
       "type": "Item",
       "path": "packs/archetypes",
       "system": "mantle",
@@ -40,7 +40,7 @@
     },
     {
       "name": "masteries",
-      "label": "Mantle: Masteries",
+      "label": "Momenta: Masteries",
       "type": "Item",
       "path": "packs/masteries",
       "system": "mantle",
@@ -51,7 +51,7 @@
     },
     {
       "name": "equipment",
-      "label": "Mantle: Equipment",
+      "label": "Momenta: Equipment",
       "type": "Item",
       "path": "packs/equipment",
       "system": "mantle",
@@ -62,7 +62,7 @@
     },
     {
       "name": "spellcasting",
-      "label": "Mantle: Arts & Resonances",
+      "label": "Momenta: Arts & Resonances",
       "type": "Item",
       "path": "packs/spellcasting",
       "system": "mantle",
@@ -73,7 +73,7 @@
     },
     {
       "name": "limitbreaks",
-      "label": "Mantle: Limit Breaks",
+      "label": "Momenta: Limit Breaks",
       "type": "Item",
       "path": "packs/limitbreaks",
       "system": "mantle",
@@ -84,7 +84,7 @@
     },
     {
       "name": "adversaries",
-      "label": "Mantle: Adversaries",
+      "label": "Momenta: Adversaries",
       "type": "Actor",
       "path": "packs/adversaries",
       "system": "mantle",
@@ -95,7 +95,7 @@
     },
     {
       "name": "pregens",
-      "label": "Mantle: Pre-Generated Characters",
+      "label": "Momenta: Pre-Generated Characters",
       "type": "Actor",
       "path": "packs/pregens",
       "system": "mantle",
@@ -106,7 +106,7 @@
     },
     {
       "name": "maneuvers",
-      "label": "Mantle: Maneuvers & Reactions",
+      "label": "Momenta: Maneuvers & Reactions",
       "type": "Item",
       "path": "packs/maneuvers",
       "system": "mantle",
@@ -204,13 +204,13 @@
   },
   "url": "https://github.com/armchairtheorist/foundryvtt-mantle",
   "manifest": "https://github.com/armchairtheorist/foundryvtt-mantle/releases/latest/download/system.json",
-  "download": "https://github.com/armchairtheorist/foundryvtt-mantle/releases/download/v0.9.6/mantle.zip",
+  "download": "https://github.com/armchairtheorist/foundryvtt-mantle/releases/download/v0.9.7/mantle.zip",
   "readme": "https://github.com/armchairtheorist/foundryvtt-mantle/blob/main/README.md",
   "bugs": "https://github.com/armchairtheorist/foundryvtt-mantle/issues",
   "socket": false,
   "packFolders": [
     {
-      "name": "Mantle",
+      "name": "Momenta",
       "sorting": "m",
       "color": "#7a7256",
       "packs": [

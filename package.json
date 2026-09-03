@@ -1,7 +1,7 @@
 {
   "name": "foundryvtt-mantle",
-  "version": "0.9.6",
-  "description": "The Mantle TTRPG as a game system for Foundry Virtual Tabletop",
+  "version": "0.9.7",
+  "description": "The Momenta TTRPG as a game system for Foundry Virtual Tabletop",
   "private": true,
   "type": "module",
   "license": "MIT",
