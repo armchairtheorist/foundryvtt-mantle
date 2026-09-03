@@ -14,6 +14,7 @@ import { describe, test } from "node:test";
 
 import { prepareManeuvers } from "../module/apps/sheets/_maneuvers-context.mjs";
 import { MANTLE } from "../module/config.mjs";
+import { build as buildArchetypes } from "../src/content/archetypes.mjs";
 
 /** @param {string} path - Repo-relative. */
 function read(path) {
@@ -36,13 +37,25 @@ function iteratedContextKeys(source) {
   return [...names].sort();
 }
 
-/** A character: tracks Vigor, so it gets the full bar and every reaction. */
+/**
+ * A character: tracks Vigor, so it gets the full bar and every reaction their
+ * abilities have granted. This one is a Warrior, so that is all of them.
+ */
 const character = {
   type: "character",
-  system: { vigor: { value: 7 } },
+  system: {
+    vigor: { value: 7 },
+    grantedReactions: { deflect: true, counterattack: true }
+  },
   meleeWeapons: [{ name: "Axe" }],
   deflectWeapons: [{ name: "Shield" }],
   reflexiveWeapons: [{ name: "Rapier" }]
+};
+
+/** The same loadout without the Warrior abilities that grant the two. */
+const untrained = {
+  ...character,
+  system: { vigor: { value: 7 }, grantedReactions: { deflect: false, counterattack: false } }
 };
 
 /** An adversary: no Vigor, no reactions, only the maneuvers enemies can take. */
@@ -133,5 +146,44 @@ describe("tandem reactions", () => {
     // for anything that does not track Vigor — worth pinning either way.
     const enemy = { ...adversary, tandemPartners: [{ actor: { name: "Mira" }, mutual: 5 }] };
     assert.deepEqual(prepareManeuvers(enemy).reactions, []);
+  });
+});
+
+describe("reactions an ability has to grant", () => {
+  /** @param {any} actor */
+  const ids = (actor) =>
+    prepareManeuvers(actor).reactions.map((/** @type {any} */ reaction) => reaction.id);
+
+  test("a Warrior holding a shield gets Deflect and Counterattack", () => {
+    assert.ok(ids(character).includes("deflect"));
+    assert.ok(ids(character).includes("counterattack"));
+  });
+
+  test("the same loadout without the abilities gets neither", () => {
+    // v0.31 is explicit: the Deflect and Shield tags mark a weapon capable of
+    // deflecting, and the reaction itself must be granted by an ability. A
+    // button that could only ever refuse is not offered.
+    assert.ok(!ids(untrained).includes("deflect"));
+    assert.ok(!ids(untrained).includes("counterattack"));
+  });
+
+  test("the ungated reactions are untouched", () => {
+    for (const id of ["dodge", "brace", "intercept", "forestall"]) {
+      assert.ok(ids(untrained).includes(id), id);
+    }
+  });
+
+  test("every gated reaction names an ability that exists to grant it", () => {
+    // Matched by name, so a rename in the archetype catalog that is not
+    // mirrored here would silently lock the reaction away forever.
+    const abilities = new Set(
+      buildArchetypes().flatMap((doc) =>
+        (doc.system.rankFeatures ?? []).map((/** @type {any} */ feature) => feature.name)
+      )
+    );
+
+    for (const [id, ability] of Object.entries(MANTLE.grantedReactions)) {
+      assert.ok(abilities.has(ability), `${id} is granted by "${ability}", which nothing grants`);
+    }
   });
 });

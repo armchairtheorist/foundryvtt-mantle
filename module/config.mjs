@@ -689,6 +689,22 @@ MANTLE.bondLabels = {
 MANTLE.bondUnlocks = { tandem: 3, comboLimitBreak: 4 };
 
 /**
+ * Reactions that an ability must grant, and the ability that grants each.
+ *
+ * A weapon's Deflect or Shield tag marks it *capable* of deflecting; the
+ * reaction itself comes from an ability, and without one a shield is a shield
+ * you do not know how to use. Every other reaction is available to everyone.
+ *
+ * Matched by the ability's name, the way Combat Reflexes and Inner Focus are:
+ * archetype rank features and masteries are authored prose, and their names
+ * are the only stable handle on them.
+ */
+MANTLE.grantedReactions = {
+  deflect: "Deflect",
+  counterattack: "Counterattack"
+};
+
+/**
  * Being out of the fight. Defeated and Lost stop a character invoking a Bond,
  * and are what Come Back to Me! reaches through — one list, read from both
  * ends.

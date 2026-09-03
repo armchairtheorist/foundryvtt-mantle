@@ -265,6 +265,24 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
     };
 
     /**
+     * Reactions an ability has actually granted.
+     *
+     * Deflect and Counterattack are Warrior abilities. Holding a shield is not
+     * the same as knowing how to use it, and v0.31 says so outright — so the
+     * buttons are gated on the ability rather than on the tag.
+     */
+    const granted = new Set([
+      ...archetypes.flatMap((a) =>
+        (a.system.activeFeatures ?? []).map((/** @type {any} */ f) => f.name)
+      ),
+      ...equippedMasteries.map((i) => i.name)
+    ]);
+
+    this.grantedReactions = Object.fromEntries(
+      Object.entries(MANTLE.grantedReactions).map(([id, ability]) => [id, granted.has(ability)])
+    );
+
+    /**
      * Combat Reflexes gives *every* equipped melee weapon the Reflexive tag,
      * the intrinsic Unarmed Attack included. Derived here rather than written
      * onto each weapon, so unequipping the mastery takes the tag back.

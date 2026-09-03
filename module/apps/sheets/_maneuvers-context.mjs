@@ -61,14 +61,20 @@ export function prepareManeuvers(actor) {
   if (!tracksVigor) return { basicManeuvers, reactions: [] };
 
   const hasMelee = actor.meleeWeapons?.length > 0;
+
+  // Deflect and Counterattack are Warrior abilities. A weapon's tag says it is
+  // capable of deflecting; the ability is what grants the reaction, so without
+  // it the button would only ever refuse.
+  const granted = actor.system.grantedReactions ?? {};
+
   /** @type {Record<string, boolean>} */
   const available = {
     dodge: true,
     brace: true,
-    deflect: actor.deflectWeapons?.length > 0,
+    deflect: granted.deflect && actor.deflectWeapons?.length > 0,
     forestall: actor.reflexiveWeapons?.length > 0,
     intercept: hasMelee,
-    counterattack: hasMelee
+    counterattack: granted.counterattack && hasMelee
   };
 
   const reactions = Object.entries(reactionTable)

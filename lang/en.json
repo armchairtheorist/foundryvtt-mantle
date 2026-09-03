@@ -427,6 +427,7 @@
   "MANTLE.Reaction.noDeflectWeapon": "No equipped weapon has the Deflect or Shield tag.",
   "MANTLE.Reaction.noMeleeWeapon": "No equipped melee weapon.",
   "MANTLE.Reaction.noReflexiveWeapon": "No equipped melee weapon has the Reflexive tag.",
+  "MANTLE.Reaction.notGranted": "{reaction} must be granted by an ability — the weapon tag alone does not grant it. Warriors gain it as the {ability} ability.",
   "MANTLE.Reaction.reactWith": "React with",
   "MANTLE.Resource.guard": "Guard",
   "MANTLE.Resource.resolve": "Resolve",

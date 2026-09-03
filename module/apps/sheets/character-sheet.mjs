@@ -112,7 +112,9 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
 
     // Each reaction needs a weapon that permits it; without one the button
     // would only ever produce a warning, so it is not offered at all.
-    context.canDeflect = this.document.deflectWeapons.length > 0;
+    context.canDeflect =
+      Boolean(this.document.system.grantedReactions?.deflect) &&
+      this.document.deflectWeapons.length > 0;
     context.canForestall = this.document.reflexiveWeapons.length > 0;
 
     context.bonds = this.#prepareBonds();

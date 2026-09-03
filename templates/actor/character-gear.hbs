@@ -69,10 +69,11 @@
           <span class="cost">{{weapon.system.attackCost}} {{localize "MANTLE.Resource.vigorShort"}}</span>
           <a class="control roll" data-action="rollWeapon"
              data-tooltip="{{localize 'MANTLE.Sheet.rollAttack'}}"><i class="fa-solid fa-dice-d6"></i></a>
-          {{#if weapon.system.canDeflect}}
+          {{#if (and weapon.system.canDeflect ../system.grantedReactions.deflect)}}
             {{!-- Which weapon deflects decides the attribute rolled, so the
                   reaction is offered on the weapon rather than only in the
-                  header. --}}
+                  header — and only once an ability has granted it, since the
+                  tag marks the weapon capable rather than the wielder. --}}
             <a class="control deflect" data-action="rollDeflect"
                data-tooltip="{{localize 'MANTLE.Reaction.deflectHint'}}"><i class="fa-solid fa-shield-halved"></i></a>
           {{/if}}

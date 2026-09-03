@@ -664,6 +664,7 @@ export default class MantleActor extends Actor {
    * @returns {Promise<ChatMessage|null>}
    */
   async rollDeflect(weapon) {
+    if (!(await this.#reactionGranted("deflect"))) return null;
     if (!weapon?.system?.canDeflect) {
       ui.notifications.warn(game.i18n.localize("MANTLE.Reaction.noDeflectWeapon"));
       return null;
@@ -1228,6 +1229,34 @@ export default class MantleActor extends Actor {
   }
 
   /**
+   * Whether an ability has granted this reaction.
+   *
+   * Only Deflect and Counterattack are gated; every other reaction is
+   * available to everyone, so anything not in the table passes.
+   *
+   * @param {string} id - A key of MANTLE.reactions
+   * @returns {Promise<boolean>}
+   */
+  async #reactionGranted(id) {
+    /** @type {Record<string, string>} */
+    const table = MANTLE.grantedReactions;
+    const ability = table[id];
+    if (!ability || this.type === "adversary") return true;
+
+    if (this.system.grantedReactions?.[id]) return true;
+
+    ui.notifications.warn(
+      game.i18n.format("MANTLE.Reaction.notGranted", {
+        reaction: game.i18n.localize(MANTLE.reactions[id].label),
+        ability
+      })
+    );
+    return false;
+  }
+
+  /* -------------------------------------------- */
+
+  /**
    * Pick the melee weapon a maneuver or reaction uses.
    *
    * @param {object} maneuver
@@ -1261,6 +1290,7 @@ export default class MantleActor extends Actor {
   async rollReactiveAttack(id) {
     const reaction = MANTLE.reactions[id];
     if (!reaction) return null;
+    if (!(await this.#reactionGranted(id))) return null;
 
     const weapon = await this.#pickMeleeWeapon(reaction);
     if (!weapon) return null;
