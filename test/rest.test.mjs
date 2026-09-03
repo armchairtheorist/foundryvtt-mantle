@@ -91,25 +91,34 @@ describe("re-entering combat", () => {
 });
 
 describe("healing with Resolve", () => {
-  test("costs the severity", () => {
-    assert.equal(healCost({ severity: 1 }), 1);
-    assert.equal(healCost({ severity: 3 }), 3);
+  test("costs a flat 1 per Wound or Burden", () => {
+    // Severities used to price this and a Critical Wound cost 3. v0.31: "spend
+    // 1 Resolve to heal 1 Wound or 1 Burden", and there are no severities.
+    assert.equal(MANTLE.healResolveCost, 1);
+    assert.equal(healCost({}), 1);
+    assert.equal(healCost({ consequence: "Broken" }), 1);
   });
 
-  test("cheap harms first, so the count is what a player would pick", () => {
-    const { indices, cost } = affordableHeals([{ severity: 3 }, { severity: 1 }, { severity: 2 }], 3);
-    assert.deepEqual(indices, [1, 2]);
-    assert.equal(cost, 3);
+  test("Resolve buys that many harms", () => {
+    const harms = [{ consequence: "a" }, { consequence: "b" }, { consequence: "c" }];
+    const { indices, cost } = affordableHeals(harms, 2);
+    assert.equal(indices.length, 2);
+    assert.equal(cost, 2);
+  });
+
+  test("enough Resolve clears the whole track", () => {
+    const harms = [{ consequence: "a" }, { consequence: "b" }];
+    assert.deepEqual(affordableHeals(harms, 10), { indices: [0, 1], cost: 2 });
   });
 
   test("no Resolve heals nothing", () => {
-    assert.deepEqual(affordableHeals([{ severity: 1 }], 0), { indices: [], cost: 0 });
+    assert.deepEqual(affordableHeals([{ consequence: "a" }], 0), { indices: [], cost: 0 });
   });
 
-  test("indices come back in track order, not cost order", () => {
+  test("indices come back in track order", () => {
     // The caller indexes into the wounds array with these.
-    const { indices } = affordableHeals([{ severity: 1 }, { severity: 3 }, { severity: 1 }], 2);
-    assert.deepEqual(indices, [0, 2]);
+    const harms = [{ consequence: "a" }, { consequence: "b" }, { consequence: "c" }];
+    assert.deepEqual(affordableHeals(harms, 2).indices, [0, 1]);
   });
 });
 

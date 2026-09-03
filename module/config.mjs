@@ -52,10 +52,17 @@ MANTLE.patterns = {
 MANTLE.bands = ["0", "1", "2", "3"];
 
 /** Hit locations and their targeting penalties, with the Wound severity floor each imposes. */
+/**
+ * The three hit locations, and what a called shot buys.
+ *
+ * v0.31 replaced the severity floors these used to impose — there is no
+ * severity any more — with effects: Edge lands Hindered on any hit, and Mark
+ * makes the defender weak to the attack and Broken if it Wounds them.
+ */
 MANTLE.hitLocations = {
-  mass: { label: "MANTLE.HitLocation.mass", penalty: 0, severityFloor: 0 },
-  edge: { label: "MANTLE.HitLocation.edge", penalty: -2, severityFloor: 2 },
-  mark: { label: "MANTLE.HitLocation.mark", penalty: -3, severityFloor: 3 }
+  mass: { label: "MANTLE.HitLocation.mass", penalty: 0 },
+  edge: { label: "MANTLE.HitLocation.edge", penalty: -2, onHit: "hindered" },
+  mark: { label: "MANTLE.HitLocation.mark", penalty: -3, weakness: true, onWound: "broken" }
 };
 
 /** Visibility states and the attack roll penalty for targeting something in each. */
@@ -293,6 +300,12 @@ MANTLE.defaultDamageType = "crushing";
  * every stat block keeps the shorthand the catalog uses and the thing the
  * affinity engine compares against as the same idea.
  */
+/**
+ * Wracked (Bleeding) is a Wracked variant that counts as Piercing *and*
+ * Slashing at once: a resistance or weakness to either answers its damage.
+ */
+MANTLE.bleedingDamageTypes = ["piercing", "slashing"];
+
 MANTLE.damageTypeGroups = {
   physical: ["slashing", "piercing", "crushing"]
 };
@@ -653,19 +666,26 @@ MANTLE.conditionBonuses = {
 /*  Wounds and Burdens                           */
 /* -------------------------------------------- */
 
-MANTLE.woundSeverities = {
-  1: { label: "MANTLE.Wound.flesh" },
-  2: { label: "MANTLE.Wound.trauma" },
-  3: { label: "MANTLE.Wound.critical" }
+/**
+ * The 1d6 table a Wound rolls for its consequence.
+ *
+ * v0.31 dropped Wound severities entirely. A Wound is a Wound; what it *does*
+ * comes off this table, and filling the last slot is what brings Faltering
+ * rather than any one severity.
+ *
+ * `scalesWithWounds` marks the Impaired row, whose stack count is the number
+ * of Wounds held — and which sets the stacks rather than adding to them.
+ */
+MANTLE.woundConsequences = {
+  1: { condition: "impaired", scalesWithWounds: true },
+  2: { condition: "hindered" },
+  3: { condition: "exhausted" },
+  4: { condition: "slowed" },
+  5: { condition: "shrouded" },
+  6: { condition: "broken" }
 };
 
-MANTLE.burdenSeverities = {
-  1: { label: "MANTLE.Burden.confusion" },
-  2: { label: "MANTLE.Burden.affliction" },
-  3: { label: "MANTLE.Burden.breakdown" }
-};
-
-/** The 1d6 affliction table rolled for Affliction and Breakdown Burdens. */
+/** The 1d6 affliction table. Every Burden rolls on it in v0.31. */
 MANTLE.afflictions = {
   1: "MANTLE.Affliction.paranoid",
   2: "MANTLE.Affliction.reckless",
@@ -697,6 +717,9 @@ MANTLE.heroicFeatMaxSuccesses = 3;
  * GM free to grant more, so this is the floor rather than the rule.
  */
 MANTLE.interludeConsumableRestock = 1;
+
+/** Resolve to heal one Wound or Burden at an interlude. Flat since v0.31. */
+MANTLE.healResolveCost = 1;
 
 /** A Heroic Feat can add at most this many successes to a single roll. */
 MANTLE.heroicFeatMaxSuccesses = 3;

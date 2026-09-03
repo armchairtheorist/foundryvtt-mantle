@@ -58,9 +58,8 @@
         </a>
       </h3>
       {{#each system.wounds as |wound index|}}
-        <div class="harm-entry severity-{{wound.severity}}">
-          <span class="severity">{{localize (lookup (lookup ../config.woundSeverities wound.severity) "label")}}</span>
-          <span class="effect">{{wound.effect}}</span>
+        <div class="harm-entry">
+          <span class="effect">{{wound.consequence}}</span>
           <a class="control" data-action="clearHarm" data-track="wounds" data-index="{{index}}"
              data-tooltip="{{localize 'MANTLE.Harm.clearWound'}}">
             <i class="fa-solid fa-xmark"></i>
@@ -81,10 +80,8 @@
         </a>
       </h3>
       {{#each system.burdens as |burden index|}}
-        <div class="harm-entry severity-{{burden.severity}}">
-          <span class="severity">{{localize (lookup (lookup ../config.burdenSeverities burden.severity) "label")}}</span>
-          <span class="effect">{{burden.effect}}</span>
-          {{#if burden.affliction}}<span class="affliction">{{burden.affliction}}</span>{{/if}}
+        <div class="harm-entry">
+          <span class="effect">{{localize burden.affliction}}</span>
           <a class="control" data-action="clearHarm" data-track="burdens" data-index="{{index}}"
              data-tooltip="{{localize 'MANTLE.Harm.clearBurden'}}">
             <i class="fa-solid fa-xmark"></i>

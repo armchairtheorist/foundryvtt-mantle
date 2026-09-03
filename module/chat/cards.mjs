@@ -446,19 +446,33 @@ async function takeHarm(button) {
   // A Wound is taken once; disable immediately so a double-click cannot take two.
   button.disabled = true;
 
-  // A called shot floors the Wound's severity — Edge at 2, Mark at 3 — so the
-  // location declared when the attack was rolled has to survive all the way to
-  // the button that finally takes the Wound. Burdens have no location.
+  // The location declared when the attack was rolled has to survive all the way
+  // to the button that finally takes the Wound. Burdens have no location.
   const hitLocation = button.dataset.hitLocation ?? "mass";
 
   const result =
     kind === "wound" ? await actor.takeWound({ hitLocation }) : await actor.takeBurden();
   if (!result) return;
 
+  // What the 1d6 landed, and the dice it discarded on the way. Showing the
+  // rerolls matters: a table watching one die become another wants to see why.
+  const what = kind === "wound" ? result.consequence : result.affliction;
+  const notes = [
+    game.i18n.format("MANTLE.Harm.rolled", { die: result.die }),
+    result.rerolls.length
+      ? game.i18n.format("MANTLE.Harm.rerolled", { dice: result.rerolls.join(", ") })
+      : "",
+    result.faltering ? game.i18n.localize("MANTLE.Condition.faltering") + " 1" : "",
+    result.unraveling ? game.i18n.localize("MANTLE.Condition.unraveling") + " 1" : ""
+  ].filter(Boolean);
+
   await ChatMessage.create({
     content: `<div class="mantle mantle-harm-card">
-        <p><strong>${actor.name}</strong> — ${game.i18n.localize(result.label)}</p>
-        <p class="notes">${result.effect}${result.affliction ? ` · ${result.affliction}` : ""}</p>
+        <p><strong>${actor.name}</strong> — ${game.i18n.localize(
+          kind === "wound" ? "MANTLE.Sheet.wound" : "MANTLE.Sheet.burden"
+        )}</p>
+        <p class="what">${what}</p>
+        <p class="notes">${notes.join(" · ")}</p>
       </div>`,
     speaker: ChatMessage.getSpeaker({ actor })
   });

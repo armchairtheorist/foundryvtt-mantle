@@ -78,14 +78,19 @@ export function combatReentry({ criticalWound, breakdown }) {
 /**
  * What one Wound or Burden costs in Resolve to heal during an interlude.
  *
- * "The amount of Resolve it costs to heal each Wound or Burden is equal to the
- * severity" — so a Critical Wound is the expensive one, which is the point.
+ * A flat 1 in v0.31: "Player characters can choose to spend 1 Resolve to heal
+ * 1 Wound or 1 Burden." Severities used to price this — a Critical Wound cost
+ * 3 — and there are no severities any more, so every Wound costs the same.
  *
- * @param {{severity: number}} harm
+ * Kept as a function rather than inlined as a literal because the *shape* of
+ * the rule is "each harm has a price", and a mastery or ability changing that
+ * price is a far smaller edit here than at every call site.
+ *
+ * @param {object} [harm] - The Wound or Burden being healed
  * @returns {number}
  */
 export function healCost(harm) {
-  return harm.severity;
+  return MANTLE.healResolveCost;
 }
 
 /**
@@ -95,7 +100,10 @@ export function healCost(harm) {
  * Greedy on purpose: it answers "what could I clear with what I have", which is
  * the question a player asks before choosing. The actual choice stays theirs.
  *
- * @param {{severity: number}[]} harms
+ * With a flat price this reduces to "as many as you can pay for", but it stays
+ * cost-aware so an ability that changes the price does not need a new function.
+ *
+ * @param {object[]} harms
  * @param {number} resolve
  * @returns {{indices: number[], cost: number}}
  */

@@ -48,10 +48,10 @@ import {
 import {
   applyDamage,
   applyStrain,
+  burdenAffliction,
   damageAffinity,
-  harmSeverity,
-  woundEffect,
-  burdenEffect
+  fillsLastSlot,
+  woundConsequence
 } from "../rules/harm.mjs";
 
 /**
@@ -1671,53 +1671,99 @@ export default class MantleActor extends Actor {
   /* -------------------------------------------- */
 
   /**
-   * Take a Wound: test your luck, work out the severity, and record it.
+   * Take a Wound: roll 1d6 for what it does, apply that, and record it.
+   *
+   * No luck roll and no severity — v0.31 replaced both with this table. A row
+   * the character already carries is rerolled, except Impaired, whose stacks
+   * are simply set to the number of Wounds held.
    *
    * @param {object} [options]
-   * @param {"mass"|"edge"|"mark"} [options.hitLocation] - A called shot floors the severity
+   * @param {"mass"|"edge"|"mark"} [options.hitLocation]
    * @returns {Promise<object|null>}
    */
   async takeWound({ hitLocation = "mass" } = {}) {
     if (this.type === "adversary") return this.#takeAdversaryHarm("wounds", hitLocation);
 
     const system = this.system;
+    const slots = system.slots?.wound ?? 0;
     const slotsFilled = system.wounds.length + 1;
 
     // No slot left is not a no-op: the rules say the character is Defeated.
     // Saying so is the point — silently doing nothing reads as a broken button.
-    if (slotsFilled > (system.slots?.wound ?? 0)) {
+    if (slotsFilled > slots) {
       ui.notifications.warn(game.i18n.localize("MANTLE.Harm.noWoundSlots"));
       return null;
     }
 
-    const luck = await this.rollAction({
-      attribute: "luck",
-      title: game.i18n.localize("MANTLE.Card.woundSeverity"),
-      subtitle: this.name
-    });
+    const rolled = await this.#rollConsequence((die) =>
+      woundConsequence(die, { woundsHeld: slotsFilled, stacks: this.conditions })
+    );
+    if (!rolled) return null;
 
-    const successes = luck?.rolls?.[0]?.resolve()?.successes ?? 0;
-    const severity = harmSeverity({ slotsFilled, luckSuccesses: successes, hitLocation });
+    const { outcome, die, rerolls } = rolled;
+    const label = game.i18n.localize(MANTLE.conditions[outcome.condition].label);
 
-    // A Trauma Wound reads a 1d6 sub-table for what it actually does.
-    const sub = await new Roll("1d6").evaluate();
-    const effect = woundEffect(severity, slotsFilled, sub.total);
+    // `sets` is the Impaired row: the stacks become the Wound count rather
+    // than climbing by one, and a lower roll than what is already held is no
+    // change at all.
+    if (outcome.sets) {
+      if (outcome.stacks > this.conditionStacks(outcome.condition)) {
+        await setCondition(this, outcome.condition, outcome.stacks);
+      }
+    } else {
+      await this.changeCondition(outcome.condition, outcome.stacks);
+    }
 
-    const wounds = [...system.wounds.map((w) => ({ ...w })), {
-      severity: effect.severity,
-      effect: effect.effect,
-      disabledGear: ""
-    }];
-
+    const consequence = outcome.sets ? `${label} ${outcome.stacks}` : label;
+    const wounds = [...system.wounds.map((w) => ({ ...w })), { consequence }];
     await this.update({ "system.wounds": wounds });
-    return { ...effect, luckSuccesses: successes, subRoll: sub.total };
+
+    // Faltering arrives with the last slot, not with any one Wound.
+    const faltering = fillsLastSlot(slotsFilled, slots);
+    if (faltering && this.conditionStacks("faltering") === 0) {
+      await this.changeCondition("faltering", 1);
+    }
+
+    return { consequence, condition: outcome.condition, die, rerolls, faltering };
+  }
+
+  /**
+   * Roll a 1d6 consequence table, rerolling what the table says to reroll.
+   *
+   * Bounded rather than looping forever: five of the six Wound rows can be
+   * held at once, so a character carrying all of them would otherwise spin
+   * here. When the dice run out the last roll stands, which is the outcome a
+   * table would reach by hand anyway.
+   *
+   * @param {(die: number) => {reroll: boolean}|null} resolve
+   * @returns {Promise<{outcome: any, die: number, rerolls: number[]}|null>}
+   */
+  async #rollConsequence(resolve) {
+    const rerolls = [];
+    let die = 0;
+    let outcome = null;
+
+    for (let attempt = 0; attempt < 12; attempt++) {
+      const roll = await new Roll("1d6").evaluate();
+      die = roll.total;
+      outcome = resolve(die);
+      if (!outcome) return null;
+      if (!outcome.reroll) break;
+      rerolls.push(die);
+    }
+
+    return { outcome, die, rerolls };
   }
 
   /* -------------------------------------------- */
 
   /**
-   * Take a Burden: as Wounds, but on the Strain track, and severity 2 or 3 also
-   * rolls an affliction that persists until the Burden is healed.
+   * Take a Burden: roll 1d6 for its affliction, and record it.
+   *
+   * Every Burden brings an affliction in v0.31, where only the higher
+   * severities used to. A character may not hold two of the same type, so an
+   * affliction already held is rerolled — which is read off the Burdens
+   * themselves, since that is where afflictions live.
    *
    * @returns {Promise<object|null>}
    */
@@ -1725,33 +1771,40 @@ export default class MantleActor extends Actor {
     if (this.type === "adversary") return this.#takeAdversaryHarm("burdens");
 
     const system = this.system;
+    const slots = system.slots?.burden ?? 0;
     const slotsFilled = system.burdens.length + 1;
 
-    if (slotsFilled > (system.slots?.burden ?? 0)) {
+    if (slotsFilled > slots) {
       ui.notifications.warn(game.i18n.localize("MANTLE.Harm.noBurdenSlots"));
       return null;
     }
 
-    const luck = await this.rollAction({
-      attribute: "luck",
-      title: game.i18n.localize("MANTLE.Card.burdenSeverity"),
-      subtitle: this.name
-    });
+    const held = system.burdens.map((burden) => burden.affliction).filter(Boolean);
+    const rolled = await this.#rollConsequence((die) => burdenAffliction(die, held));
+    if (!rolled) return null;
 
-    const successes = luck?.rolls?.[0]?.resolve()?.successes ?? 0;
-    const severity = harmSeverity({ slotsFilled, luckSuccesses: successes });
-
-    const sub = await new Roll("1d6").evaluate();
-    const effect = burdenEffect(severity, slotsFilled, sub.total);
-
+    const { outcome, die, rerolls } = rolled;
     const burdens = [...system.burdens.map((b) => ({ ...b })), {
-      severity: effect.severity,
-      effect: effect.effect,
-      affliction: effect.affliction ? game.i18n.localize(effect.affliction) : ""
+      affliction: outcome.affliction
     }];
 
     await this.update({ "system.burdens": burdens });
-    return { ...effect, luckSuccesses: successes, subRoll: sub.total };
+
+    // The Affliction condition is the token marker; the Burden is the record
+    // of which affliction it was.
+    await this.changeCondition("affliction", 1);
+
+    const unraveling = fillsLastSlot(slotsFilled, slots);
+    if (unraveling && this.conditionStacks("unraveling") === 0) {
+      await this.changeCondition("unraveling", 1);
+    }
+
+    return {
+      affliction: game.i18n.localize(outcome.affliction),
+      die,
+      rerolls,
+      unraveling
+    };
   }
 
   /* -------------------------------------------- */

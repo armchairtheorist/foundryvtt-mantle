@@ -448,24 +448,10 @@
     margin-bottom: 3px;
     background: var(--mantle-panel);
 
-    /* Severity escalates from a flesh wound to something that can end you. */
-    &.severity-1 { border-left-color: #c9a227; }
-    &.severity-2 { border-left-color: var(--mantle-warning); }
-    &.severity-3 { border-left-color: var(--mantle-vitality); }
-
-    .severity {
-      font-weight: 700;
+    /* No severity tiers to colour any more: v0.31 made every Wound a Wound,
+       and what distinguishes them is the condition each one rolled. */
+    .effect {
       font-size: 0.85em;
-    }
-
-    .effect,
-    .affliction {
-      font-size: 0.85em;
-    }
-
-    .affliction {
-      font-style: italic;
-      color: var(--mantle-strain);
     }
   }
 }

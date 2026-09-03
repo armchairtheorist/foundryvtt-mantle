@@ -53,9 +53,15 @@ function matchesAffinity(damageTypes, affinities) {
   /** @type {Record<string, string[]>} */
   const groups = MANTLE.damageTypeGroups;
 
+  // Wracked (Bleeding) is one damage type that answers to two: a resistance or
+  // weakness to Piercing or to Slashing applies to it.
+  const expanded = damageTypes.flatMap((type) =>
+    type === "bleeding" ? MANTLE.bleedingDamageTypes : [type]
+  );
+
   return affinities.some((entry) => {
     const group = groups[entry];
-    return group ? damageTypes.some((type) => group.includes(type)) : damageTypes.includes(entry);
+    return group ? expanded.some((type) => group.includes(type)) : expanded.includes(entry);
   });
 }
 
@@ -203,70 +209,72 @@ export function applyStrain({
 }
 
 /**
- * The severity of a Wound or Burden.
+ * What a Wound does, from the 1d6 table.
  *
- * Severity counts the slots filled *including* the one being taken, less the
- * successes from testing your luck — so a first Wound with no luck is a Flesh
- * Wound, and a third is Critical. Called shots impose a floor regardless of how
- * the luck roll went.
+ * v0.31 replaced Wound severities with a straight roll: no luck test, no
+ * severity, just one of six conditions. Two wrinkles, and both matter:
  *
- * @param {object} options
- * @param {number} options.slotsFilled - Slots filled including this one
- * @param {number} [options.luckSuccesses]
- * @param {"mass"|"edge"|"mark"} [options.hitLocation]
- * @returns {number}
+ *  - **Impaired** scales with the number of Wounds held and *sets* the stacks
+ *    rather than adding to them — "if N is greater than the current Impaired
+ *    stacks, then the number of stacks gets reset to N". Rolling it while
+ *    already more Impaired than the new N therefore changes nothing, and is
+ *    still not a reroll.
+ *  - **Every other row rerolls** if the character already carries it. This
+ *    reports that rather than looping, so the caller owns the dice.
+ *
+ * @param {number} die - The 1d6 result
+ * @param {object} state
+ * @param {number} state.woundsHeld - Wounds held including the one just taken
+ * @param {Record<string, number>} [state.stacks] - Condition id to stacks held
+ * @returns {{condition: string, stacks: number, sets: boolean, reroll: boolean}|null}
  */
-export function harmSeverity({ slotsFilled, luckSuccesses = 0, hitLocation = "mass" }) {
-  const rolled = Math.max(1, slotsFilled - luckSuccesses);
-  const floor = MANTLE.hitLocations[hitLocation]?.severityFloor ?? 0;
-  return Math.max(rolled, floor);
-}
+export function woundConsequence(die, { woundsHeld, stacks = {} }) {
+  const row = /** @type {Record<number, {condition: string, scalesWithWounds?: boolean}>} */ (
+    MANTLE.woundConsequences
+  )[die];
+  if (!row) return null;
 
-/**
- * What a Wound of a given severity does.
- *
- * @param {number} severity
- * @param {number} slotsFilled - Wound slots now filled, which Flesh Wounds scale on
- * @param {number} [subRoll] - The 1d6 for a Trauma Wound
- * @returns {{severity: number, label: string, effect: string}}
- */
-export function woundEffect(severity, slotsFilled, subRoll = 1) {
-  const capped = Math.min(severity, 3);
-  const label = /** @type {Record<number, {label: string}>} */ (MANTLE.woundSeverities)[capped]?.label ?? "";
+  if (row.scalesWithWounds) {
+    return { condition: row.condition, stacks: woundsHeld, sets: true, reroll: false };
+  }
 
-  if (capped === 1) return { severity: capped, label, effect: `Impaired ${slotsFilled}` };
-  if (capped === 3) return { severity: capped, label, effect: "Faltering 1 and Broken" };
-
-  /** @type {Record<number, string>} */
-  const trauma = {
-    1: "One equipped gear item is disabled until the Wound is removed",
-    2: "One equipped gear item is disabled until the Wound is removed",
-    3: "Hindered 1",
-    4: "Exhausted",
-    5: "Slowed",
-    6: "Shrouded"
+  return {
+    condition: row.condition,
+    stacks: 1,
+    sets: false,
+    reroll: (stacks[row.condition] ?? 0) > 0
   };
-  return { severity: capped, label, effect: trauma[subRoll] ?? trauma[1] };
 }
 
 /**
- * What a Burden of a given severity does.
+ * The affliction a Burden inflicts, from the 1d6 table.
  *
- * @param {number} severity
- * @param {number} slotsFilled
- * @param {number} [subRoll] - The 1d6 affliction
- * @returns {{severity: number, label: string, effect: string, affliction: string}}
+ * Every Burden brings one in v0.31, where only severity 2 and 3 did before.
+ * An affliction the character already holds is rerolled — a character may not
+ * hold two of the same type.
+ *
+ * @param {number} die
+ * @param {string[]} [held] - Affliction keys already held
+ * @returns {{affliction: string, reroll: boolean}|null}
  */
-export function burdenEffect(severity, slotsFilled, subRoll = 1) {
-  const capped = Math.min(severity, 3);
-  const label = /** @type {Record<number, {label: string}>} */ (MANTLE.burdenSeverities)[capped]?.label ?? "";
-  const affliction = /** @type {Record<number, string>} */ (MANTLE.afflictions)[subRoll] ?? "";
+export function burdenAffliction(die, held = []) {
+  const affliction = /** @type {Record<number, string>} */ (MANTLE.afflictions)[die];
+  if (!affliction) return null;
 
-  if (capped === 1) {
-    return { severity: capped, label, effect: `Impaired ${slotsFilled}`, affliction: "" };
-  }
-  if (capped === 3) {
-    return { severity: capped, label, effect: "Unraveling 1", affliction };
-  }
-  return { severity: capped, label, effect: "", affliction };
+  return { affliction, reroll: held.includes(affliction) };
+}
+
+/**
+ * Whether filling a slot brings the escalating condition with it.
+ *
+ * Faltering and Unraveling used to come from a Critical Wound and a Breakdown —
+ * the top severities. With severity gone, they arrive when the *last* slot
+ * fills, which is a different trigger reached by a different route.
+ *
+ * @param {number} slotsFilled - Slots filled including the one just taken
+ * @param {number} slots - Total slots
+ * @returns {boolean}
+ */
+export function fillsLastSlot(slotsFilled, slots) {
+  return slots > 0 && slotsFilled >= slots;
 }

@@ -13,9 +13,9 @@ import {
   applyAffinity,
   applyDamage,
   applyStrain,
-  harmSeverity,
-  woundEffect,
-  burdenEffect
+  burdenAffliction,
+  fillsLastSlot,
+  woundConsequence
 } from "../module/rules/harm.mjs";
 
 describe("resistance and weakness", () => {
@@ -180,66 +180,124 @@ describe("Strain and Burdens", () => {
   });
 });
 
-describe("severity", () => {
-  test("without luck, the first Wound is Flesh and the third is Critical", () => {
-    assert.equal(harmSeverity({ slotsFilled: 1 }), 1);
-    assert.equal(harmSeverity({ slotsFilled: 2 }), 2);
-    assert.equal(harmSeverity({ slotsFilled: 3 }), 3);
-  });
-
-  test("luck successes reduce severity, to a floor of 1", () => {
-    assert.equal(harmSeverity({ slotsFilled: 3, luckSuccesses: 1 }), 2);
-    assert.equal(harmSeverity({ slotsFilled: 3, luckSuccesses: 5 }), 1);
-  });
-
-  test("an Edge called shot floors severity at 2 regardless of luck", () => {
-    assert.equal(harmSeverity({ slotsFilled: 1, luckSuccesses: 3, hitLocation: "edge" }), 2);
-  });
-
-  test("a Mark called shot floors severity at 3", () => {
-    assert.equal(harmSeverity({ slotsFilled: 1, luckSuccesses: 3, hitLocation: "mark" }), 3);
-  });
-
-  test("a called shot floor never lowers a naturally higher severity", () => {
-    assert.equal(harmSeverity({ slotsFilled: 3, hitLocation: "edge" }), 3);
-  });
-});
-
 describe("what a Wound does", () => {
-  test("a Flesh Wound's Impaired scales with slots filled", () => {
-    assert.equal(woundEffect(1, 1).effect, "Impaired 1");
-    assert.equal(woundEffect(1, 3).effect, "Impaired 3");
+  // v0.31 replaced severities and the luck roll with one 1d6 table.
+  test("the table is the six conditions the rules print", () => {
+    const rolled = [1, 2, 3, 4, 5, 6].map(
+      (die) => woundConsequence(die, { woundsHeld: 1 })?.condition
+    );
+    assert.deepEqual(rolled, [
+      "impaired",
+      "hindered",
+      "exhausted",
+      "slowed",
+      "shrouded",
+      "broken"
+    ]);
   });
 
-  test("a Trauma Wound reads its 1d6 sub-table", () => {
-    assert.equal(woundEffect(2, 2, 3).effect, "Hindered 1");
-    assert.equal(woundEffect(2, 2, 4).effect, "Exhausted");
-    assert.equal(woundEffect(2, 2, 5).effect, "Slowed");
-    assert.equal(woundEffect(2, 2, 6).effect, "Shrouded");
+  test("Impaired scales with the Wounds held", () => {
+    assert.equal(woundConsequence(1, { woundsHeld: 1 })?.stacks, 1);
+    assert.equal(woundConsequence(1, { woundsHeld: 3 })?.stacks, 3);
   });
 
-  test("a Critical Wound is Faltering and Broken", () => {
-    assert.equal(woundEffect(3, 3).effect, "Faltering 1 and Broken");
+  test("Impaired sets its stacks rather than adding to them", () => {
+    // "if N is greater than the current Impaired stacks, then the number of
+    // stacks gets reset to N" — so it is a set, and rolling it while already
+    // more Impaired changes nothing.
+    const outcome = woundConsequence(1, { woundsHeld: 2, stacks: { impaired: 3 } });
+    assert.equal(outcome?.sets, true);
+    assert.equal(outcome?.stacks, 2, "the caller compares against what is held");
   });
 
-  test("severity above 3 is still Critical", () => {
-    assert.equal(woundEffect(5, 3).severity, 3);
+  test("Impaired never rerolls, even when already held", () => {
+    assert.equal(woundConsequence(1, { woundsHeld: 2, stacks: { impaired: 3 } })?.reroll, false);
+  });
+
+  test("every other row rerolls if the character already carries it", () => {
+    for (const [die, condition] of [
+      [2, "hindered"],
+      [3, "exhausted"],
+      [4, "slowed"],
+      [5, "shrouded"],
+      [6, "broken"]
+    ]) {
+      const fresh = woundConsequence(Number(die), { woundsHeld: 1 });
+      assert.equal(fresh?.reroll, false, `${condition} fresh`);
+
+      const held = woundConsequence(Number(die), {
+        woundsHeld: 1,
+        stacks: { [String(condition)]: 1 }
+      });
+      assert.equal(held?.reroll, true, `${condition} already held`);
+    }
+  });
+
+  test("a die outside the table is not an outcome", () => {
+    assert.equal(woundConsequence(0, { woundsHeld: 1 }), null);
+    assert.equal(woundConsequence(7, { woundsHeld: 1 }), null);
   });
 });
 
 describe("what a Burden does", () => {
-  test("Confusion applies Impaired scaling with slots", () => {
-    assert.equal(burdenEffect(1, 2).effect, "Impaired 2");
-    assert.equal(burdenEffect(1, 2).affliction, "", "no affliction at severity 1");
+  test("every Burden brings an affliction from the 1d6 table", () => {
+    // In v0.21 only severity 2 and 3 rolled one; now they all do.
+    const rolled = [1, 2, 3, 4, 5, 6].map((die) => burdenAffliction(die)?.affliction);
+    assert.deepEqual(rolled, [
+      "MANTLE.Affliction.paranoid",
+      "MANTLE.Affliction.reckless",
+      "MANTLE.Affliction.obsessed",
+      "MANTLE.Affliction.terrified",
+      "MANTLE.Affliction.withdrawn",
+      "MANTLE.Affliction.bloodthirsty"
+    ]);
   });
 
-  test("an Affliction rolls the affliction table", () => {
-    assert.equal(burdenEffect(2, 2, 2).affliction, "MANTLE.Affliction.reckless");
+  test("an affliction already held is rerolled", () => {
+    // "You may not have more than one Affliction of the same type."
+    assert.equal(burdenAffliction(2, ["MANTLE.Affliction.reckless"])?.reroll, true);
+    assert.equal(burdenAffliction(2, ["MANTLE.Affliction.paranoid"])?.reroll, false);
+    assert.equal(burdenAffliction(2)?.reroll, false);
   });
 
-  test("a Breakdown is Unraveling plus an affliction", () => {
-    const result = burdenEffect(3, 3, 6);
-    assert.equal(result.effect, "Unraveling 1");
-    assert.equal(result.affliction, "MANTLE.Affliction.bloodthirsty");
+  test("a die outside the table is not an outcome", () => {
+    assert.equal(burdenAffliction(7), null);
+  });
+});
+
+describe("the escalating conditions", () => {
+  test("arrive with the last slot, not with a severity", () => {
+    // Faltering came from a Critical Wound and Unraveling from a Breakdown.
+    // v0.31 has neither: filling the final slot is the trigger.
+    assert.equal(fillsLastSlot(3, 3), true);
+    assert.equal(fillsLastSlot(2, 3), false);
+    assert.equal(fillsLastSlot(1, 1), true);
+  });
+
+  test("a creature with no slots at all never reaches the trigger", () => {
+    // Grunts and Regulars have no Wound slots; they are removed outright.
+    assert.equal(fillsLastSlot(0, 0), false);
+    assert.equal(fillsLastSlot(1, 0), false);
+  });
+});
+
+describe("Wracked (Bleeding)", () => {
+  test("answers to resistance against either Piercing or Slashing", () => {
+    assert.equal(damageAffinity(["bleeding"], ["piercing"]), "resistant");
+    assert.equal(damageAffinity(["bleeding"], ["slashing"]), "resistant");
+    assert.equal(damageAffinity(["bleeding"], ["physical"]), "resistant", "via the group");
+  });
+
+  test("and to weakness against either", () => {
+    assert.equal(damageAffinity(["bleeding"], [], ["slashing"]), "weak");
+    assert.equal(damageAffinity(["bleeding"], [], ["piercing"]), "weak");
+  });
+
+  test("holding both still cancels", () => {
+    assert.equal(damageAffinity(["bleeding"], ["piercing"], ["slashing"]), "normal");
+  });
+
+  test("an unrelated affinity does not answer it", () => {
+    assert.equal(damageAffinity(["bleeding"], ["fire"]), "normal");
   });
 });

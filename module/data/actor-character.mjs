@@ -36,22 +36,26 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
 
       /**
        * Wounds and Burdens are slot-based persistent harm. Each entry records
-       * what was rolled so the consequence stays visible for the rest of the
-       * mission — a Trauma Wound remembers which gear it disabled, a Breakdown
-       * remembers its affliction.
+       * what it rolled, so the consequence stays readable for the rest of the
+       * mission after the condition itself has been cleared and re-cleared.
+       *
+       * Neither carries a severity any more: v0.31 dropped severities, and a
+       * Wound is now a Wound whatever else is already on the sheet.
        */
       wounds: new fields.ArrayField(
         new fields.SchemaField({
-          severity: count(1, { min: 1 }),
-          effect: text(),
-          disabledGear: text()
+          /** The condition this Wound rolled on the 1d6 table, for display. */
+          consequence: text()
         })
       ),
 
       burdens: new fields.ArrayField(
         new fields.SchemaField({
-          severity: count(1, { min: 1 }),
-          effect: text(),
+          /**
+           * The affliction this Burden brought. Afflictions are cleared by
+           * healing a Burden and the player chooses which, so the Burden is
+           * where the record has to live.
+           */
           affliction: text()
         })
       ),
