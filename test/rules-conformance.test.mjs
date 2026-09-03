@@ -24,6 +24,9 @@ import { fileURLToPath } from "node:url";
 import { build as buildEquipment } from "../src/content/equipment.mjs";
 import { build as buildMasteries } from "../src/content/masteries.mjs";
 import { build as buildAdversaries } from "../src/content/adversaries.mjs";
+import { build as buildLimitBreaks } from "../src/content/limitbreaks.mjs";
+import { build as buildArchetypes } from "../src/content/archetypes.mjs";
+import { build as buildSpellcasting } from "../src/content/spellcasting.mjs";
 import { build as buildPregens } from "../src/content/pregens.mjs";
 import { bondCapacity, bondIntensity } from "../module/rules/bonds.mjs";
 import {
@@ -323,6 +326,189 @@ describe("masteries match the Masteries catalog", () => {
     }
   });
 });
+
+/* -------------------------------------------- */
+
+describe("effect text matches the catalogs", () => {
+  /**
+   * Every `[TAG] Name` block in a document, with the prose under it.
+   *
+   * The name can carry a parenthesised summary — "Alchemist's Fire (Fire,
+   * Range 5, …)" — which is not part of the name.
+   *
+   * @param {string} document - A member of DOCUMENTS
+   * @param {string} tag - The bracketed block tag, e.g. "WONDROUS"
+   * @returns {{name: string, effect: string}[]}
+   */
+  function printed(document, tag) {
+    const pattern = new RegExp(
+      "^\\[" + tag + "\\] ([^\\n(]+?)\\s*(?:\\([^)]*\\))?$([\\s\\S]*?)^```",
+      "gm"
+    );
+
+    const blocks = [];
+    for (const match of rules(document).matchAll(pattern)) {
+      const at = match[2].indexOf("Effect:");
+      if (at < 0) continue;
+      blocks.push({ name: match[1].trim(), effect: match[2].slice(at + "Effect:".length) });
+    }
+    return blocks;
+  }
+
+  /**
+   * What two pieces of prose have to agree on.
+   *
+   * Line breaks and indentation differ freely — the documents wrap where the
+   * page wants and the packs store one string — and a trailing full stop is a
+   * copy-edit rather than a rules change. Everything else must match: these
+   * blocks are transcribed verbatim, and the drift this catches is the kind
+   * that leaves an item still referring to a rule that no longer exists.
+   *
+   * @param {string} text
+   * @returns {string}
+   */
+  const normalize = (text) => text.replace(/\s+/g, " ").trim().replace(/\.$/, "");
+
+  /**
+   * Effects the packs deliberately word differently, and why.
+   *
+   * @type {Record<string, string>}
+   */
+  const SUBSTITUTED = {
+    // The catalog prints "Effect: none" for the plain focus; the sheet needs a
+    // line that says what carrying one is for.
+    "Basic Spell Focus": "Enables casting at full effectiveness."
+  };
+
+  const catalog = new Map(
+    [...buildEquipment(), ...buildLimitBreaks()].map((doc) => [doc.name, doc])
+  );
+
+  /** @param {any} doc */
+  const effectOf = (doc) =>
+    doc.system.effect || String(doc.system.description ?? "").replace(/<[^>]+>/g, " ");
+
+  for (const [document, tag] of [
+    ["equipment", "WONDROUS"],
+    ["equipment", "FOCUS"],
+    ["equipment", "CONSUMABLE"],
+    ["limit-breaks", "LIMIT BREAK"]
+  ]) {
+    test(`${tag.toLowerCase()} effects are transcribed as printed`, () => {
+      const blocks = printed(document, tag);
+      assert.ok(blocks.length > 0, `${tag}: blocks found`);
+
+      for (const block of blocks) {
+        const doc = catalog.get(block.name);
+        assert.ok(doc, `${block.name} is in the packs`);
+
+        // A thrown consumable's effect *is* its damage ladder, which the
+        // weapon suite already checks band by band.
+        if (doc.system.isAttack) continue;
+
+        const expected = SUBSTITUTED[block.name] ?? block.effect;
+        assert.equal(normalize(effectOf(doc)), normalize(expected), block.name);
+      }
+    });
+  }
+
+  test("nothing in the packs still refers to a deleted rule", () => {
+    // v0.31 removed trained skills, Wound and Burden severities, Sequences and
+    // Valor. A catalog entry that still names one is drift that reads as
+    // perfectly good prose, so nothing else would catch it — which is exactly
+    // how two Mend pairings kept costing "Resolve equal to its severity" long
+    // after severities stopped existing.
+    const gone = /\btrained\b|\bskills?\b|\bseverit|\bsequences?\b|\bvalor\b/i;
+
+    for (const doc of everything()) {
+      for (const text of prose(doc)) {
+        assert.ok(!gone.test(text), `${doc.name}: "${text.trim()}"`);
+      }
+    }
+  });
+
+  test("the sweep actually reaches the places drift hides", () => {
+    // A canary over an empty cage passes forever. These are the three fields
+    // that have gone stale in practice — an Art pairing's bonus effect, an
+    // archetype's rank feature, and an adversary's printed maneuver — so the
+    // sweep is worthless if it cannot see them.
+    /**
+     * @param {string} name
+     * @param {string} needle
+     */
+    const reached = (name, needle) => {
+      const doc = everything().find((entry) => entry.name === name);
+      assert.ok(doc, `${name} is in the packs`);
+      assert.ok(
+        prose(doc).some((text) => text.includes(needle)),
+        `${name}: the sweep never saw "${needle}"`
+      );
+    };
+
+    reached("Ignis", "heal one Wound on the target");
+    reached("Human", "Human Experience");
+    reached("Sorrowmaw, the Grief-Drake", "Grave-Chill Bite");
+  });
+});
+
+/**
+ * Every document the content packs build.
+ *
+ * @returns {any[]}
+ */
+function everything() {
+  return [
+    ...buildEquipment(),
+    ...buildMasteries(),
+    ...buildArchetypes(),
+    ...buildSpellcasting(),
+    ...buildLimitBreaks(),
+    ...buildAdversaries(),
+    ...buildPregens()
+  ];
+}
+
+/**
+ * Every piece of authored prose on a document, HTML stripped.
+ *
+ * Deliberately wide: an Art pairing's bonus effect and an archetype's rank
+ * feature are as much transcribed rules text as a weapon's special, and either
+ * can go stale the same way.
+ *
+ * @param {any} doc
+ * @returns {string[]}
+ */
+function prose(doc) {
+  const system = doc.system ?? {};
+  const strings = [
+    system.description,
+    system.effect,
+    system.special,
+    system.rules,
+    system.notes,
+    system.biography,
+    ...(system.rankFeatures ?? []).map(
+      (/** @type {any} */ feature) => `${feature.name ?? ""} ${feature.effect ?? ""}`
+    ),
+    ...(system.arts ?? []).flatMap((/** @type {any} */ pairing) =>
+      [pairing.bolsterEffect, pairing.bonusEffect, pairing.qualifyingRolls, pairing.notes]
+    ),
+    system.tactics,
+    ...(system.maneuvers ?? []).map(
+      (/** @type {any} */ maneuver) => `${maneuver.name ?? ""} ${maneuver.notes ?? ""}`
+    ),
+    ...(system.abilities ?? []).map(
+      (/** @type {any} */ ability) => `${ability.name ?? ""} ${ability.description ?? ""}`
+    ),
+    ...(system.hitLocations ?? []).flatMap(
+      (/** @type {any} */ location) => [location.hitEffect, location.woundEffect]
+    )
+  ];
+
+  return strings
+    .filter((text) => typeof text === "string" && text.length > 0)
+    .map((text) => String(text).replace(/<[^>]+>/g, " "));
+}
 
 /* -------------------------------------------- */
 

@@ -142,7 +142,7 @@ const RESONANCES = [
       { art: "Rend", ladder: "vitality", bonusDamage: 2, tags: ["fire"], condition: "Wracked (Fire)" },
       { art: "Afflict", ladder: "vitality", tags: ["fire", "indefensible", "imprecise", "seeking"], condition: "Wracked (Fire)", opposedBy: "POW" },
       { art: "Bolster", ladder: "vitality", bolsterEffect: "+2 Fire damage on melee weapon attacks", qualifyingRolls: "Melee weapon attacks" },
-      { art: "Mend", ladder: "vitality", bonusEffect: "The caster may spend extra Resolve to heal one Wound on the target, equal to its severity. The target then gains Wracked 3 (Fire)." }
+      { art: "Mend", ladder: "vitality", bonusEffect: "The caster may further choose to spend 1 Resolve to heal one Wound on the target. The Resolve cost may be paid by the caster or the target (caster's choice). The target then gains the Wracked 3 (Fire) condition." }
     ]
   },
   {
@@ -166,7 +166,7 @@ const RESONANCES = [
       { art: "Rend", ladder: "strain", tags: ["mental", "indefensible", "imprecise", "seeking"], condition: "Frightened", opposedBy: "INS" },
       { art: "Afflict", ladder: "vitality", tags: ["mental", "indefensible", "imprecise", "seeking"], condition: "Frightened", opposedBy: "INS" },
       { art: "Bolster", ladder: "vitality", bolsterEffect: "+2d on REA and INS rolls made to oppose another roll", qualifyingRolls: "All other REA and INS rolls" },
-      { art: "Mend", ladder: "strain", bonusEffect: "The target is cleansed of Frightened. The caster may spend extra Resolve to heal one Burden, equal to its severity." }
+      { art: "Mend", ladder: "strain", bonusEffect: "The target is cleansed of the Frightened condition. The caster may further choose to spend 1 Resolve to heal one Burden on the target. The Resolve cost may be paid by the caster or the target (caster's choice)." }
     ]
   },
   {

@@ -135,9 +135,9 @@ const FOCI = [
 ];
 
 const WONDROUS = [
-  { name: "Pathfinder's Compass", effect: "+1d to action rolls that can apply the character's trained Navigation skill.", description: "A brass compass whose needle points not north, but home." },
-  { name: "Spider-Grip Gloves", effect: "When climbing in combat, the wearer is considered as trained in the Climbing skill. In addition, while climbing, every square is not treated as difficult terrain, but as normal terrain instead.", description: "Supple leather gloves stitched with a faint, tacky resin." },
-  { name: "Pendant of the Ox", effect: "The character is considered trained in the Lifting and Endurance skills. If already trained, they get an additional +1d when applying those skills.", description: "A soapstone ox on a leather cord, worn smooth by generations of labourers' thumbs." }
+  { name: "Pathfinder's Compass", effect: "+1d to action rolls that apply to situations where navigation or tracking are involved.", description: "A brass compass whose needle points not north, but home." },
+  { name: "Spider-Grip Gloves", effect: "When climbing in combat, the wearer is considered as having the Athlete mastery. In addition, while climbing, every square is not treated as difficult terrain, but as normal terrain instead.", description: "Supple leather gloves stitched with a faint, tacky resin that never seems to wear away." },
+  { name: "Pendant of the Ox", effect: "The character gains Resistance (Slashing), but suffers a -1 to SPD.", description: "A soapstone ox on a leather cord, worn smooth by generations of labourers' thumbs." }
 ];
 
 const CONSUMABLES = [
@@ -150,7 +150,8 @@ const CONSUMABLES = [
     effect: "",
     attack: { attr: "agi", types: ["fire"], range: 5, tags: ["seeking", "imprecise"], damage: ["1 damage", "4 damage", "8 damage, target gains Wracked 1 (Fire)", "12 damage, target gains Wracked 1 (Fire)"] }
   },
-  { name: "Smoke Bomb", category: "exotic", target: "Self", effect: "Target becomes Obscured from all enemies until the start of their next turn." },
+  { name: "Smoke Bomb", category: "common", target: "Self", effect: "Target becomes Obscured from all enemies until the start of their next turn." },
+  { name: "Phoenix Ember", category: "exotic", target: "Adjacent Ally", effect: "Remove the target's Defeated condition." },
   {
     name: "Lightning in a Bottle",
     category: "exotic",

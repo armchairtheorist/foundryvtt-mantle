@@ -53,7 +53,7 @@ const LIMIT_BREAKS = [
     core: "mind",
     coreValue: 2,
     effect:
-      "Every ally within SEN squares (including yourself) restores Vitality equal to half their Max Vitality at no Resolve cost, then chooses one of the following:\n\n- Clear Strain equal to half their Max Strain; or\n- Clear one condition on themselves that is auto-clear or roll-to-clear."
+      "Every non-Defeated ally within SEN squares (including yourself) restores Vitality equal to half their Max Vitality at no Resolve cost, then chooses one of the following:\n\n- Clear Strain equal to half their Max Strain; or\n- Clear one condition on themselves that is auto-clear or roll-to-clear; or\n- Clear either the Faltering or Unraveling condition"
   },
   {
     name: "Bulwark Unbreakable",
@@ -77,7 +77,7 @@ const LIMIT_BREAKS = [
     category: "archetype",
     archetype: "Warrior",
     effect:
-      "Double your SPD for this turn. Choose one equipped melee weapon. For every enemy that enters your weapon's melee range during your turn, make one Basic Attack against it; on 3 or more successes the enemy disregards the attack's normal effects and instead takes a Wound. Each enemy can only be struck once this turn in this manner."
+      "Double your SPD for this turn. Choose one equipped melee weapon. As you move, make one Basic Attack with that weapon against each enemy that comes within the weapon's reach at any point during your movement this turn (each enemy can only be struck once this way). On 3 or more successes, the enemy disregards the attack's normal effects and instead takes a Wound (if the enemy has no Wound slots, they become Defeated)."
   }
 ];
 
