@@ -17,7 +17,6 @@ import { buildPool, standardModifiers } from "../dice/pool.mjs";
 import { postRollCard } from "../chat/cards.mjs";
 import {
   affordableHeals,
-  combatReentry,
   downtimeRestore,
   healCost,
   interludeConditions,
@@ -1192,9 +1191,9 @@ export default class MantleActor extends Actor {
    * for 1, and healing Wounds and Burdens for their severity. Those are
    * choices, so they are asked rather than taken.
    *
-   * Faltering and Unraveling are left exactly as they are. They neither clear
-   * nor tick here; whether they come back next fight depends on whether the
-   * harm underneath was healed, which is what `beginCombat` reads.
+   * Faltering and Unraveling clear outright in v0.31, where they used to be
+   * paused and returned at one stack if the harm underneath was unhealed. An
+   * interlude now genuinely ends a death spiral.
    *
    * @returns {Promise<string[]>} What happened, for the report
    */
@@ -1222,16 +1221,6 @@ export default class MantleActor extends Actor {
         })
       );
     }
-    if (plan.pauses.length > 0) {
-      lines.push(
-        game.i18n.format("MANTLE.Rest.conditionsPaused", {
-          conditions: plan.pauses
-            .map((id) => game.i18n.localize(MANTLE.conditions[id].label))
-            .join(", ")
-        })
-      );
-    }
-
     // The Crisis route into a Limit Break refreshes here rather than at the
     // start of a turn — it is once per combat.
     await this.unsetFlag("mantle", "crisisLimitBreakUsed");
@@ -1258,7 +1247,7 @@ export default class MantleActor extends Actor {
 
     // Narrative conditions survive downtime too: the relic is still out there.
     const plan = interludeConditions(this.conditions);
-    for (const id of [...plan.clears, ...plan.pauses]) await this.clearCondition(id);
+    for (const id of plan.clears) await this.clearCondition(id);
 
     const harms = this.system.wounds.length + this.system.burdens.length;
     if (harms > 0) {
@@ -1279,37 +1268,6 @@ export default class MantleActor extends Actor {
     }
 
     await this.unsetFlag("mantle", "crisisLimitBreakUsed");
-    return lines;
-  }
-
-  /**
-   * What a character re-enters combat carrying.
-   *
-   * Faltering and Unraveling were paused by the interlude rather than cleared.
-   * An unhealed Critical Wound restarts Faltering at 1 and an unhealed
-   * Breakdown restarts Unraveling at 1 — at one stack, not at the stack the
-   * character reached, so the escalation begins again.
-   *
-   * @returns {Promise<string[]>}
-   */
-  async beginCombat() {
-    if (this.type !== "character") return [];
-
-    const stacks = combatReentry({
-      criticalWound: this.system.wounds.some((wound) => wound.severity >= 3),
-      breakdown: this.system.burdens.some((burden) => burden.severity >= 3)
-    });
-
-    const lines = [];
-    for (const [id, held] of Object.entries(stacks)) {
-      // Never below what they already carry: a character who somehow kept a
-      // higher stack keeps it.
-      if (this.conditionStacks(id) >= held) continue;
-
-      await this.changeCondition(id, held - this.conditionStacks(id));
-      lines.push(`${game.i18n.localize(MANTLE.conditions[id].label)} ${held}`);
-    }
-
     return lines;
   }
 
@@ -1614,8 +1572,8 @@ export default class MantleActor extends Actor {
    * Apply an incoming hit, updating Guard and Vitality — or Strain — and
    * reporting what happened so the caller can narrate it.
    *
-   * Wounds and Burdens are counted here but not *created*: their severity needs
-   * a luck roll, which is a decision point rather than something to resolve
+   * Wounds and Burdens are counted here but not *created*: each rolls its own
+   * consequence, which is a decision point rather than something to resolve
    * silently. `takeWound` and `takeBurden` finish the job.
    *
    * @param {object} options
@@ -1623,14 +1581,28 @@ export default class MantleActor extends Actor {
    * @param {string[]} [options.damageTypes]
    * @param {boolean} [options.penetrating]
    * @param {boolean} [options.strain] - Resolve on the Strain track instead
+   * @param {boolean} [options.forceWeak] - A Mark called shot; weakness regardless
    * @returns {Promise<object>}
    */
-  async applyHarm({ amount, damageTypes = [], penetrating = false, strain = false }) {
+  async applyHarm({
+    amount,
+    damageTypes = [],
+    penetrating = false,
+    strain = false,
+    forceWeak = false
+  }) {
     const system = this.system;
     const untyped = damageTypes.includes("untyped");
+
+    // A Mark called shot grants weakness to the attack outright. It overrides
+    // what the defender's own affinities would have said — including a
+    // resistance, which is the point of aiming at the weak spot — but never
+    // reaches untyped harm, which no affinity touches.
     const affinity = untyped
       ? "normal"
-      : damageAffinity(damageTypes, this.resistances, this.weaknesses);
+      : forceWeak
+        ? "weak"
+        : damageAffinity(damageTypes, this.resistances, this.weaknesses);
 
     // Strain is never halved or doubled by an affinity, so the one computed
     // above is deliberately not passed on — and is reported as "normal" so the

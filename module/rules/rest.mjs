@@ -17,62 +17,52 @@ import { MANTLE } from "../config.mjs";
 /**
  * Conditions an interlude does not clear.
  *
- * Two quite different reasons to survive a rest, so they are listed apart:
- *
- *  - *Narrative* conditions are anchored to something in the story. Cursed
- *    lasts until the relic is destroyed, not until the party catches its
- *    breath. The GM may rule others narrative case by case — a Defeated
- *    character who was fatally stabbed does not simply get up.
- *  - *Paused* conditions are Faltering and Unraveling. They neither clear nor
- *    tick during an interlude: no checks are rolled. If the Critical Wound or
- *    Breakdown underneath is still there when the next fight starts, the
- *    character re-enters at one stack.
+ * Anchored to something outside the fight, so catching your breath does not
+ * touch them. Cursed lasts until the relic is destroyed; an Affliction lasts
+ * until its Burden is healed. The GM may rule others narrative case by case —
+ * a Defeated character who was fatally stabbed does not simply get up.
  */
-export const NARRATIVE_CONDITIONS = ["cursed"];
-export const PAUSED_CONDITIONS = ["faltering", "unraveling"];
+export const NARRATIVE_CONDITIONS = ["cursed", "affliction"];
+
+/**
+ * The persistent conditions an interlude clears.
+ *
+ * Auto-clear and roll-to-clear conditions all go, so only the persistent ones
+ * need naming — and v0.31 names exactly these five. Faltering and Unraveling
+ * are the change: they used to be *paused* and returned at one stack if the
+ * harm underneath was unhealed, and they now simply end.
+ */
+export const CLEARED_PERSISTENT = ["faltering", "unraveling", "defeated", "lost", "vulnerable"];
 
 /**
  * What an interlude does to the conditions a character is carrying.
  *
  * @param {Record<string, number>} stacks - Condition id to stacks held
- * @returns {{clears: string[], persists: string[], pauses: string[]}}
+ * @returns {{clears: string[], persists: string[]}}
  */
 export function interludeConditions(stacks) {
   /** @type {string[]} */ const clears = [];
   /** @type {string[]} */ const persists = [];
-  /** @type {string[]} */ const pauses = [];
+
+  /** @type {Record<string, {clear: string}>} */
+  const table = MANTLE.conditions;
 
   for (const [id, held] of Object.entries(stacks)) {
     if (held <= 0) continue;
 
-    if (PAUSED_CONDITIONS.includes(id)) pauses.push(id);
-    else if (NARRATIVE_CONDITIONS.includes(id)) persists.push(id);
-    else clears.push(id);
+    if (NARRATIVE_CONDITIONS.includes(id)) {
+      persists.push(id);
+      continue;
+    }
+
+    // Everything that clears on its own in combat clears here too; a
+    // persistent condition only goes if v0.31 names it.
+    const clear = table[id]?.clear;
+    if (clear === "auto" || clear === "roll" || CLEARED_PERSISTENT.includes(id)) clears.push(id);
+    else persists.push(id);
   }
 
-  return { clears, persists, pauses };
-}
-
-/**
- * What a character re-enters combat carrying.
- *
- * Faltering and Unraveling were paused rather than cleared, and the harm
- * underneath is what decides whether they come back: an unhealed Critical Wound
- * restarts Faltering at 1, an unhealed Breakdown restarts Unraveling at 1.
- *
- * @param {object} input
- * @param {boolean} input.criticalWound - A Critical Wound is still unhealed
- * @param {boolean} input.breakdown - A Breakdown is still unhealed
- * @returns {Record<string, number>}
- */
-export function combatReentry({ criticalWound, breakdown }) {
-  /** @type {Record<string, number>} */
-  const stacks = {};
-
-  if (criticalWound) stacks.faltering = 1;
-  if (breakdown) stacks.unraveling = 1;
-
-  return stacks;
+  return { clears, persists };
 }
 
 /**

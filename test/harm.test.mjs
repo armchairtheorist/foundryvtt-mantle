@@ -17,6 +17,7 @@ import {
   fillsLastSlot,
   woundConsequence
 } from "../module/rules/harm.mjs";
+import { MANTLE } from "../module/config.mjs";
 
 describe("resistance and weakness", () => {
   const sword = ["slashing", "radiant", "fire"];
@@ -299,5 +300,54 @@ describe("Wracked (Bleeding)", () => {
 
   test("an unrelated affinity does not answer it", () => {
     assert.equal(damageAffinity(["bleeding"], ["fire"]), "normal");
+  });
+});
+
+describe("called shots", () => {
+  test("the three locations carry the penalties the rules print", () => {
+    assert.equal(MANTLE.hitLocations.mass.penalty, 0);
+    assert.equal(MANTLE.hitLocations.edge.penalty, -2);
+    assert.equal(MANTLE.hitLocations.mark.penalty, -3);
+  });
+
+  test("Mass buys nothing beyond the default", () => {
+    const mass = /** @type {Record<string, any>} */ (MANTLE.hitLocations.mass);
+    assert.equal(mass.onHit, undefined);
+    assert.equal(mass.onWound, undefined);
+    assert.equal(mass.weakness, undefined);
+  });
+
+  test("Edge lands Hindered on a hit; Mark is weakness plus Broken on a Wound", () => {
+    // v0.31 replaced the severity floors these used to impose. Edge fires on
+    // any hit, Mark's condition waits for the Wound — a different trigger, and
+    // the reason they are separate fields rather than one.
+    assert.equal(MANTLE.hitLocations.edge.onHit, "hindered");
+    assert.equal(MANTLE.hitLocations.mark.weakness, true);
+    assert.equal(MANTLE.hitLocations.mark.onWound, "broken");
+  });
+
+  test("no location still imposes a severity floor", () => {
+    // There is no severity left to floor.
+    for (const location of Object.values(MANTLE.hitLocations)) {
+      assert.equal(/** @type {Record<string, any>} */ (location).severityFloor, undefined);
+    }
+  });
+
+  test("every condition a location applies is a real one", () => {
+    for (const [key, location] of Object.entries(MANTLE.hitLocations)) {
+      const entry = /** @type {Record<string, any>} */ (location);
+      for (const id of [entry.onHit, entry.onWound].filter(Boolean)) {
+        assert.ok(id in MANTLE.conditions, `${key} applies ${id}`);
+      }
+    }
+  });
+
+  test("a Mark shot beats the defender's own resistance", () => {
+    // Weakness granted by the called shot overrides what the target resists,
+    // which is the whole point of aiming at the weak spot. Applied as an
+    // override at the call site rather than by editing the affinity rule.
+    assert.equal(damageAffinity(["fire"], ["fire"]), "resistant");
+    assert.equal(applyAffinity(10, "resistant"), 5);
+    assert.equal(applyAffinity(10, "weak"), 20);
   });
 });

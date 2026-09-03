@@ -399,15 +399,38 @@ async function applyToTargets(message) {
   const context = roll.mantle;
   const isStrain = (context.ladderKind ?? "vitality") === "strain";
 
+  const hitLocation = context.hitLocation ?? "mass";
+  /** @type {{onHit?: string, onWound?: string, weakness?: boolean}} */
+  const location = CONFIG.MANTLE.hitLocations[hitLocation] ?? {};
+
+  // "Attacks that deal Strain will generally have no additional benefit from
+  // hit locations", so a called shot on the Strain track lands nothing extra.
+  const called = !isStrain;
+
   for (const actor of targets) {
     const result = await actor.applyHarm({
       amount,
       damageTypes: context.damageTypes ?? [],
       penetrating: context.penetrating ?? false,
-      strain: isStrain
+      strain: isStrain,
+      // A Mark shot makes the defender weak to this attack whatever their own
+      // affinities say, which doubles what gets past Guard.
+      forceWeak: called && Boolean(location.weakness)
     });
 
-    await reportHarm(actor, amount, result, context.hitLocation ?? "mass");
+    // Edge lands its condition on any hit; the damage having been applied at
+    // all is what "on a hit with 1+ successes" means by the time we are here.
+    if (called && location.onHit) {
+      await actor.changeCondition(location.onHit, 1);
+    }
+
+    // Mark adds its condition only when the attack actually Wounds — which is
+    // owed rather than taken, so it waits for the Wound button.
+    if (called && location.onWound && result.woundsInflicted > 0) {
+      await actor.changeCondition(location.onWound, 1);
+    }
+
+    await reportHarm(actor, amount, result, hitLocation);
   }
 }
 

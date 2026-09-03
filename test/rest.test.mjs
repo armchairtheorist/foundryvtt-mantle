@@ -13,14 +13,13 @@ import { describe, test } from "node:test";
 
 import {
   affordableHeals,
-  combatReentry,
+  CLEARED_PERSISTENT,
   downtimeRestore,
   earnsMerit,
   healCost,
   interludeConditions,
   interludeRestore,
-  NARRATIVE_CONDITIONS,
-  PAUSED_CONDITIONS
+  NARRATIVE_CONDITIONS
 } from "../module/rules/rest.mjs";
 import { MANTLE } from "../module/config.mjs";
 
@@ -47,46 +46,57 @@ describe("what an interlude clears", () => {
     assert.deepEqual(plan.clears, ["frightened"]);
   });
 
-  test("Faltering and Unraveling are paused, neither cleared nor ticked", () => {
+  test("Afflictions stay: only healing their Burden removes one", () => {
+    assert.deepEqual(interludeConditions({ affliction: 1 }).persists, ["affliction"]);
+  });
+
+  test("Faltering and Unraveling now clear outright", () => {
+    // Through v0.21 they were *paused* and returned at one stack if the harm
+    // underneath was unhealed. v0.31 simply ends them, which is why there is
+    // no combat re-entry step any more.
     const plan = interludeConditions({ faltering: 3, unraveling: 2 });
-    assert.deepEqual(plan.pauses.sort(), ["faltering", "unraveling"]);
-    assert.deepEqual(plan.clears, []);
+    assert.deepEqual(plan.clears.sort(), ["faltering", "unraveling"]);
     assert.deepEqual(plan.persists, []);
   });
 
+  test("the five persistent conditions the rules name are the ones that clear", () => {
+    assert.deepEqual(CLEARED_PERSISTENT.slice().sort(), [
+      "defeated",
+      "faltering",
+      "lost",
+      "unraveling",
+      "vulnerable"
+    ]);
+
+    const plan = interludeConditions(
+      Object.fromEntries(CLEARED_PERSISTENT.map((id) => [id, 1]))
+    );
+    assert.deepEqual(plan.clears.sort(), CLEARED_PERSISTENT.slice().sort());
+  });
+
+  test("a persistent condition the rules do not name survives", () => {
+    // Invisible is ability-granted rather than combat-scoped, so nothing in
+    // the interlude list reaches it.
+    assert.deepEqual(interludeConditions({ invisible: 1 }).persists, ["invisible"]);
+  });
+
+  test("every auto-clear and roll-to-clear condition goes, whatever it is", () => {
+    // Stated as a rule over the condition table rather than a list, so a new
+    // condition is covered the day it is added.
+    for (const [id, condition] of Object.entries(MANTLE.conditions)) {
+      if (condition.clear === "persistent") continue;
+      assert.deepEqual(interludeConditions({ [id]: 1 }).clears, [id], id);
+    }
+  });
+
   test("a condition at zero stacks is not reported at all", () => {
-    assert.deepEqual(interludeConditions({ hindered: 0 }), {
-      clears: [],
-      persists: [],
-      pauses: []
-    });
+    assert.deepEqual(interludeConditions({ hindered: 0 }), { clears: [], persists: [] });
   });
 
   test("every id named is a real condition", () => {
-    for (const id of [...NARRATIVE_CONDITIONS, ...PAUSED_CONDITIONS]) {
+    for (const id of [...NARRATIVE_CONDITIONS, ...CLEARED_PERSISTENT]) {
       assert.ok(id in MANTLE.conditions, id);
     }
-  });
-});
-
-describe("re-entering combat", () => {
-  test("an unhealed Critical Wound restarts Faltering at one", () => {
-    assert.deepEqual(combatReentry({ criticalWound: true, breakdown: false }), { faltering: 1 });
-  });
-
-  test("an unhealed Breakdown restarts Unraveling at one", () => {
-    assert.deepEqual(combatReentry({ criticalWound: false, breakdown: true }), { unraveling: 1 });
-  });
-
-  test("heal the harm and neither comes back", () => {
-    assert.deepEqual(combatReentry({ criticalWound: false, breakdown: false }), {});
-  });
-
-  test("one stack, not the stack you had — the escalation restarts", () => {
-    // A character who reached Faltering 4 and survived does not resume at 4.
-    const stacks = combatReentry({ criticalWound: true, breakdown: true });
-    assert.equal(stacks.faltering, 1);
-    assert.equal(stacks.unraveling, 1);
   });
 });
 

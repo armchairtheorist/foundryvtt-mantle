@@ -36,8 +36,7 @@ export default class MantlePartySheet extends HandlebarsApplicationMixin(ActorSh
       removeMember: MantlePartySheet.#onRemoveMember,
       openMember: MantlePartySheet.#onOpenMember,
       interlude: MantlePartySheet.#onInterlude,
-      downtime: MantlePartySheet.#onDowntime,
-      beginCombat: MantlePartySheet.#onBeginCombat
+      downtime: MantlePartySheet.#onDowntime
     }
   };
 
@@ -271,12 +270,5 @@ export default class MantlePartySheet extends HandlebarsApplicationMixin(ActorSh
         </div>`,
       speaker: ChatMessage.getSpeaker({ actor: this.document })
     });
-  }
-
-  /**
-   * @this {MantlePartySheet}
-   */
-  static async #onBeginCombat() {
-    await this.#rest("beginCombat", game.i18n.localize("MANTLE.Rest.beginCombat"));
   }
 }
