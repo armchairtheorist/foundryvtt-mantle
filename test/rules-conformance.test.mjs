@@ -27,17 +27,73 @@ import { build as buildAdversaries } from "../src/content/adversaries.mjs";
 import { MANTLE } from "../module/config.mjs";
 
 /**
+ * The eight canonical documents, by the short name this file refers to them by.
+ *
+ * The paths carry no version. The rules are versioned in git and marked by a
+ * `**Version:**` line inside each document, so a rules release is a content
+ * diff on stable paths rather than eight new files — and no test has to be
+ * edited to point at them.
+ */
+const DOCUMENTS = [
+  "quickstart",
+  "equipment",
+  "masteries",
+  "archetypes",
+  "spellcasting",
+  "limit-breaks",
+  "pregen-characters",
+  "pregen-enemies"
+];
+
+/**
  * Read one of the canonical documents.
  *
- * @param {string} name
+ * @param {string} name - A member of DOCUMENTS
  * @returns {string}
  */
 function rules(name) {
   return readFileSync(
-    fileURLToPath(new URL(`../docs/rules/mantle-${name}-v0.21.md`, import.meta.url)),
+    fileURLToPath(new URL(`../docs/rules/mantle-${name}.md`, import.meta.url)),
     "utf8"
   );
 }
+
+/* -------------------------------------------- */
+
+describe("the rules set itself", () => {
+  test("all eight documents are present and readable", () => {
+    for (const name of DOCUMENTS) {
+      assert.ok(rules(name).length > 500, `${name} is missing or truncated`);
+    }
+  });
+
+  test("every document carries a version marker", () => {
+    for (const name of DOCUMENTS) {
+      assert.match(
+        rules(name),
+        /^\*\*Version:\*\* \d+\.\d+$/m,
+        `${name} has no **Version:** line under its title`
+      );
+    }
+  });
+
+  test("the whole set is on one version", () => {
+    // Eight files updated by hand is eight chances to update seven of them.
+    // A mixed set would have the packs checked against a mix of two rulebooks
+    // below, with the mismatches reading as content drift rather than as a
+    // half-finished import.
+    const versions = new Map(
+      DOCUMENTS.map((name) => [name, rules(name).match(/^\*\*Version:\*\* (\d+\.\d+)$/m)?.[1]])
+    );
+
+    const distinct = new Set(versions.values());
+    assert.equal(
+      distinct.size,
+      1,
+      `mixed rules versions: ${[...versions].map(([n, v]) => `${n}=${v}`).join(", ")}`
+    );
+  });
+});
 
 /* -------------------------------------------- */
 
@@ -351,10 +407,7 @@ describe("conditions match the rules", () => {
 /* -------------------------------------------- */
 
 describe("adversaries match the Pre-Generated Enemies catalog", () => {
-  const enemies = readFileSync(
-    fileURLToPath(new URL("../docs/rules/mantle-pregen-enemies-v0.21.md", import.meta.url)),
-    "utf8"
-  );
+  const enemies = rules("pregen-enemies");
   const built = new Map(buildAdversaries().map((doc) => [doc.name, doc]));
 
   /**

@@ -1,5 +1,7 @@
 # Mantle — Pre-Generated Enemies
 
+**Version:** 0.21
+
 Mantle is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This catalog contains ready-to-run enemy stat blocks and overlay templates for the **Novice tier** of play. It is intended to be used with the `Mantle - Quick Start Guide` document, which contains the core rules of Mantle — including the encounter asymmetry rules that govern everything below.
 
 All of the catalog examples are a *sample of the design space*, and not to be considered an exhaustive list.

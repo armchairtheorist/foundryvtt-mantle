@@ -1,5 +1,7 @@
 # Mantle — Equipment Catalog
 
+**Version:** 0.21
+
 Mantle is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This catalog contains the stat blocks for gear (weapons, armor, and spell foci). It is intended to be used with the `Mantle - Quick Start Guide` document, which contains the core rules of Mantle.
 
 All of the catalog examples are a *sample of the design space*, and not to be considered an exhaustive list.
