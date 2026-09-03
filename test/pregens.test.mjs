@@ -19,6 +19,7 @@ import {
   deriveMaxStrain,
   deriveMaxVitality,
   deriveResolve,
+  deriveThreads,
   gatherBonuses,
   countSlotUsage,
   isInCrisis,
@@ -63,7 +64,7 @@ describe("Mira — Half-Elf R1 / Warrior R2", () => {
   test("derived stats match the printed stat block", () => {
     expectStats(
       mira,
-      { maxVitality: 21, maxStrain: 5, maxResolve: 8, maxGuard: 4, spd: 5, sen: 10, languagesKnown: 1 },
+      { maxVitality: 21, maxStrain: 5, maxResolve: 8, maxGuard: 4, spd: 5, sen: 10 },
       "Mira"
     );
     // 3 + BODY 3 / 2 = 4, with nothing on top: Combat Reflexes replaced her
@@ -97,7 +98,7 @@ describe("Kira — Dwarf R1 / Barbarian R2", () => {
   test("derived stats match the printed stat block", () => {
     expectStats(
       kira,
-      { maxVitality: 21, maxStrain: 5, maxResolve: 9, maxGuard: 3, spd: 4, sen: 12, languagesKnown: 1 },
+      { maxVitality: 21, maxStrain: 5, maxResolve: 9, maxGuard: 3, spd: 4, sen: 12 },
       "Kira"
     );
     expectStats(kira, { maxVigor: 7, vigorRefresh: 4 }, "Kira vigor"); // 3 + BODY 2 / 2
@@ -129,7 +130,7 @@ describe("Maya — Human R1 / Scholar R2", () => {
   test("derived stats match the printed stat block", () => {
     expectStats(
       maya,
-      { maxVitality: 10, maxStrain: 12, maxResolve: 9, maxGuard: 2, languagesKnown: 4 },
+      { maxVitality: 10, maxStrain: 12, maxResolve: 9, maxGuard: 2 },
       "Maya"
     );
   });
@@ -166,7 +167,7 @@ describe("Vera — Elf R1 / Channeler R2", () => {
   test("derived stats match the printed stat block", () => {
     expectStats(
       vera,
-      { maxVitality: 12, maxStrain: 8, maxResolve: 10, maxGuard: 2, spd: 6, sen: 15, languagesKnown: 1 },
+      { maxVitality: 12, maxStrain: 8, maxResolve: 10, maxGuard: 2, spd: 6, sen: 15 },
       "Vera"
     );
     // 3 + BODY 1 / 2 = 3, and Vigorous — which she keeps — makes it 4.
@@ -538,5 +539,64 @@ describe("the v0.31 formula changes", () => {
     assert.equal(MANTLE.baseline.burdenSlots, 3, "Burden Slots = 3");
     assert.equal(MANTLE.baseline.gearSlots, 3, "Gear Slots = 3");
     assert.equal(MANTLE.baseline.consumablePoints, 2, "Consumable Points = 2");
+  });
+});
+
+describe("Threads replace the narrative skills", () => {
+  test("nothing enumerates skills any more", () => {
+    // 50 skills in 6 groups became free-text prose, so there is no list left
+    // to hold. A leftover table would be a second source of truth.
+    const config = /** @type {Record<string, any>} */ (MANTLE);
+    assert.equal(config.skills, undefined);
+    assert.equal(config.skillGroups, undefined);
+    assert.equal(config.skillBonus, undefined, "renamed to threadBonus");
+  });
+
+  test("a Thread is worth the same +2d training was", () => {
+    // Same value and the same one-per-roll rule, which is why the roll dialog
+    // needed so little changing.
+    assert.equal(MANTLE.threadBonus, 2);
+  });
+
+  test("characters start with three", () => {
+    assert.equal(MANTLE.baseline.threads, 3);
+    assert.equal(deriveThreads(), 3);
+  });
+
+  test("Human Experience and Storied Past each add one", () => {
+    assert.equal(deriveThreads({ threads: 1 }), 4);
+    assert.equal(deriveThreads({ threads: 2 }), 5);
+  });
+
+  test("every pregen carries the Threads its stat block prints", () => {
+    const built = new Map(buildPregens().map((doc) => [doc.name, doc.system.threads]));
+
+    // Maya is the interesting one: 3 base, +1 from Human Experience, +1 from
+    // the Storied Past mastery. Her stat block prints "Threads (5)", and both
+    // new features composing is what gets her there.
+    assert.equal(built.get("Maya").length, 5);
+    assert.equal(built.get("Mira").length, 3);
+    assert.equal(built.get("Kira").length, 3);
+    assert.equal(built.get("Vera").length, 3);
+  });
+
+  test("Threads are prose, not identifiers", () => {
+    // The old skills were keys like "magicTheory". A Thread is a sentence, and
+    // storing it as one is what lets the roll card name it.
+    for (const doc of buildPregens()) {
+      for (const thread of doc.system.threads) {
+        assert.match(thread, /^[A-Z].* /, `${doc.name}: "${thread}"`);
+        assert.ok(thread.length > 15, `${doc.name}: "${thread}" reads as a key, not a chapter`);
+      }
+    }
+  });
+
+  test("languages no longer carry a number", async () => {
+    // v0.31 governs them by the same Expert/Familiar framework Threads answer,
+    // so there is nothing to derive and nothing to store.
+    const derive = /** @type {Record<string, any>} */ (
+      await import("../module/data/derive.mjs")
+    );
+    assert.equal(derive.deriveLanguages, undefined);
   });
 });

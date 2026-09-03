@@ -17,20 +17,21 @@
     </select>
   </label>
 
-  {{!-- Training is binary and worth +2d, at most one skill per roll, and never
-        on an attack — so a flat list of the trained ones is the whole choice. --}}
+  {{!-- A Thread is worth +2d when the GM rules it applies, at most one per
+        roll, and never on an attack — so a flat list of the ones this character
+        holds is the whole choice. Whether it applies is the table's call. --}}
   <label class="row">
-    {{localize "MANTLE.Action.skill"}}
-    <select name="skill">
+    {{localize "MANTLE.Sheet.threads"}}
+    <select name="thread">
       <option value="">{{localize "MANTLE.Field.none"}}</option>
-      {{#each skills as |skill|}}
-        <option value="{{skill.key}}">{{skill.label}} (+{{../skillBonus}}d)</option>
+      {{#each threads as |thread|}}
+        <option value="{{thread.key}}">{{thread.label}} (+{{../threadBonus}}d)</option>
       {{/each}}
     </select>
   </label>
 
-  {{#unless skills.length}}
-    <p class="hint">{{localize "MANTLE.Action.noTrainedSkills"}}</p>
+  {{#unless threads.length}}
+    <p class="hint">{{localize "MANTLE.Action.noThreads"}}</p>
   {{/unless}}
 
   <label class="row">

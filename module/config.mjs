@@ -81,6 +81,9 @@ MANTLE.visibility = {
  * and equipment modify them.
  */
 MANTLE.baseline = {
+  /** Threads a character starts with; archetypes and masteries add more. */
+  threads: 3,
+
   woundSlots: 3,
   burdenSlots: 3,
   gearSlots: 3,
@@ -174,83 +177,27 @@ MANTLE.sizes = {
 };
 
 /* -------------------------------------------- */
-/*  Narrative skills                             */
+/*  Threads                                      */
 /* -------------------------------------------- */
 
-/** Skill groups, in book order. */
-MANTLE.skillGroups = {
-  knowledge: "MANTLE.SkillGroup.knowledge",
-  fieldcraft: "MANTLE.SkillGroup.fieldcraft",
-  athletics: "MANTLE.SkillGroup.athletics",
-  artisanry: "MANTLE.SkillGroup.artisanry",
-  subterfuge: "MANTLE.SkillGroup.subterfuge",
-  influence: "MANTLE.SkillGroup.influence"
-};
-
 /**
- * Every narrative skill, keyed by id, with the group it belongs to. Skills are
- * binary — trained or not — and a trained skill grants +2d, at most once per roll.
+ * Threads replaced the 50 narrative skills in v0.31.
+ *
+ * A Thread is a chapter of a character's life, written as a free-text
+ * provenance phrase — "Raised in the Ashmark War College" — rather than chosen
+ * from a list. There is nothing to enumerate here as a result: the catalog is
+ * whatever the player and GM ratified, so the only rules the system holds are
+ * how many you start with and what one is worth.
+ *
+ * Every Thread does two jobs. It settles knowledge questions without a roll,
+ * which is GM adjudication and stays at the table; and it grants +2d on an
+ * action roll the GM rules it applies to, at most one Thread per roll — the
+ * same shape the trained-skill bonus had, which is why the roll dialog needed
+ * so little changing.
  */
-MANTLE.skills = {
-  history: "knowledge",
-  religion: "knowledge",
-  magicTheory: "knowledge",
-  esoterica: "knowledge",
-  bestiary: "knowledge",
-  nature: "knowledge",
-  engineering: "knowledge",
-  politics: "knowledge",
 
-  tracking: "fieldcraft",
-  foraging: "fieldcraft",
-  bushcraft: "fieldcraft",
-  firstAid: "fieldcraft",
-  herbalism: "fieldcraft",
-  animalHandling: "fieldcraft",
-  animalMimicry: "fieldcraft",
-  navigation: "fieldcraft",
-
-  climbing: "athletics",
-  swimming: "athletics",
-  endurance: "athletics",
-  acrobatics: "athletics",
-  jumping: "athletics",
-  lifting: "athletics",
-  riding: "athletics",
-  vehicles: "athletics",
-
-  smithing: "artisanry",
-  alchemy: "artisanry",
-  cooking: "artisanry",
-  tanning: "artisanry",
-  stonemasonry: "artisanry",
-  carpentry: "artisanry",
-  lapidary: "artisanry",
-  tinkering: "artisanry",
-  tailoring: "artisanry",
-
-  stealth: "subterfuge",
-  sleightOfHand: "subterfuge",
-  disguise: "subterfuge",
-  lockpicking: "subterfuge",
-  traps: "subterfuge",
-  forgery: "subterfuge",
-  surveillance: "subterfuge",
-  poisons: "subterfuge",
-  streetwise: "subterfuge",
-  escapeArtist: "subterfuge",
-
-  charm: "influence",
-  coercion: "influence",
-  guile: "influence",
-  readPeople: "influence",
-  seduction: "influence",
-  performance: "influence",
-  etiquette: "influence"
-};
-
-/** The bonus a trained skill contributes to an action roll. */
-MANTLE.skillBonus = 2;
+/** The bonus an applicable Thread contributes to an action roll. */
+MANTLE.threadBonus = 2;
 
 /** The bonus an attack gains when the attacker is Hidden from the target. */
 MANTLE.hiddenAttackBonus = 2;

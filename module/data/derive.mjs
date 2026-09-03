@@ -51,7 +51,6 @@ import { MANTLE } from "../config.mjs";
  * @property {number} [maxBonds]
  * @property {number} [threads]
  * @property {number} [consumablePoints]
- * @property {number} [languages]
  * @property {number} [masteryBody]
  * @property {number} [masteryMind]
  * @property {number} [masterySoul]
@@ -72,7 +71,7 @@ export const floor = Math.floor;
 export const BONUS_KEYS = Object.freeze([
   "vitality", "strain", "resolve", "guard", "vigorRefresh", "vigorCap",
   "spd", "sen", "woundSlots", "burdenSlots", "gearSlots", "wondrousSlots",
-  "consumablePoints", "languages", "maxBonds", "threads",
+  "consumablePoints", "maxBonds", "threads",
   "masteryBody", "masteryMind", "masterySoul", "masteryWildcard", "masteryRepertoire"
 ]);
 
@@ -322,13 +321,17 @@ export function deriveMasterySlots(cores, characterRank, bonuses = {}) {
 }
 
 /**
- * Additional languages beyond Common = REA + 1.
+ * Threads a character holds: three, plus whatever their build grants.
  *
- * @param {Attributes} attributes
+ * Human Experience adds one and the Storied Past mastery adds another, so a
+ * Human with it holds five. Threads are earned in play rather than retrained,
+ * so this is a floor the sheet shows rather than a cap it enforces.
+ *
  * @param {Bonuses} [bonuses]
+ * @returns {number}
  */
-export function deriveLanguages(attributes, bonuses = {}) {
-  return attributes.rea + 1 + (bonuses.languages ?? 0);
+export function deriveThreads(bonuses = {}) {
+  return MANTLE.baseline.threads + (bonuses.threads ?? 0);
 }
 
 /**
@@ -384,7 +387,7 @@ export function deriveCharacter({ attributes, characterRank, bonuses = {}, ances
   const baseline = MANTLE.baseline;
 
   // Every key here is deliberately named so it cannot collide with a stored
-  // schema field. `resolve`, `vigor`, and `languages` are all resources or sets
+  // schema field. `resolve` and `vigor` are resources rather than plain
   // on the character, and returning those names invites a caller to overwrite
   // real data with a derived number. See the collision guard in the tests.
   return {
@@ -415,6 +418,6 @@ export function deriveCharacter({ attributes, characterRank, bonuses = {}, ances
     sen: (ancestry.sen ?? 0) + (bonuses.sen ?? 0),
     size: ancestry.size ?? "1M",
 
-    languagesKnown: deriveLanguages(attributes, bonuses)
+    maxThreads: deriveThreads(bonuses)
   };
 }

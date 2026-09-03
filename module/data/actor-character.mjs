@@ -69,10 +69,15 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
       woundSlots: track(),
       burdenSlots: track(),
 
-      /** Trained narrative skills, by skill id. Training is binary. */
-      skills: new fields.SetField(new fields.StringField({ blank: false })),
-
-      languages: new fields.SetField(new fields.StringField({ blank: false })),
+      /**
+       * Threads: free-text chapters of the character's life, in the order they
+       * were written. An array rather than a set because they are prose and two
+       * could legitimately read alike, and because the order is the player's.
+       *
+       * Languages left with them: v0.31 governs language by the same
+       * Expert/Familiar framework Threads answer, with no number to store.
+       */
+      threads: new fields.ArrayField(new fields.StringField({ blank: false })),
 
       /**
        * Damage affinities. Characters gain these from masteries and gear;
@@ -164,7 +169,7 @@ export default class CharacterData extends foundry.abstract.TypeDataModel {
     this.spd = derived.spd;
     this.sen = derived.sen;
     this.size = derived.size;
-    this.languagesKnown = derived.languagesKnown;
+    this.maxThreads = derived.maxThreads;
     this.characterRank = characterRank;
 
     // Attach maxima to the resources so token bars and the sheet can read

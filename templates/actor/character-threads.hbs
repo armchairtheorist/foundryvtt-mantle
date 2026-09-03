@@ -1,0 +1,43 @@
+{{!--
+  Threads tab.
+
+  A Thread is a chapter of the character's life, written as prose rather than
+  picked from a list — so this is an editor, not a checklist. What a Thread
+  covers is the GM's call at the table; what the sheet owes the player is the
+  wording they agreed on and a count against what their build grants.
+--}}
+<section class="tab threads {{tab.cssClass}}" data-tab="{{tab.id}}" data-group="{{tab.group}}">
+
+  <div class="section threads-list">
+    <h3>
+      {{localize "MANTLE.Sheet.threads"}}
+      <span class="slots">{{system.threads.length}} / {{system.maxThreads}}</span>
+      <a class="control add" data-action="addThread"
+         data-tooltip="{{localize 'MANTLE.Sheet.addThreadHint'}}"><i class="fa-solid fa-plus"></i></a>
+    </h3>
+
+    {{#each system.threads as |thread index|}}
+      <div class="entry thread" data-index="{{index}}">
+        <input type="text" name="system.threads.{{index}}" value="{{thread}}"
+               placeholder="{{localize 'MANTLE.Sheet.threadPlaceholder'}}"
+               {{#unless ../editable}}disabled{{/unless}}>
+        <a class="control" data-action="deleteThread"
+           data-tooltip="{{localize 'MANTLE.Sheet.deleteThreadHint'}}">
+          <i class="fa-solid fa-xmark"></i>
+        </a>
+      </div>
+    {{else}}
+      <p class="empty">{{localize "MANTLE.Sheet.noThreads"}}</p>
+    {{/each}}
+
+    <p class="hint">{{localize "MANTLE.Sheet.threadsHint"}}</p>
+  </div>
+
+  {{!-- Knowledge and languages are governed by the same framework: a Thread
+        that covers a subject makes you Expert in it, with no roll and nothing
+        to store. --}}
+  <div class="section knowledge">
+    <h3>{{localize "MANTLE.Sheet.knowledge"}}</h3>
+    <p class="hint">{{localize "MANTLE.Sheet.knowledgeHint"}}</p>
+  </div>
+</section>

@@ -10,9 +10,11 @@
  * this dialog has to get right is showing the player the pool they are about to
  * roll while they assemble it.
  *
- * Only skills the character is actually trained in are offered. Training is
- * binary and worth +2d, at most one skill per roll, so a dropdown of the
- * trained ones is the whole interaction.
+ * Only the character's own Threads are offered. A Thread is worth +2d when the
+ * GM rules it applies, at most one per roll — the same shape training had — so
+ * a dropdown of the ones they hold is the whole interaction. Whether a Thread
+ * *does* apply is the GM's call and stays at the table; the dialog only prices
+ * the answer.
  */
 
 import { MANTLE } from "../config.mjs";
@@ -31,12 +33,12 @@ const TEMPLATE = "systems/mantle/templates/apps/action-dialog.hbs";
  * @returns {Promise<{attribute: string, modifiers: import("../dice/pool.mjs").Modifier[], subtitle: string}|null>}
  */
 export async function promptAction(actor, { attribute = "pow" } = {}) {
-  const trained = actor.system.skills ?? new Set();
-
-  const skills = Object.keys(MANTLE.skills)
-    .filter((key) => trained.has(key))
-    .map((key) => ({ key, label: game.i18n.localize(`MANTLE.Skill.${key}`) }))
-    .sort((a, b) => a.label.localeCompare(b.label));
+  // Indexed rather than keyed by text: Threads are prose, and two could
+  // legitimately read alike.
+  const threads = (actor.system.threads ?? []).map((text, index) => ({
+    key: String(index),
+    label: text
+  }));
 
   const attributes = Object.entries(MANTLE.attributes).map(([key, entry]) => ({
     key,
@@ -53,8 +55,8 @@ export async function promptAction(actor, { attribute = "pow" } = {}) {
 
   const content = await foundry.applications.handlebars.renderTemplate(TEMPLATE, {
     attributes,
-    skills,
-    skillBonus: MANTLE.skillBonus,
+    threads,
+    threadBonus: MANTLE.threadBonus,
     impaired: conditions.impaired
   });
 
@@ -71,19 +73,19 @@ export async function promptAction(actor, { attribute = "pow" } = {}) {
       },
       { action: "cancel", label: game.i18n.localize("MANTLE.Action.cancel") }
     ],
-    render: (_event, dialog) => attachLivePool(dialog.element, actor, skills),
+    render: (_event, dialog) => attachLivePool(dialog.element, actor, threads),
     rejectClose: false
   });
 
   if (!result) return null;
 
   const chosen = String(result.get("attribute") || attribute);
-  const skill = String(result.get("skill") || "");
+  const thread = threads.find((entry) => entry.key === String(result.get("thread") || ""));
 
   return {
     attribute: chosen,
-    modifiers: readModifiers(result, skills),
-    subtitle: skill ? game.i18n.localize(`MANTLE.Skill.${skill}`) : ""
+    modifiers: readModifiers(result, threads),
+    subtitle: thread?.label ?? ""
   };
 }
 
@@ -94,16 +96,19 @@ export async function promptAction(actor, { attribute = "pow" } = {}) {
  * against. Modifiers worth nothing are left out rather than listed as zero.
  *
  * @param {FormData} data
- * @param {{key: string, label: string}[]} skills
+ * @param {{key: string, label: string}[]} threads
  * @returns {import("../dice/pool.mjs").Modifier[]}
  */
-function readModifiers(data, skills) {
+function readModifiers(data, threads) {
   /** @type {import("../dice/pool.mjs").Modifier[]} */
   const modifiers = [];
 
-  const skill = String(data.get("skill") || "");
-  if (skill && skills.some((entry) => entry.key === skill)) {
-    modifiers.push({ label: `MANTLE.Skill.${skill}`, value: MANTLE.skillBonus });
+  const thread = threads.find((entry) => entry.key === String(data.get("thread") || ""));
+  if (thread) {
+    // The label is the Thread's own prose, which is what the card should show —
+    // "Twenty years keeping ledgers" reads better than "Thread". Foundry's
+    // localize passes an unknown key through unchanged, so prose survives it.
+    modifiers.push({ label: thread.label, value: MANTLE.threadBonus });
   }
 
   const impaired = Number(data.get("impaired")) || 0;
@@ -126,9 +131,9 @@ function readModifiers(data, skills) {
  *
  * @param {HTMLElement} html
  * @param {Actor} actor
- * @param {{key: string, label: string}[]} skills
+ * @param {{key: string, label: string}[]} threads
  */
-function attachLivePool(html, actor, skills) {
+function attachLivePool(html, actor, threads) {
   const form = html.querySelector("form");
   if (!form) return;
 
@@ -136,7 +141,7 @@ function attachLivePool(html, actor, skills) {
     const data = new FormData(form);
     const attribute = String(data.get("attribute") || "pow");
     const base = actor.system.attributes?.[attribute] ?? 0;
-    const pool = buildPool(base, readModifiers(data, skills));
+    const pool = buildPool(base, readModifiers(data, threads));
 
     const readout = html.querySelector("[data-pool]");
     if (readout) {

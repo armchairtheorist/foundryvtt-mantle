@@ -45,7 +45,7 @@ const CATALOG = new Map(
  * @property {Record<string, object>} [gearOverrides]
  *   System fields to change on this character's copy of a piece of gear
  * @property {string[]} limitBreaks
- * @property {string[]} skills - Trained skill ids
+ * @property {string[]} threads - Free-text provenance phrases, as printed
  * @property {string} playstyle
  */
 
@@ -55,6 +55,11 @@ const PREGENS = [
     name: "Mira",
     concept: "Half-Elf, Agile Skirmisher Warrior",
     attributes: { pow: 0, agi: 3, rea: 0, ins: 1, pre: 0, luck: 0 },
+    threads: [
+      "Raised in the Pearl Court of Exantria.",
+      "Last student of the crown blademaster, Maestro Corvine.",
+      "Three years on the smugglers' roads under a false name."
+    ],
     archetypes: [["Half-Elf", 1], ["Warrior", 2]],
     masteries: {
       body: ["Lightning Reflexes", "Combat Reflexes", "Bloodlust"],
@@ -63,14 +68,18 @@ const PREGENS = [
     },
     gear: ["Rapier", "Shortbow", "Chain Shirt"],
     limitBreaks: ["Deadeye Requiem"],
-    skills: ["climbing", "stealth", "tracking", "bestiary", "seduction", "navigation"],
-    playstyle:
+        playstyle:
       "Open at range with Overwatch, close with the Rapier, Focused Strike against armor. Combat Reflexes makes the Rapier Reflexive, so anything that tries to disengage from you eats a Forestall."
   },
   {
     name: "Kira",
     concept: "Dwarf, Raging Brute",
     attributes: { pow: 2, agi: 0, rea: 0, ins: 1, pre: 0, luck: 1 },
+    threads: [
+      "Forged as a shieldbreaker of Kargen Deephold.",
+      "Twenty years cutting ore in the deep galleries.",
+      "Crowd favorite of the Emberlow fighting pits."
+    ],
     archetypes: [["Dwarf", 1], ["Barbarian", 2]],
     masteries: {
       body: ["Bloodlust", "Bloodfeast"],
@@ -80,14 +89,20 @@ const PREGENS = [
     },
     gear: ["Greataxe", "Sling", "Plate Armor"],
     limitBreaks: ["Crescent Onslaught"],
-    skills: ["lifting", "endurance", "coercion", "smithing", "tracking", "history"],
-    playstyle:
+        playstyle:
       "Enter Frenzy every turn and swing the Greataxe — at Frenzy 3 you roll 5d6. Taunt whoever is about to reach the casters. Watch your Strain: the rage costs 3 a turn at full stacks against a maximum of 5, and while Frenzied you have no defensive reactions."
   },
   {
     name: "Maya",
     concept: "Human, Damage Caster",
     attributes: { pow: 0, agi: 0, rea: 3, ins: 0, pre: 0, luck: 1 },
+    threads: [
+      "Youngest-ever fellow of the Kolgrimm Athenaeum.",
+      "Expelled after the Emberfall Incident.",
+      "Summers apprenticed to her apothecary aunt.",
+      "Field cataloguer on the Threnody Expedition.",
+      "Keeps ciphered correspondence with a dozen dubious scholars."
+    ],
     archetypes: [["Human", 1], ["Scholar", 2]],
     masteries: {
       mind: ["Mens Resonance", "Cone Shaping", "Arcane Shield"],
@@ -97,17 +112,18 @@ const PREGENS = [
     },
     gear: ["Dagger", "Basic Spell Focus", "Armored Cloak"],
     limitBreaks: ["Arcane Overdrive"],
-    skills: [
-      "magicTheory", "esoterica", "history", "engineering",
-      "charm", "readPeople", "alchemy", "firstAid"
-    ],
-    playstyle:
+        playstyle:
       "Ignis Rend is the workhorse; Push the Craft when the roll has to land. Mens Afflict when the target's Strain is the softer track. Iron Will halves incoming Strain for 1 Vigor — worth holding for the Mindbinder."
   },
   {
     name: "Vera",
     concept: "Elf, Battle-Priest",
     attributes: { pow: 1, agi: 0, rea: 0, ins: 3, pre: 0, luck: 0 },
+    threads: [
+      "Novice-raised in the Cloister of First Light.",
+      "Walked the pilgrim roads as a lantern-bearer.",
+      "Chosen as a Voice on the Night of Falling Stars."
+    ],
     archetypes: [["Elf", 1], ["Channeler", 2]],
     masteries: {
       body: ["Vigorous"],
@@ -117,11 +133,7 @@ const PREGENS = [
     },
     gear: ["Dagger", "Basic Spell Focus", "Armored Cloak"],
     limitBreaks: ["Undying Vow"],
-    skills: [
-      "etiquette", "charm", "religion", "herbalism",
-      "nature", "firstAid", "politics", "animalHandling"
-    ],
-    playstyle:
+        playstyle:
       "Lux Mend keeps the line standing; Patron's Will buys a certain heal at 2 Strain a success when the roll cannot be risked."
   }
 ];
@@ -206,7 +218,7 @@ export function build() {
       img: "icons/svg/mystery-man.svg",
       system: {
         attributes: pregen.attributes,
-        skills: pregen.skills,
+        threads: pregen.threads,
         languages: [],
 
         // Every track starts full. A pregen handed to a player at the table

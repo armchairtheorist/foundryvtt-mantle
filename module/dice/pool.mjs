@@ -113,7 +113,7 @@ export function patternsApply({ effective, desperate }) {
  * apply so the chat card lists only what actually moved the pool.
  *
  * @param {object} options
- * @param {boolean} [options.trained] - A trained skill, worth +2d, never on attacks
+ * @param {boolean} [options.trained] - An applicable Thread, worth +2d, never on attacks
  * @param {"mass"|"edge"|"mark"} [options.hitLocation]
  * @param {number} [options.impaired] - Stacks of Impaired, -1d each
  * @param {boolean} [options.hindered] - Hindered imposes -1d on attacks
@@ -134,7 +134,7 @@ export function standardModifiers({
   /** @type {Modifier[]} */
   const modifiers = [];
 
-  if (trained) modifiers.push({ label: "MANTLE.Modifier.trained", value: MANTLE.skillBonus });
+  if (trained) modifiers.push({ label: "MANTLE.Modifier.thread", value: MANTLE.threadBonus });
 
   const location = MANTLE.hitLocations[hitLocation];
   if (location?.penalty) {

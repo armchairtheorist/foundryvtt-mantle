@@ -23,7 +23,8 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     window: { resizable: true },
     form: { submitOnChange: true },
     actions: {
-      toggleSkill: MantleCharacterSheet.#onToggleSkill,
+      addThread: MantleCharacterSheet.#onAddThread,
+      deleteThread: MantleCharacterSheet.#onDeleteThread,
       toggleEquipped: MantleCharacterSheet.#onToggleEquipped,
       cycleBoard: MantleCharacterSheet.#onCycleBoard,
       takeWound: MantleCharacterSheet.#onTakeWound,
@@ -57,7 +58,7 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     build: { template: "systems/mantle/templates/actor/character-build.hbs", scrollable: [""] },
     gear: { template: "systems/mantle/templates/actor/character-gear.hbs", scrollable: [""] },
     magic: { template: "systems/mantle/templates/actor/character-magic.hbs", scrollable: [""] },
-    skills: { template: "systems/mantle/templates/actor/character-skills.hbs", scrollable: [""] },
+    threads: { template: "systems/mantle/templates/actor/character-threads.hbs", scrollable: [""] },
     bio: { template: "systems/mantle/templates/actor/character-bio.hbs", scrollable: [""] }
   };
 
@@ -91,7 +92,6 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     context.tabs = this.#getTabs();
     context.items = this.#organizeItems();
     context.attributes = this.#prepareAttributes();
-    context.skills = this.#prepareSkills();
     context.slots = this.#prepareSlots();
 
     // The Unarmed Attack is always available and never costs a gear slot, so
@@ -137,7 +137,7 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
       build: "MANTLE.Tab.build",
       gear: "MANTLE.Tab.gear",
       magic: "MANTLE.Tab.magic",
-      skills: "MANTLE.Tab.skills",
+      threads: "MANTLE.Tab.threads",
       bio: "MANTLE.Tab.bio"
     };
 
@@ -177,23 +177,6 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
   }
 
   /* -------------------------------------------- */
-
-  /** Skills grouped by their skill group, each flagged trained or not. */
-  #prepareSkills() {
-    const trained = this.document.system.skills;
-
-    return Object.entries(MANTLE.skillGroups).map(([groupKey, groupLabel]) => ({
-      key: groupKey,
-      label: groupLabel,
-      skills: Object.entries(MANTLE.skills)
-        .filter(([, group]) => group === groupKey)
-        .map(([skillKey]) => ({
-          key: skillKey,
-          label: `MANTLE.Skill.${skillKey}`,
-          trained: trained.has(skillKey)
-        }))
-    }));
-  }
 
   /* -------------------------------------------- */
 
@@ -280,15 +263,25 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
    * @param {PointerEvent} _event
    * @param {HTMLElement} target
    */
-  static async #onToggleSkill(_event, target) {
-    const key = target.dataset.skill;
-    if (!key) return;
+  static async #onAddThread() {
+    // Added blank for the player to write into. Threads are earned in play, so
+    // the count from their build is a guide on the sheet rather than a cap:
+    // nothing here refuses a fourth Thread the GM awarded.
+    const threads = [...this.document.system.threads, ""];
+    await this.document.update({ "system.threads": threads });
+  }
 
-    const trained = new Set(this.document.system.skills);
-    if (trained.has(key)) trained.delete(key);
-    else trained.add(key);
+  /**
+   * @this {MantleCharacterSheet}
+   * @param {PointerEvent} _event
+   * @param {HTMLElement} target
+   */
+  static async #onDeleteThread(_event, target) {
+    const index = Number(target.closest("[data-index]")?.getAttribute("data-index"));
+    if (!Number.isInteger(index)) return;
 
-    await this.document.update({ "system.skills": Array.from(trained) });
+    const threads = this.document.system.threads.filter((_, at) => at !== index);
+    await this.document.update({ "system.threads": threads });
   }
 
   /**

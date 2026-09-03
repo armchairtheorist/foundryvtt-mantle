@@ -536,54 +536,37 @@
 }
 
 /* -------------------------------------------- */
-/*  Skills                                       */
+/*  Threads                                      */
 /* -------------------------------------------- */
 
-.mantle .skill-groups {
-  columns: 2;
-  column-gap: 14px;
+/* Threads are prose the player wrote, so the field is the content — a full
+   width text input rather than a label with a value beside it. */
+.mantle .threads-list {
+  .entry.thread {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 
-  .skill-group {
-    break-inside: avoid;
-    margin-bottom: 10px;
+    input[type="text"] {
+      flex: 1 1 auto;
+      background: none;
+      border: none;
+      border-bottom: 1px solid var(--mantle-border);
+      border-radius: 0;
+      color: inherit;
+      font-size: 0.95em;
+      padding: 2px 3px;
 
-    ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
+      &:disabled {
+        border-bottom-style: dotted;
+      }
     }
   }
+}
 
-  /* Contrast here comes from opacity against the sheet's own text colour
-     rather than from a fixed ink value. A trained skill has to be legible on
-     whichever theme the player runs, and inheriting is the only way to be sure
-     of that; a hard-coded ink read as near-black on the dark theme. */
-  .skill {
-    cursor: pointer;
-    padding: 1px 3px;
-    border-radius: 3px;
-    font-size: 0.9em;
-    color: inherit;
-    opacity: 0.55;
-
-    i {
-      width: 1em;
-      margin-right: 4px;
-    }
-
-    &:hover {
-      background: var(--mantle-panel);
-      opacity: 0.85;
-    }
-
-    /* Trained skills are the ones worth +2d, so they carry the weight. */
-    &.trained {
-      opacity: 1;
-      font-weight: 600;
-      background: var(--mantle-panel);
-      box-shadow: inset 3px 0 0 var(--mantle-success);
-    }
-  }
+/* The knowledge note is guidance, not a control: no rolls, no stored state. */
+.mantle .knowledge .hint {
+  margin: 0;
 }
 
 /* -------------------------------------------- */
