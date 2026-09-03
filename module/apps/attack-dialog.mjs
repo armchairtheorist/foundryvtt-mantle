@@ -32,12 +32,15 @@ const TEMPLATE = "systems/mantle/templates/apps/attack-dialog.hbs";
  * @param {{name: string, system: object}} weapon
  * @param {object} [options]
  * @param {string} [options.attribute] - The attribute already chosen
+ * @param {number} [options.base] - Dice the roll starts from, when they do not
+ *   come from an attribute. An adversary's pool is printed on its stat block.
  * @returns {Promise<{modifiers: import("../dice/pool.mjs").Modifier[],
  *   hitLocation: string}|null>}
  */
-export async function promptAttack(actor, weapon, { attribute = "pow" } = {}) {
+export async function promptAttack(actor, weapon, { attribute = "pow", base } = {}) {
   const target = firstTarget(actor);
   const isRanged = pickMode(weapon, target);
+  const tags = Array.from(weapon.system.tags ?? []).map(String);
 
   const context = {
     weapon: weapon.name,
@@ -47,7 +50,14 @@ export async function promptAttack(actor, weapon, { attribute = "pow" } = {}) {
     sen: actor.system.sen ?? 0,
     canSwitchMode: weapon.system.melee !== null && weapon.system.range !== null,
     distance: target?.distance ?? null,
-    locations: hitLocationChoices(target),
+
+    // An Imprecise weapon cannot target hit locations at all, so it is offered
+    // Mass and nothing else rather than a list it may not use.
+    imprecise: tags.includes("imprecise"),
+    // A Seeking weapon is not affected by cover, which is what otherwise takes
+    // Mass off the table for a ranged attack.
+    seeking: tags.includes("seeking"),
+    locations: hitLocationChoices(target, tags.includes("imprecise")),
     visibility: Object.entries(MANTLE.visibility)
       // Hidden is not a choice an attacker makes — you cannot aim at something
       // whose location you do not know — so it is left out of the list.
@@ -55,7 +65,8 @@ export async function promptAttack(actor, weapon, { attribute = "pow" } = {}) {
       .map(([key, entry]) => ({ key, label: game.i18n.localize(entry.label) })),
     conditions: conditionModifiers(actor.conditions ?? {}),
     frenzy: actor.conditionStacks?.("frenzy") ?? 0,
-    attribute
+    attribute,
+    base: base ?? actor.system.attributes?.[attribute] ?? 0
   };
 
   const content = await foundry.applications.handlebars.renderTemplate(TEMPLATE, context);
@@ -142,9 +153,14 @@ function pickMode(weapon, target) {
  * three otherwise.
  *
  * @param {{actor: Actor|null}|null} target
+ * @param {boolean} [imprecise] - Whether the weapon can target locations at all
  * @returns {{key: string, label: string, penalty: number}[]}
  */
-function hitLocationChoices(target) {
+function hitLocationChoices(target, imprecise = false) {
+  if (imprecise) {
+    return [{ key: "mass", label: game.i18n.localize(MANTLE.hitLocations.mass.label), penalty: 0 }];
+  }
+
   const printed = target?.actor?.system?.hitLocations;
 
   if (printed?.length) {
@@ -176,6 +192,11 @@ function readAttack(data, context) {
   const raw = String(data.get("distance") ?? "");
   const distance = raw === "" ? null : Number(raw);
 
+  const hitLocation = String(data.get("hitLocation") || "mass");
+  const chosen = context.locations.find(
+    (/** @type {{key: string}} */ entry) => entry.key === hitLocation
+  );
+
   const positional = attackModifiers({
     distance,
     sen: context.sen,
@@ -184,7 +205,10 @@ function readAttack(data, context) {
     maxRange: context.maxRange,
     visibility: String(data.get("visibility") || "visible"),
     hiddenAttacker: data.get("hiddenAttacker") === "on",
-    hitLocation: String(data.get("hitLocation") || "mass"),
+    hitLocation,
+    // The target's own printed locations are named rather than keyed, so the
+    // penalty comes from the list this dialog built rather than the config.
+    hitLocationPenalty: chosen?.penalty ?? null,
     frenzy: Number(data.get("frenzy")) || 0
   });
 
@@ -224,7 +248,7 @@ function attachLivePool(html, actor, context) {
     // table and only Edge and Mark remain. Melee ignores cover entirely.
     const mass = form.querySelector('[name="hitLocation"] option[value="mass"]');
     if (mass) {
-      const allowed = massAvailable({ cover, ranged });
+      const allowed = context.seeking || massAvailable({ cover, ranged });
       mass.disabled = !allowed;
       if (!allowed && mass.selected) {
         const fallback = form.querySelector('[name="hitLocation"] option:not([disabled])');
@@ -233,8 +257,7 @@ function attachLivePool(html, actor, context) {
     }
 
     const { modifiers, canTarget, blockedBy } = readAttack(new FormData(form), context);
-    const base = actor.system.attributes?.[context.attribute] ?? 0;
-    const pool = buildPool(base, modifiers);
+    const pool = buildPool(context.base, modifiers);
 
     const readout = html.querySelector("[data-pool]");
     if (readout) {

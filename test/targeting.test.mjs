@@ -15,9 +15,11 @@ import {
   attackModifiers,
   massAvailable,
   meleeReach,
+  reachFromTags,
   rangedReach,
   visibilityReach
 } from "../module/rules/targeting.mjs";
+import { MANTLE } from "../module/config.mjs";
 
 describe("ranged reach", () => {
   test("adjacent is awkward, however keen the attacker's senses", () => {
@@ -165,5 +167,73 @@ describe("the whole attack", () => {
       visibility: "hidden"
     });
     assert.equal(result.blockedBy, "MANTLE.Targeting.beyondRange");
+  });
+});
+
+describe("locations printed on a stat block", () => {
+  const base = { distance: 1, sen: 12, ranged: false, reach: 1, maxRange: null };
+
+  test("a named location carries the penalty the caller supplies", () => {
+    // A Razorwing has Wings and no Mark. Those are its own locations, not keys
+    // of the config table, so the penalty cannot be looked up — and before it
+    // was passed in, aiming at a wing quietly cost nothing.
+    const result = attackModifiers({ ...base, hitLocation: "wings", hitLocationPenalty: -2 });
+
+    assert.deepEqual(result.modifiers, [{ label: "wings", value: -2 }]);
+  });
+
+  test("a config location still localizes through its key", () => {
+    const result = attackModifiers({ ...base, hitLocation: "mark", hitLocationPenalty: -3 });
+
+    assert.deepEqual(result.modifiers, [{ label: "MANTLE.HitLocation.mark", value: -3 }]);
+  });
+
+  test("without a supplied penalty the config table still answers", () => {
+    const result = attackModifiers({ ...base, hitLocation: "edge" });
+
+    assert.deepEqual(result.modifiers, [
+      { label: "MANTLE.HitLocation.edge", value: MANTLE.hitLocations.edge.penalty }
+    ]);
+  });
+
+  test("a location worth nothing adds nothing", () => {
+    assert.deepEqual(attackModifiers({ ...base, hitLocation: "mass" }).modifiers, []);
+    assert.deepEqual(
+      attackModifiers({ ...base, hitLocation: "head", hitLocationPenalty: 0 }).modifiers,
+      []
+    );
+  });
+});
+
+describe("reach and range read off a tag list", () => {
+  test("a melee tag gives reach and no range", () => {
+    assert.deepEqual(reachFromTags(["slashing", "melee 2"]), { melee: 2, range: null });
+  });
+
+  test("a range tag gives range and no reach", () => {
+    assert.deepEqual(reachFromTags(["piercing", "range 6", "seeking"]), {
+      melee: null,
+      range: 6
+    });
+  });
+
+  test("both is a weapon that does both", () => {
+    assert.deepEqual(reachFromTags(["melee 1", "range 5"]), { melee: 1, range: 5 });
+  });
+
+  test("neither means melee at reach 1", () => {
+    // What every unarmed stat block means by saying nothing at all.
+    assert.deepEqual(reachFromTags(["crushing"]), { melee: 1, range: null });
+    assert.deepEqual(reachFromTags([]), { melee: 1, range: null });
+  });
+
+  test("a tag that only looks like one is ignored", () => {
+    // "Melee" with nothing after it, and "meleerange" — neither declares a
+    // number, and reading NaN as a reach would refuse every attack.
+    assert.deepEqual(reachFromTags(["melee", "ranged"]), { melee: 1, range: null });
+  });
+
+  test("case is not the stat block's problem", () => {
+    assert.deepEqual(reachFromTags(["Melee 3"]), { melee: 3, range: null });
   });
 });

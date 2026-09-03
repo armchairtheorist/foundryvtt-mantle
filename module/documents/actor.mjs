@@ -25,6 +25,7 @@ import {
 import { limitBreakRoutes } from "../rules/momentum.mjs";
 import { bondManeuvers, mutualBond } from "../rules/bonds.mjs";
 import { isUsable } from "../rules/equipment.mjs";
+import { reachFromTags } from "../rules/targeting.mjs";
 import { castTemplate, isMultiTarget } from "../rules/templates.mjs";
 import { pairingEffects, rangeAtStep } from "../rules/shaping.mjs";
 import { placeSpellTemplate } from "../canvas/spell-template.mjs";
@@ -79,6 +80,36 @@ function consumableAsWeapon(item) {
       // The consumable point is the price; there is no second Vigor cost.
       attackCost: 0,
       special: item.system.effect
+    }
+  };
+}
+
+/**
+ * An adversary's printed maneuver, shaped like a weapon.
+ *
+ * The attack dialog asks its questions of a weapon — reach, range, tags — and
+ * an enemy attack raises exactly the same ones: which hit location, how far,
+ * whether the target is behind cover. The stat block carries reach and range
+ * inside the tag list rather than as fields ("Melee 1", "Range 6"), so they are
+ * read back out here.
+ *
+ * @param {any} maneuver - One entry from an adversary's `system.maneuvers`
+ * @returns {{name: string, system: any}}
+ */
+function maneuverAsWeapon(maneuver) {
+  const tags = toArray(maneuver.tags);
+  const { melee, range } = reachFromTags(tags);
+
+  return {
+    name: maneuver.name,
+    system: {
+      tags,
+      damageTypes: tags.filter((tag) => tag in MANTLE.damageTypes),
+      melee,
+      range,
+      damage: maneuver.ladder,
+      attackCost: 0,
+      special: maneuver.notes ?? ""
     }
   };
 }
@@ -511,12 +542,19 @@ export default class MantleActor extends Actor {
    * as exactly one success, so the card is posted with that result rather than
    * with dice nobody needed to throw.
    *
+   * An enemy attack raises the same positional questions a character's does —
+   * which hit location, how far, whether the target is behind cover — so it
+   * goes through the same dialog, with the printed pool standing in for the
+   * attribute a character would roll. `silent` skips it for the callers that
+   * already know the shape of the attack.
+   *
    * @param {number} index - Which maneuver, by position on the stat block
    * @param {object} [options]
    * @param {number} [options.situational]
+   * @param {boolean} [options.silent] - Skip the attack dialog
    * @returns {Promise<ChatMessage|null>}
    */
-  async rollManeuver(index, { situational = 0 } = {}) {
+  async rollManeuver(index, { situational = 0, silent = false } = {}) {
     const maneuver = this.system.maneuvers?.[index];
     if (!maneuver) return null;
 
@@ -528,6 +566,18 @@ export default class MantleActor extends Actor {
       modifiers.push({ label: "MANTLE.Adversary.tierBonus", value: this.system.diceBonus });
     }
     if (situational) modifiers.push({ label: "MANTLE.Modifier.situational", value: situational });
+
+    // The pool the dialog shows has to be the pool that will be rolled, so the
+    // tier bonus is already in `base` rather than added afterwards.
+    let hitLocation = "mass";
+    if (!silent) {
+      const base = modifiers.reduce((total, entry) => total + entry.value, maneuver.pool);
+      const declared = await promptAttack(this, maneuverAsWeapon(maneuver), { base });
+      if (!declared) return null;
+
+      modifiers.push(...declared.modifiers);
+      hitLocation = declared.hitLocation;
+    }
 
     const subtitle = [
       maneuver.opposedBy
@@ -547,6 +597,7 @@ export default class MantleActor extends Actor {
       ladderKind: strain ? "strain" : "vitality",
       damageTypes: tags.filter((tag) => tag in MANTLE.damageTypes),
       penetrating: tags.includes("penetrating"),
+      hitLocation,
       fixedSuccesses: this.system.rollsDice ? null : 1,
       noPatterns: !this.system.readsPatterns
     });

@@ -37,6 +37,7 @@ import {
 } from "../module/rules/equipment.mjs";
 import { deriveCores, deriveMaxBonds } from "../module/data/derive.mjs";
 import { MANTLE } from "../module/config.mjs";
+import { reachFromTags } from "../module/rules/targeting.mjs";
 
 /**
  * The eight canonical documents, by the short name this file refers to them by.
@@ -653,6 +654,26 @@ describe("adversaries match the Pre-Generated Enemies catalog", () => {
         tags.split(",").map((tag) => tag.trim().toLowerCase()),
         `${name}: tags`
       );
+    }
+  });
+
+  test("every printed maneuver declares a reach the dialog can read", () => {
+    // The attack dialog reads reach and range off the tag list, so a stat
+    // block that writes "Melee1" or "Range" with no number would silently
+    // become a melee attack at reach 1 and refuse every shot past adjacent.
+    for (const [name, doc] of built) {
+      for (const maneuver of doc.system.maneuvers) {
+        const tags = [...maneuver.tags];
+        const { melee, range } = reachFromTags(tags);
+
+        const declares = tags.some((/** @type {string} */ tag) =>
+          /^(melee|range)\b/i.test(tag)
+        );
+        assert.ok(
+          !declares || melee !== null || range !== null,
+          `${name} / ${maneuver.name}: tags ${tags.join(", ")} declare no usable distance`
+        );
+      }
     }
   });
 

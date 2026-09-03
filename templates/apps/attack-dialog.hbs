@@ -23,9 +23,11 @@
     </label>
   {{/if}}
 
+  {{!-- An Imprecise weapon can only ever hit Mass, so the list holds one entry
+        and says why rather than offering choices the tag forbids. --}}
   <label class="row">
     {{localize "MANTLE.Attack.hitLocation"}}
-    <select name="hitLocation">
+    <select name="hitLocation" {{#if imprecise}}disabled{{/if}}>
       {{#each locations as |location|}}
         <option value="{{location.key}}">
           {{location.label}}{{#if location.penalty}} ({{location.penalty}}d){{/if}}
@@ -33,6 +35,10 @@
       {{/each}}
     </select>
   </label>
+
+  {{#if imprecise}}
+    <p class="hint">{{localize "MANTLE.Attack.impreciseHint"}}</p>
+  {{/if}}
 
   {{!-- Measured from the canvas when a token is targeted, and editable
         regardless: the map is often a sketch of the fiction. Blank means
@@ -58,6 +64,10 @@
            data-tooltip="{{localize 'MANTLE.Attack.coverHint'}}">
     {{localize "MANTLE.Attack.cover"}}
   </label>
+
+  {{#if seeking}}
+    <p class="hint">{{localize "MANTLE.Attack.seekingHint"}}</p>
+  {{/if}}
 
   <label class="row check">
     <input type="checkbox" name="hiddenAttacker"

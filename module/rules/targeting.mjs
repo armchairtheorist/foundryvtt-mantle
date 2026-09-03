@@ -108,7 +108,11 @@ export function massAvailable({ cover, ranged }) {
  * @param {number|null} input.maxRange - Range N, when attacking at range
  * @param {string} [input.visibility] - A key of MANTLE.visibility
  * @param {boolean} [input.hiddenAttacker] - Whether the attacker is Hidden
- * @param {string} [input.hitLocation] - A key of MANTLE.hitLocations
+ * @param {string} [input.hitLocation] - A key of MANTLE.hitLocations, or the
+ *   name of a location printed on the target's own stat block
+ * @param {number|null} [input.hitLocationPenalty] - That location's penalty,
+ *   when the caller already knows it. A Razorwing's Wings are its own, not a
+ *   key of the config table, so the penalty cannot always be looked up here.
  * @param {number} [input.frenzy] - Frenzy stacks held by the attacker
  * @returns {{canTarget: boolean, blockedBy: string|null,
  *   modifiers: {label: string, value: number}[]}}
@@ -122,6 +126,7 @@ export function attackModifiers({
   visibility = "visible",
   hiddenAttacker = false,
   hitLocation = "mass",
+  hitLocationPenalty = null,
   frenzy = 0
 }) {
   /** @type {{label: string, value: number}[]} */
@@ -148,8 +153,14 @@ export function attackModifiers({
   const location = /** @type {Record<string, {penalty: number}>} */ (MANTLE.hitLocations)[
     hitLocation
   ];
-  if (location?.penalty) {
-    modifiers.push({ label: `MANTLE.HitLocation.${hitLocation}`, value: location.penalty });
+  const penalty = hitLocationPenalty ?? location?.penalty ?? 0;
+  if (penalty) {
+    // Printed locations are named rather than keyed, and localize passes an
+    // unknown key through unchanged — so "Wings" arrives on the card as Wings.
+    modifiers.push({
+      label: location ? `MANTLE.HitLocation.${hitLocation}` : hitLocation,
+      value: penalty
+    });
   }
 
   // Striking from hiding is worth two dice, and only against the target the
@@ -164,4 +175,31 @@ export function attackModifiers({
   }
 
   return { canTarget: blockedBy === null, blockedBy, modifiers };
+}
+
+/* -------------------------------------------- */
+
+/**
+ * The reach and range a tag list declares.
+ *
+ * Adversary stat blocks carry these inside the tag list — "Melee 1", "Range 6"
+ * — rather than as fields, because that is how they are printed. An attack that
+ * names neither is melee at reach 1: that is what a stat block means by saying
+ * nothing, and it is the shape of every unarmed line in the catalog.
+ *
+ * @param {string[]} tags
+ * @returns {{melee: number|null, range: number|null}}
+ */
+export function reachFromTags(tags) {
+  /** @param {string} word */
+  const distance = (word) => {
+    const tag = tags.find((entry) => entry.toLowerCase().startsWith(`${word} `));
+    const value = tag ? Number(tag.slice(word.length + 1)) : NaN;
+    return Number.isFinite(value) ? value : null;
+  };
+
+  const melee = distance("melee");
+  const range = distance("range");
+
+  return { melee: range === null && melee === null ? 1 : melee, range };
 }
