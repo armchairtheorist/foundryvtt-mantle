@@ -78,7 +78,10 @@ describe("archetype bonuses match the pre-generated characters", () => {
       resolve: 0,
       guard: 0,
       masteryWildcard: 1,
-      masteryRepertoire: 3 // Starting Repertoire, for the Arts and Resonances
+      // Starting Repertoire's 3, plus the fourth from Magic Study — which
+      // v0.31 added at Scholar rank 2 and which the catalog's stat block for
+      // Maya prints as "Repertoire slots (4)".
+      masteryRepertoire: 4
     });
   });
 

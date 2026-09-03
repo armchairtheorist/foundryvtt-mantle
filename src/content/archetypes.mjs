@@ -33,7 +33,7 @@ const ANCESTRIES = [
     domains: ["general", "human"],
     ranks: [
       rank(1, "Versatile", "Gain an additional 1 wildcard mastery slot.", { vitality: 1, strain: 1, masteryWildcard: 1 }),
-      rank(1, "Skill Training", SKILL_TRAINING_4),
+      rank(1, "Human Experience", "Gain one additional Thread.", { threads: 1 }),
       rank(2, "Mental Resilience", "When you take the Steady Yourself maneuver, you can spend Resolve to clear one Burden. The Resolve spent equals the Burden's severity.", { vitality: 1, strain: 1 }),
       rank(3, "Last Stand", "While you are in Crisis, you gain +1d bonus on all attacks and reactive defense rolls.", { vitality: 1, strain: 1 })
     ]
@@ -44,7 +44,6 @@ const ANCESTRIES = [
     domains: ["general", "human", "elf"],
     ranks: [
       rank(1, "Low-Light Vision", "Treat Dim Light as Bright Light, and Darkness as Dim Light.", { vitality: 1, strain: 1 }),
-      rank(1, "Skill Training", SKILL_TRAINING_4),
       rank(2, "Elven Memories", "When making an action roll that can apply a skill from the Knowledge skill group, you may instead resolve it by testing your luck. You must take the results of the luck roll.", { vitality: 1, strain: 1 }),
       rank(3, "Cultural Fluency", "Gain +1d for all action rolls applying an Influence skill, as long as it involves Humans, Elves, or Half-Elves.", { vitality: 1, strain: 1 }),
       rank(3, "Adaptability", "During an Interlude, you may retrain one equipped mastery for another mastery that you qualify for.")
@@ -58,7 +57,6 @@ const ANCESTRIES = [
     ranks: [
       rank(1, "Low-Light Vision", "Treat Dim Light as Bright Light, and Darkness as Dim Light.", { strain: 2 }),
       rank(1, "Elven Memories", "When making an action roll that can apply a skill from the Knowledge skill group, you may instead resolve it by testing your luck."),
-      rank(1, "Skill Training", SKILL_TRAINING_4),
       rank(2, "Dauntless Mind", "You cannot gain the Frightened condition.", { strain: 2 }),
       rank(3, "Magic Initiate", "You gain access to the Magic mastery domain.", { strain: 2 }),
       rank(3, "Innate Spellcasting", "You may cast spells, using PRE as your casting attribute. You gain 1 bonus mastery slot that must be filled with a Resonance. You gain no Arts for free, and no access to spell foci, so your spells always suffer the -1d no-focus penalty.")
@@ -70,7 +68,6 @@ const ANCESTRIES = [
     domains: ["general", "dwarf"],
     ranks: [
       rank(1, "Darkvision", "Treat both Dim Light and Darkness as Bright Light.", { vitality: 2 }),
-      rank(1, "Skill Training", SKILL_TRAINING_4),
       rank(2, "Tremorsense", "Sense the location of all grounded creatures within (SEN / 2) squares, regardless of lighting or cover. Sensed creatures count as visible for targeting. Flying creatures are unaffected.", { vitality: 2 }),
       rank(3, "Stone Will", "When you would gain the Broken condition from any source other than your own Brace reaction, you may test your luck. On 1+ success, you do not gain it.", { vitality: 2 })
     ]
@@ -84,7 +81,6 @@ const PATHS = [
     domains: ["martial", "barbarian"],
     ranks: [
       rank(1, "Martial Training", MARTIAL_TRAINING, { vitality: 2 }),
-      rank(1, "Skill Training", "Receive training in 2 narrative skills from the Athletics or Fieldcraft skill groups."),
       rank(1, "Enter Frenzy", "You have access to the Enter Frenzy maneuver (Vigor 0, 1/turn) to gain the Frenzy condition. Maximum Frenzy stacks cannot exceed 1 without the Berserk mastery."),
       rank(2, "Relentless", "Your melee weapon attacks deal +2 damage for every stack of Frenzy.", { vitality: 2 }),
       rank(2, "Adrenaline", "While Frenzied, you can perform the Surge maneuver using BODY instead of MIND."),
@@ -98,7 +94,6 @@ const PATHS = [
     domains: ["martial", "warrior"],
     ranks: [
       rank(1, "Martial Training", MARTIAL_TRAINING, { vitality: 1, guard: 1 }),
-      rank(1, "Skill Training", "Receive training in 2 narrative skills from the Athletics or Subterfuge skill groups."),
       rank(1, "Deflect", "You have access to the Deflect reactive defense."),
       rank(2, "Counterattack", "You have access to the Counterattack reactive attack.", { vitality: 1, guard: 1 }),
       rank(2, "Focused Strike", "When you make a Basic Attack with a weapon, you can spend +2 Vigor to roll with a +2d bonus."),
@@ -115,7 +110,7 @@ const PATHS = [
       rank(1, "Spellcasting", "You may perform the Cast a Spell maneuver, using REA as the spellcasting attribute.", { strain: 1 }),
       rank(1, "Starting Repertoire", "You get 3 bonus mastery slots that must be filled with Resonances and Arts, including at least 1 of each.", { masteryRepertoire: 3 }),
       rank(1, "Spell Focus", "You may use your gear slots to equip spell foci. Casting without one incurs a -1d penalty."),
-      rank(1, "Skill Training", "Receive training in Magic Theory, and 3 additional narrative skills from the Knowledge skill group."),
+      rank(2, "Magic Study", "Gain 1 additional bonus mastery slot that must be filled with Resonances and Arts.", { masteryRepertoire: 1 }),
       rank(2, "Detect Magic", "You have access to the Detect Magic maneuver (Vigor 2).", { strain: 1 }),
       rank(2, "Push the Craft", "When you cast a spell, you may take up to MIND Strain. Each Strain taken grants +1d on the cast. Declare before rolling."),
       rank(3, "Long Casting", "You may spread a spell's Vigor cost across two turns, resolving on the second. You cannot take reactions while holding the cast.", { strain: 1 }),
@@ -131,7 +126,6 @@ const PATHS = [
       rank(1, "Spellcasting", "You may perform the Cast a Spell maneuver, using INS as the spellcasting attribute.", { resolve: 1 }),
       rank(1, "Starting Repertoire", "You get 3 bonus mastery slots that must be filled with Resonances and Arts, including at least 1 of each.", { masteryRepertoire: 3 }),
       rank(1, "Spell Focus", "You may use your gear slots to equip spell foci. Casting without one incurs a -1d penalty."),
-      rank(1, "Skill Training", "Receive training in 2 narrative skills from the Influence skill group, and 2 from any group."),
       rank(2, "Patron's Aura", "You project an aura of divine protection covering all squares within 5 squares of you. You also gain the Helping Hand reaction.", { resolve: 1 }),
       rank(2, "Patron's Will", "When you cast a spell, you may bypass the spellcasting roll and declare successes at 2 Strain each. No modifiers apply. Declare before rolling."),
       rank(3, "Patron's Aegis", "When you would take a Wound, you may spend 2 Resolve to prevent it entirely. Once per combat encounter.", { resolve: 1 }),

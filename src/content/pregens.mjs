@@ -76,7 +76,7 @@ const PREGENS = [
       body: ["Bloodlust", "Bloodfeast"],
       mind: ["Willpower"],
       soul: ["Berserk"],
-      wildcard: ["Taunt"]
+      wildcard: ["Charging Frenzy"]
     },
     gear: ["Greataxe", "Sling", "Plate Armor"],
     limitBreaks: ["Crescent Onslaught"],
@@ -91,9 +91,9 @@ const PREGENS = [
     archetypes: [["Human", 1], ["Scholar", 2]],
     masteries: {
       mind: ["Mens Resonance", "Cone Shaping", "Arcane Shield"],
-      soul: ["Improviser"],
-      wildcard: ["Bolster Art", "Iron Will"],
-      repertoire: ["Ignis Resonance", "Rend Art", "Afflict Art"]
+      soul: ["Storied Past"],
+      wildcard: ["Iron Will", "Potpourri"],
+      repertoire: ["Ignis Resonance", "Rend Art", "Afflict Art", "Bolster Art"]
     },
     gear: ["Dagger", "Basic Spell Focus", "Armored Cloak"],
     limitBreaks: ["Arcane Overdrive"],

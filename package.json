@@ -1,6 +1,6 @@
 {
   "name": "foundryvtt-mantle",
-  "version": "0.12.1",
+  "version": "0.13.0",
   "description": "The Momenta TTRPG as a game system for Foundry Virtual Tabletop",
   "private": true,
   "type": "module",

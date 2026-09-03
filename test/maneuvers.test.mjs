@@ -311,7 +311,7 @@ describe("affinities from content", () => {
     const ironWill = masteries.find((m) => m.name === "Iron Will");
     assert.ok(ironWill);
     assert.deepEqual(ironWill.system.resistances, [], "not modelled as resistance");
-    assert.match(ironWill.system.description, /halve the Strain you take/);
+    assert.match(ironWill.system.description, /[Hh]alve the Strain that you take/);
     assert.equal(ironWill.system.bonuses.strain, 2);
   });
 });

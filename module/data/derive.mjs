@@ -49,6 +49,7 @@ import { MANTLE } from "../config.mjs";
  * @property {number} [gearSlots]
  * @property {number} [wondrousSlots]
  * @property {number} [maxBonds]
+ * @property {number} [threads]
  * @property {number} [consumablePoints]
  * @property {number} [languages]
  * @property {number} [masteryBody]
@@ -71,7 +72,7 @@ export const floor = Math.floor;
 export const BONUS_KEYS = Object.freeze([
   "vitality", "strain", "resolve", "guard", "vigorRefresh", "vigorCap",
   "spd", "sen", "woundSlots", "burdenSlots", "gearSlots", "wondrousSlots",
-  "consumablePoints", "languages", "maxBonds",
+  "consumablePoints", "languages", "maxBonds", "threads",
   "masteryBody", "masteryMind", "masterySoul", "masteryWildcard", "masteryRepertoire"
 ]);
 
