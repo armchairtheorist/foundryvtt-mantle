@@ -1,7 +1,7 @@
 /**
  * The compendium content, checked against the canonical rules documents.
  *
- * `docs/rules/` holds the Mantle rulebooks themselves. Every number in the
+ * `docs/rules/` holds the Momenta rulebooks themselves. Every number in the
  * content packs was transcribed from them by hand, and a transcription is only
  * as good as the last time somebody re-read both. This parses the documents and
  * compares them to what the packs actually build, so a weapon whose ladder
@@ -53,7 +53,7 @@ const DOCUMENTS = [
  */
 function rules(name) {
   return readFileSync(
-    fileURLToPath(new URL(`../docs/rules/mantle-${name}.md`, import.meta.url)),
+    fileURLToPath(new URL(`../docs/rules/momenta-${name}.md`, import.meta.url)),
     "utf8"
   );
 }
