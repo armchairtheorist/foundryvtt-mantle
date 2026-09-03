@@ -23,7 +23,7 @@ import {
   interludeConditions,
   interludeRestore
 } from "../rules/rest.mjs";
-import { limitBreakRoutes } from "../rules/valor.mjs";
+import { limitBreakRoutes } from "../rules/momentum.mjs";
 import { castTemplate, isMultiTarget } from "../rules/templates.mjs";
 import { pairingEffects, rangeAtStep } from "../rules/shaping.mjs";
 import { placeSpellTemplate } from "../canvas/spell-template.mjs";
@@ -152,7 +152,7 @@ export default class MantleActor extends Actor {
    * The Party actor this character belongs to, if any.
    *
    * Membership is stored on the party rather than on the character, so this
-   * searches. A character in no party simply has no Valor to spend — which is
+   * searches. A character in no party simply has no Momentum to spend — which is
    * a perfectly ordinary state for an NPC ally or a one-shot pregen.
    *
    * @returns {Actor|null}
@@ -902,7 +902,7 @@ export default class MantleActor extends Actor {
    * Limit Break: pick one of the equipped Limit Breaks, pay for it, and post
    * what it does.
    *
-   * Two routes, and the character may have both. Three Valor from the party
+   * Two routes, and the character may have both. Three Momentum from the party
    * pool is the ordinary price. A character in Crisis may instead spend
    * nothing and take Exhausted once it resolves — once per combat, refreshing
    * at the next Interlude, which is why the flag is cleared by the Interlude
@@ -923,7 +923,7 @@ export default class MantleActor extends Actor {
 
     const party = this.party;
     const routes = limitBreakRoutes({
-      valor: party?.system.valor.value ?? 0,
+      momentum: party?.system.momentum.value ?? 0,
       crisis: this.system.states?.crisis ?? false,
       crisisUsed: this.getFlag("mantle", "crisisLimitBreakUsed") === true
     });
@@ -931,8 +931,8 @@ export default class MantleActor extends Actor {
     if (routes.length === 0) {
       ui.notifications.warn(
         game.i18n.format("MANTLE.LimitBreak.cannotAfford", {
-          cost: MANTLE.valorCosts.limitBreak,
-          valor: party?.system.valor.value ?? 0
+          cost: MANTLE.momentumCosts.limitBreak,
+          momentum: party?.system.momentum.value ?? 0
         })
       );
       return null;
@@ -952,7 +952,7 @@ export default class MantleActor extends Actor {
     if (!route) return null;
 
     if (route.cost > 0) {
-      await party.update({ "system.valor.value": party.system.valor.value - route.cost });
+      await party.update({ "system.momentum.value": party.system.momentum.value - route.cost });
     }
 
     if (route.exhausts) {
@@ -961,8 +961,8 @@ export default class MantleActor extends Actor {
     }
 
     const paid =
-      route.route === "valor"
-        ? game.i18n.format("MANTLE.LimitBreak.paidValor", { cost: route.cost })
+      route.route === "momentum"
+        ? game.i18n.format("MANTLE.LimitBreak.paidMomentum", { cost: route.cost })
         : game.i18n.localize("MANTLE.LimitBreak.paidCrisis");
 
     return ChatMessage.create({
@@ -1015,8 +1015,8 @@ export default class MantleActor extends Actor {
       routes.map((route) => ({
         value: route.route,
         label:
-          route.route === "valor"
-            ? game.i18n.format("MANTLE.LimitBreak.routeValor", { cost: route.cost })
+          route.route === "momentum"
+            ? game.i18n.format("MANTLE.LimitBreak.routeMomentum", { cost: route.cost })
             : game.i18n.localize("MANTLE.LimitBreak.routeCrisis")
       }))
     );
@@ -1471,7 +1471,7 @@ export default class MantleActor extends Actor {
 
   /**
    * Test your luck: a LUCK roll that takes no modifiers of any kind — no
-   * skills, no Impaired, no Heroic Feats. The Cursed condition forces it to
+   * skills, no Impaired, no Momentous Feats. The Cursed condition forces it to
    * zero successes regardless of what the dice show.
    *
    * @param {string} [reason]

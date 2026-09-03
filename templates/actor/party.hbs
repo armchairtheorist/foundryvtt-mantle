@@ -1,8 +1,8 @@
 {{!--
-  The Party sheet: one shared Valor pool, its members, and the three ways it is
+  The Party sheet: one shared Momentum pool, its members, and the three ways it is
   spent.
 
-  Give every player Owner permission on this actor and they can spend Valor
+  Give every player Owner permission on this actor and they can spend Momentum
   themselves — the pool is the point, and routing every spend through the GM
   would make it feel like the GM's resource rather than the table's.
 --}}
@@ -15,16 +15,16 @@
            {{#unless editable}}disabled{{/unless}}>
   </header>
 
-  <div class="valor-pool {{#if system.meritEarned}}merit{{/if}}">
-    <label>{{localize "MANTLE.Valor.valor"}}</label>
+  <div class="momentum-pool {{#if system.meritEarned}}merit{{/if}}">
+    <label>{{localize "MANTLE.Momentum.momentum"}}</label>
     <div class="pair">
-      <input type="number" name="system.valor.value" value="{{system.valor.value}}"
+      <input type="number" name="system.momentum.value" value="{{system.momentum.value}}"
              {{#unless editable}}disabled{{/unless}}>
-      <span class="max">/ {{system.valor.max}}</span>
+      <span class="max">/ {{system.momentum.max}}</span>
     </div>
 
-    <div class="valor-controls">
-      <a data-action="gainValor" data-amount="1" data-tooltip="{{localize 'MANTLE.Valor.gainHint'}}">
+    <div class="momentum-controls">
+      <a data-action="gainMomentum" data-amount="1" data-tooltip="{{localize 'MANTLE.Momentum.gainHint'}}">
         <i class="fa-solid fa-plus"></i>
       </a>
     </div>
@@ -32,11 +32,11 @@
     {{!-- Entering downtime at half the cap or better earns the party a merit,
           so the threshold is worth showing rather than making everyone work it
           out from the cap. --}}
-    <span class="merit-note" data-tooltip="{{localize 'MANTLE.Valor.meritHint'}}">
+    <span class="merit-note" data-tooltip="{{localize 'MANTLE.Momentum.meritHint'}}">
       {{#if system.meritEarned}}
-        {{localize "MANTLE.Valor.meritEarned"}}
+        {{localize "MANTLE.Momentum.meritEarned"}}
       {{else}}
-        {{localize "MANTLE.Valor.meritAt"}} {{system.meritThreshold}}
+        {{localize "MANTLE.Momentum.meritAt"}} {{system.meritThreshold}}
       {{/if}}
     </span>
   </div>
@@ -64,15 +64,15 @@
   </div>
 
   <div class="section spends">
-    <h3>{{localize "MANTLE.Valor.spend"}}</h3>
+    <h3>{{localize "MANTLE.Momentum.spend"}}</h3>
     {{#each spends as |spend|}}
       <button type="button" class="spend {{#unless spend.affordable}}unaffordable{{/unless}}"
-              data-action="spendValor" data-cost="{{spend.cost}}" data-label="{{spend.label}}">
+              data-action="spendMomentum" data-cost="{{spend.cost}}" data-label="{{spend.label}}">
         <span class="what">{{localize spend.label}}</span>
         <span class="cost">{{spend.cost}}</span>
       </button>
     {{/each}}
-    <p class="hint">{{localize "MANTLE.Valor.feathHint"}}</p>
+    <p class="hint">{{localize "MANTLE.Momentum.momentousFeatCostHint"}}</p>
   </div>
 
   <div class="section members">

@@ -35,7 +35,7 @@
   </div>
 
   {{!-- Successes, with the stepper. One control covers opposition rolls,
-        Heroic Feats, and GM adjudication alike. --}}
+        Momentous Feats, and GM adjudication alike. --}}
   <div class="successes">
     <button type="button" class="step" data-adjust="-1"
             data-tooltip="{{localize 'MANTLE.Card.subtractHint'}}">&minus;</button>
@@ -54,22 +54,39 @@
             data-tooltip="{{localize 'MANTLE.Card.addHint'}}">+</button>
   </div>
 
-  {{!-- Heroic Feat is the one Valor spend the rules allow after the dice are
+  {{!-- Momentous Feat is the one Momentum spend the rules allow after the dice are
         read, so it belongs here rather than in the roll dialog. Shown only
         while the party can still afford successes, or has already bought
         some — a button that cannot be pressed is noise. --}}
-  {{#if heroicFeat}}
-    <div class="heroic-feat">
-      {{#if heroicFeat.max}}
-        <button type="button" data-heroic-feat
-                data-tooltip="{{localize 'MANTLE.Valor.heroicFeatHint'}}">
-          <i class="fa-solid fa-hand-fist"></i> {{localize "MANTLE.Valor.heroicFeat"}}
+  {{!-- Momentous Fortune only ever appears on a luck roll, where a Momentous
+        Feat never can. The two are mutually exclusive by rule. --}}
+  {{#if momentousFortune}}
+    <div class="momentous-feat fortune">
+      {{#unless momentousFortune.spent}}
+        <button type="button" data-momentous-fortune
+                data-tooltip="{{localize 'MANTLE.Momentum.momentousFortuneHint'}}">
+          <i class="fa-solid fa-clover"></i> {{localize "MANTLE.Momentum.momentousFortune"}}
+          ({{momentousFortune.cost}})
+        </button>
+      {{else}}
+        <span class="spent">{{localize "MANTLE.Momentum.momentousFortuneApplied"}}</span>
+      {{/unless}}
+      <span class="pool">{{localize "MANTLE.Momentum.momentum"}} {{momentousFortune.momentum}}</span>
+    </div>
+  {{/if}}
+
+  {{#if momentousFeat}}
+    <div class="momentous-feat">
+      {{#if momentousFeat.max}}
+        <button type="button" data-momentous-feat
+                data-tooltip="{{localize 'MANTLE.Momentum.momentousFeatHint'}}">
+          <i class="fa-solid fa-hand-fist"></i> {{localize "MANTLE.Momentum.momentousFeat"}}
         </button>
       {{/if}}
-      {{#if heroicFeat.spent}}
-        <span class="spent">{{localize "MANTLE.Valor.heroicFeatApplied"}} +{{heroicFeat.spent}}</span>
+      {{#if momentousFeat.spent}}
+        <span class="spent">{{localize "MANTLE.Momentum.momentousFeatApplied"}} +{{momentousFeat.spent}}</span>
       {{/if}}
-      <span class="pool">{{localize "MANTLE.Valor.valor"}} {{heroicFeat.valor}}</span>
+      <span class="pool">{{localize "MANTLE.Momentum.momentum"}} {{momentousFeat.momentum}}</span>
     </div>
   {{/if}}
 
@@ -119,7 +136,7 @@
   {{/if}}
 
   {{!-- The ladder, with the achieved band lit. Showing every band, not just the
-        one hit, keeps the stakes of a re-roll or a Heroic Feat visible. --}}
+        one hit, keeps the stakes of a re-roll or a Momentous Feat visible. --}}
   {{#if ladder}}
     <div class="ladder">
       {{#each config.bands as |band|}}

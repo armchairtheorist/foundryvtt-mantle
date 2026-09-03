@@ -149,8 +149,8 @@ describe("token bars", () => {
     ]);
   });
 
-  test("a party offers its Valor pool", () => {
-    assert.deepEqual(trackedBars(MODELS.party.defineSchema()), ["valor"]);
+  test("a party offers its Momentum pool", () => {
+    assert.deepEqual(trackedBars(MODELS.party.defineSchema()), ["momentum"]);
   });
 
   test("both creature types agree on the tracks they share", () => {

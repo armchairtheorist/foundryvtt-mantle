@@ -6,12 +6,12 @@
 /**
  * Data model for the Party actor.
  *
- * Valor is a single pooled resource earned by the whole group and spent by
+ * Momentum is a single pooled resource earned by the whole group and spent by
  * whoever needs it. Foundry has no concept of a shared table resource, so it
  * lives on an Actor: give every player Owner permission and they can spend it
  * themselves, without any socket relaying through the GM.
  *
- * Max Valor is the sum of every player character's SOUL plus the number of
+ * Max Momentum is the sum of every player character's SOUL plus the number of
  * party members, so the model tracks its own membership.
  */
 
@@ -20,9 +20,9 @@ import { fields, count, resource } from "./_fields.mjs";
 export default class PartyData extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      valor: resource(0),
+      momentum: resource(0),
 
-      /** Player characters counted toward Max Valor. NPC allies do not count. */
+      /** Player characters counted toward Max Momentum. NPC allies do not count. */
       members: new fields.SetField(new fields.DocumentUUIDField({ type: "Actor" })),
 
       notes: new fields.HTMLField({ required: true, blank: true })
@@ -42,18 +42,18 @@ export default class PartyData extends foundry.abstract.TypeDataModel {
       memberCount += 1;
     }
 
-    this.valor.max = soulTotal + memberCount;
+    this.momentum.max = soulTotal + memberCount;
     this.memberCount = memberCount;
 
-    // Valor never rises above the cap or falls below zero.
-    this.valor.value = Math.clamp(this.valor.value, 0, this.valor.max);
+    // Momentum never rises above the cap or falls below zero.
+    this.momentum.value = Math.clamp(this.momentum.value, 0, this.momentum.max);
 
     /**
-     * Entering downtime with Valor at half the cap or better earns the party a
+     * Entering downtime with Momentum at half the cap or better earns the party a
      * merit, so it is worth showing the threshold rather than making everyone
      * work it out.
      */
-    this.meritThreshold = Math.max(1, Math.floor(this.valor.max / 2));
-    this.meritEarned = this.valor.value >= this.meritThreshold;
+    this.meritThreshold = Math.max(1, Math.floor(this.momentum.max / 2));
+    this.meritEarned = this.momentum.value >= this.meritThreshold;
   }
 }

@@ -59,7 +59,7 @@ export default class MantleRoll extends Roll {
    * Resolve the roll into everything the chat card needs.
    *
    * @param {object} [options]
-   * @param {number} [options.adjustment] - Net success adjustment, from opposition or Valor
+   * @param {number} [options.adjustment] - Net success adjustment, from opposition or Momentum
    * @param {number} [options.allocationIndex] - Which pattern reading the player picked
    */
   resolve({ adjustment = 0, allocationIndex = 0 } = {}) {

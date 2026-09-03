@@ -3,15 +3,15 @@
 // render context is a closed interface JSDoc cannot widen.
 
 /**
- * The Party sheet — the Valor tracker.
+ * The Party sheet — the Momentum tracker.
  *
- * Valor is one pooled resource earned by the whole group and spent by whoever
+ * Momentum is one pooled resource earned by the whole group and spent by whoever
  * needs it. Foundry has no concept of a shared table resource, so it lives on
  * an Actor: give every player Owner permission on this one document and they
- * can spend Valor themselves, with no socket relaying through the GM and no
+ * can spend Momentum themselves, with no socket relaying through the GM and no
  * "can you spend two for me" at the table.
  *
- * The three ways Valor is spent are buttons rather than a bare number, because
+ * The three ways Momentum is spent are buttons rather than a bare number, because
  * each has a fixed price and getting the arithmetic wrong in either direction
  * is the kind of mistake nobody notices until much later.
  */
@@ -30,8 +30,8 @@ export default class MantlePartySheet extends HandlebarsApplicationMixin(ActorSh
     window: { resizable: true },
     form: { submitOnChange: true },
     actions: {
-      spendValor: MantlePartySheet.#onSpendValor,
-      gainValor: MantlePartySheet.#onGainValor,
+      spendMomentum: MantlePartySheet.#onSpendMomentum,
+      gainMomentum: MantlePartySheet.#onGainMomentum,
       addMember: MantlePartySheet.#onAddMember,
       removeMember: MantlePartySheet.#onRemoveMember,
       openMember: MantlePartySheet.#onOpenMember,
@@ -65,7 +65,7 @@ export default class MantlePartySheet extends HandlebarsApplicationMixin(ActorSh
 
     // A member whose actor has been deleted still has its uuid on the list.
     // Showing it as unresolved beats dropping it silently, since the party's
-    // Max Valor changes when it goes.
+    // Max Momentum changes when it goes.
     context.members = Array.from(system.members).map((uuid) => {
       const actor = fromUuidSync(uuid);
       return {
@@ -77,20 +77,28 @@ export default class MantlePartySheet extends HandlebarsApplicationMixin(ActorSh
       };
     });
 
-    // Each way of spending Valor, priced, and flagged when it is out of reach.
+    // Each way of spending Momentum, priced, and flagged when it is out of
+    // reach. Momentous Feat and Momentous Fortune also appear on the roll card
+    // itself, which is where the rules put those decisions — these are the
+    // manual route for a table that has already resolved a roll by hand.
     context.spends = [
-      { key: "limitBreak", label: "MANTLE.Valor.limitBreak", cost: MANTLE.valorCosts.limitBreak },
+      { key: "limitBreak", label: "MANTLE.Momentum.limitBreak", cost: MANTLE.momentumCosts.limitBreak },
       {
-        key: "heroicFortune",
-        label: "MANTLE.Valor.heroicFortune",
-        cost: MANTLE.valorCosts.heroicFortune
+        key: "momentousFortune",
+        label: "MANTLE.Momentum.momentousFortune",
+        cost: MANTLE.momentumCosts.momentousFortune
       },
       {
-        key: "heroicFeat",
-        label: "MANTLE.Valor.heroicFeat",
-        cost: MANTLE.valorCosts.heroicFeatPerSuccess
+        key: "momentousFeat",
+        label: "MANTLE.Momentum.momentousFeat",
+        cost: MANTLE.momentumCosts.momentousFeatPerSuccess
+      },
+      {
+        key: "momentousDevelopment",
+        label: "MANTLE.Momentum.momentousDevelopment",
+        cost: MANTLE.momentumCosts.momentousDevelopment
       }
-    ].map((spend) => ({ ...spend, affordable: spend.cost <= system.valor.value }));
+    ].map((spend) => ({ ...spend, affordable: spend.cost <= system.momentum.value }));
 
     return context;
   }
@@ -104,25 +112,25 @@ export default class MantlePartySheet extends HandlebarsApplicationMixin(ActorSh
    * @param {PointerEvent} _event
    * @param {HTMLElement} target
    */
-  static async #onSpendValor(_event, target) {
+  static async #onSpendMomentum(_event, target) {
     const cost = Number(target.dataset.cost) || 1;
     const system = this.document.system;
 
-    if (cost > system.valor.value) {
-      ui.notifications.warn(game.i18n.format("MANTLE.Valor.notEnough", { cost }));
+    if (cost > system.momentum.value) {
+      ui.notifications.warn(game.i18n.format("MANTLE.Momentum.notEnough", { cost }));
       return;
     }
 
-    await this.document.update({ "system.valor.value": system.valor.value - cost });
+    await this.document.update({ "system.momentum.value": system.momentum.value - cost });
 
-    // Spending Valor is a table event — someone just did something heroic on
+    // Spending Momentum is a table event — someone just did something heroic on
     // the group's shared credit — so it goes to chat rather than quietly
     // decrementing a number nobody was watching.
     await ChatMessage.create({
       content: `<div class="mantle mantle-harm-card">
-          <p><strong>${this.document.name}</strong> — ${game.i18n.format("MANTLE.Valor.spent", {
+          <p><strong>${this.document.name}</strong> — ${game.i18n.format("MANTLE.Momentum.spent", {
             cost,
-            what: game.i18n.localize(target.dataset.label ?? "MANTLE.Valor.valor")
+            what: game.i18n.localize(target.dataset.label ?? "MANTLE.Momentum.momentum")
           })}</p>
         </div>`
     });
@@ -133,11 +141,11 @@ export default class MantlePartySheet extends HandlebarsApplicationMixin(ActorSh
    * @param {PointerEvent} _event
    * @param {HTMLElement} target
    */
-  static async #onGainValor(_event, target) {
+  static async #onGainMomentum(_event, target) {
     const amount = Number(target.dataset.amount) || 1;
     const system = this.document.system;
     await this.document.update({
-      "system.valor.value": Math.min(system.valor.value + amount, system.valor.max)
+      "system.momentum.value": Math.min(system.momentum.value + amount, system.momentum.max)
     });
   }
 
@@ -241,7 +249,7 @@ export default class MantlePartySheet extends HandlebarsApplicationMixin(ActorSh
   }
 
   /**
-   * Downtime also resets the party's Valor to zero — and awards a merit first
+   * Downtime also resets the party's Momentum to zero — and awards a merit first
    * if the pool got high enough, which is why the check happens before the
    * reset rather than after it.
    *
@@ -249,17 +257,17 @@ export default class MantlePartySheet extends HandlebarsApplicationMixin(ActorSh
    */
   static async #onDowntime() {
     const system = this.document.system;
-    const earned = earnsMerit(system.valor.value, system.meritThreshold);
+    const earned = earnsMerit(system.momentum.value, system.meritThreshold);
 
     await this.#rest("downtime", game.i18n.localize("MANTLE.Rest.downtime"));
-    await this.document.update({ "system.valor.value": 0 });
+    await this.document.update({ "system.momentum.value": 0 });
 
     await ChatMessage.create({
       content: `<div class="mantle mantle-harm-card">
           <p><strong>${this.document.name}</strong> — ${game.i18n.localize(
             earned ? "MANTLE.Rest.meritEarned" : "MANTLE.Rest.noMerit"
           )}</p>
-          <p class="notes">${game.i18n.localize("MANTLE.Rest.valorReset")}</p>
+          <p class="notes">${game.i18n.localize("MANTLE.Rest.momentumReset")}</p>
         </div>`,
       speaker: ChatMessage.getSpeaker({ actor: this.document })
     });

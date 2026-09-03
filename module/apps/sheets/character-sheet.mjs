@@ -417,7 +417,7 @@ export default class MantleCharacterSheet extends HandlebarsApplicationMixin(Act
     if (!attribute) return;
 
     // Testing your luck takes no modifiers of any kind — no skills, no
-    // Impaired, no Heroic Feats — so offering the modifier dialog for LUCK
+    // Impaired, no Momentous Feats — so offering the modifier dialog for LUCK
     // would invite exactly the roll the rules forbid. Send it straight through.
     if (attribute === "luck") {
       await this.document.testLuck();

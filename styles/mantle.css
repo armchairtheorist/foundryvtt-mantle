@@ -17,7 +17,7 @@
   --mantle-guard: #4a6d8c;
   --mantle-vigor: #b8860b;
   --mantle-resolve: #2e7d5b;
-  --mantle-valor: #c8a02c;
+  --mantle-momentum: #c8a02c;
 
   --mantle-success: #2e7d32;
   --mantle-graze: #8a8a8a;
@@ -162,8 +162,8 @@
   }
 
   .badge.realized {
-    color: var(--mantle-valor);
-    border-color: var(--mantle-valor);
+    color: var(--mantle-momentum);
+    border-color: var(--mantle-momentum);
     font-weight: 600;
   }
 }
@@ -220,7 +220,7 @@
   }
 
   .archetype.realized {
-    color: var(--mantle-valor);
+    color: var(--mantle-momentum);
   }
 
   .state {
@@ -851,8 +851,8 @@
       font-size: 0.75em;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      border: 1px solid var(--mantle-valor);
-      color: var(--mantle-valor);
+      border: 1px solid var(--mantle-momentum);
+      color: var(--mantle-momentum);
       border-radius: 3px;
       padding: 0 5px;
     }
@@ -885,13 +885,13 @@
     }
 
     .chip.active {
-      border-color: var(--mantle-valor);
+      border-color: var(--mantle-momentum);
       font-weight: 700;
     }
   }
 
   /* Every band stays visible, not just the one hit — that's what makes the
-     cost of a re-roll or a Heroic Feat legible. */
+     cost of a re-roll or a Momentous Feat legible. */
   .ladder {
     border: 1px solid var(--mantle-border);
     border-radius: 4px;
@@ -913,7 +913,7 @@
 
     .rung.achieved {
       opacity: 1;
-      background: color-mix(in srgb, var(--mantle-valor) 18%, transparent);
+      background: color-mix(in srgb, var(--mantle-momentum) 18%, transparent);
 
       .band {
         color: var(--mantle-ink);
@@ -936,7 +936,7 @@
 
       em {
         font-style: normal;
-        color: var(--mantle-valor);
+        color: var(--mantle-momentum);
       }
     }
 
@@ -1142,8 +1142,8 @@
   /* A mastery parked on wildcard is the interesting case — it is the one that
      took a slot the player could have spent elsewhere. */
   &.wildcard {
-    border-color: var(--mantle-valor);
-    color: var(--mantle-valor);
+    border-color: var(--mantle-momentum);
+    color: var(--mantle-momentum);
     font-weight: 700;
   }
 
@@ -1353,12 +1353,12 @@
 }
 
 /* Activation controls read as an action rather than as bookkeeping, so they
-   take the Valor gold rather than the muted grey the other row controls use. */
+   take the Momentum gold rather than the muted grey the other row controls use. */
 .mantle .control.use {
-  color: var(--mantle-valor);
+  color: var(--mantle-momentum);
 
   &:hover {
-    color: var(--mantle-valor);
+    color: var(--mantle-momentum);
     filter: brightness(1.3);
   }
 }
@@ -1375,9 +1375,11 @@
   }
 }
 
-/* Heroic Feat sits under the success stepper, because it is a decision about
+/* Momentous Feat sits under the success stepper, because it is a decision about
    that number and the rules explicitly allow it after the dice are read. */
-.mantle .heroic-feat {
+/* Momentous Fortune sits in the same slot as a Feat, on the luck rolls where
+   a Feat is forbidden — so it shares the layout and takes the clover. */
+.mantle .momentous-feat {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1386,14 +1388,14 @@
   button {
     flex: 0 1 auto;
     font-size: 0.85em;
-    color: var(--mantle-valor);
-    border-color: var(--mantle-valor);
+    color: var(--mantle-momentum);
+    border-color: var(--mantle-momentum);
   }
 
   .spent {
     font-size: 0.8em;
     font-weight: 700;
-    color: var(--mantle-valor);
+    color: var(--mantle-momentum);
   }
 
   .pool {
@@ -1453,7 +1455,7 @@
     &.class-champion { border-color: var(--mantle-warning); color: var(--mantle-warning); }
     &.class-nemesis { border-color: var(--mantle-vitality); color: var(--mantle-vitality); }
 
-    &.patterns { border-color: var(--mantle-valor); color: var(--mantle-valor); }
+    &.patterns { border-color: var(--mantle-momentum); color: var(--mantle-momentum); }
     &.no-roll { border-style: dashed; color: var(--mantle-muted); }
   }
 
@@ -1493,7 +1495,7 @@
       color: var(--mantle-muted);
     }
 
-    .tier-bonus { color: var(--mantle-valor); }
+    .tier-bonus { color: var(--mantle-momentum); }
   }
 }
 
@@ -1501,7 +1503,7 @@
   /* Signature maneuvers are the ones that end fights; they should be findable
      without reading. */
   .entry.maneuver.signature {
-    border-left: 3px solid var(--mantle-valor);
+    border-left: 3px solid var(--mantle-momentum);
     padding-left: 5px;
   }
 
@@ -1511,8 +1513,8 @@
   }
 
   .tag.telegraphed {
-    border-color: var(--mantle-valor);
-    color: var(--mantle-valor);
+    border-color: var(--mantle-momentum);
+    color: var(--mantle-momentum);
   }
 
   .tag.opposed {
@@ -1671,9 +1673,9 @@
     }
   }
 
-  /* Valor is the table's resource, not one character's, so it gets the whole
+  /* Momentum is the table's resource, not one character's, so it gets the whole
      width and the largest number on the sheet. */
-  .valor-pool {
+  .momentum-pool {
     display: grid;
     grid-template-columns: auto 1fr auto;
     grid-template-areas:
@@ -1683,7 +1685,7 @@
     gap: 4px 10px;
     margin: 12px 0;
     padding: 10px 12px;
-    border: 2px solid var(--mantle-valor);
+    border: 2px solid var(--mantle-momentum);
     border-radius: 6px;
 
     > label {
@@ -1691,7 +1693,7 @@
       text-transform: uppercase;
       font-size: 0.8em;
       letter-spacing: 0.08em;
-      color: var(--mantle-valor);
+      color: var(--mantle-momentum);
       font-weight: 700;
     }
 
@@ -1706,7 +1708,7 @@
         font-size: 1.8em;
         font-weight: 700;
         text-align: right;
-        color: var(--mantle-valor);
+        color: var(--mantle-momentum);
       }
 
       .max {
@@ -1715,12 +1717,12 @@
       }
     }
 
-    .valor-controls {
+    .momentum-controls {
       grid-area: controls;
 
       a {
         cursor: pointer;
-        color: var(--mantle-valor);
+        color: var(--mantle-momentum);
       }
     }
 
@@ -1731,7 +1733,7 @@
     }
 
     &.merit .merit-note {
-      color: var(--mantle-valor);
+      color: var(--mantle-momentum);
       font-weight: 600;
     }
   }
@@ -1752,7 +1754,7 @@
 
       .cost {
         font-weight: 700;
-        color: var(--mantle-valor);
+        color: var(--mantle-momentum);
       }
 
       /* Priced out rather than hidden: knowing what you cannot yet afford is
@@ -1797,7 +1799,7 @@
       &:hover { color: var(--mantle-vitality); }
     }
 
-    /* A member whose actor was deleted still counts against Max Valor until it
+    /* A member whose actor was deleted still counts against Max Momentum until it
        is taken off the list, so it is shown rather than dropped. */
     &.missing .name {
       color: var(--mantle-warning);

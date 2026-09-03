@@ -177,12 +177,12 @@ export function downtimeRestore(character) {
 }
 
 /**
- * Whether the party's Valor at downtime earns a merit.
+ * Whether the party's Momentum at downtime earns a merit.
  *
- * @param {number} valor
+ * @param {number} momentum
  * @param {number} threshold
  * @returns {boolean}
  */
-export function earnsMerit(valor, threshold) {
-  return valor >= threshold;
+export function earnsMerit(momentum, threshold) {
+  return momentum >= threshold;
 }

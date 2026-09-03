@@ -173,8 +173,8 @@ export default class AdversaryData extends foundry.abstract.TypeDataModel {
     this.rollsDice = scaled.rollsDice;
     this.readsPatterns = scaled.readsPatterns;
 
-    /** Defeating an adversary grants Valor only at Elite and above. */
-    this.valorValue = MANTLE.challengeClasses[scaled.effectiveClass]?.valor ?? 0;
+    /** Defeating an adversary grants Momentum only at Elite and above. */
+    this.momentumValue = MANTLE.challengeClasses[scaled.effectiveClass]?.momentum ?? 0;
 
     this.overGuard = this.guard.value > this.guard.max;
 

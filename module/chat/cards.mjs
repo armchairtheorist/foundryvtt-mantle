@@ -11,8 +11,8 @@
  *
  * Two controls do most of the work:
  *
- *  - The **net-success stepper** absorbs opposition rolls, Heroic Feats bought
- *    with Valor, and plain GM adjudication in one place. Rather than
+ *  - The **net-success stepper** absorbs opposition rolls, Momentous Feats bought
+ *    with Momentum, and plain GM adjudication in one place. Rather than
  *    orchestrating two players' rolls in code, the defender rolls their own and
  *    someone clicks minus twice.
  *  - The **allocation chips** let the player choose how their dice read, because
@@ -25,7 +25,7 @@
 import MantleRoll from "../dice/roll.mjs";
 import { MANTLE } from "../config.mjs";
 import { maneuverEffectSize } from "../rules/maneuvers.mjs";
-import { heroicFeatSuccesses } from "../rules/valor.mjs";
+import { betterLuck, momentousFeatSuccesses, momentousFortune } from "../rules/momentum.mjs";
 
 const TEMPLATE = "systems/mantle/templates/chat/roll-card.hbs";
 
@@ -41,7 +41,7 @@ const TEMPLATE = "systems/mantle/templates/chat/roll-card.hbs";
  */
 export async function postRollCard(roll, { actor, title = "", subtitle = "" } = {}) {
   // The actor is recorded on the card rather than read from the speaker: a
-  // Heroic Feat needs the roller's party, and a speaker can be an alias.
+  // Momentous Feat needs the roller's party, and a speaker can be an alias.
   const state = { adjustment: 0, allocationIndex: 0, title, subtitle, actorId: actor?.id ?? null };
   const content = await renderCard(roll, state);
 
@@ -82,7 +82,8 @@ async function renderCard(roll, state) {
     // Chips are only worth showing when the dice genuinely read more than one
     // way; a single reading is not a choice.
     showAllocations: resolved.allocations.length > 1,
-    heroicFeat: heroicFeatOffer(roll, state),
+    momentousFeat: momentousFeatOffer(roll, state),
+    momentousFortune: momentousFortuneOffer(roll, state),
     config: CONFIG.MANTLE
   });
 }
@@ -107,9 +108,9 @@ async function updateCard(message, changes) {
 /* -------------------------------------------- */
 
 /**
- * Whether this card can still buy successes with the party's Valor.
+ * Whether this card can still buy successes with the party's Momentum.
  *
- * Heroic Feat is the one Valor spend the rules explicitly allow *after* the
+ * Momentous Feat is the one Momentum spend the rules explicitly allow *after* the
  * dice are read — "the character can decide to apply this after the roll is
  * made" — so it belongs on the card rather than in the roll dialog. Testing
  * your luck is the sole exclusion, and luck rolls carry no attribute pool at
@@ -117,21 +118,103 @@ async function updateCard(message, changes) {
  *
  * @param {MantleRoll} roll
  * @param {object} state
- * @returns {{valor: number, spent: number, max: number}|null}
+ * @returns {{momentum: number, spent: number, max: number}|null}
  */
-function heroicFeatOffer(roll, state) {
+function momentousFeatOffer(roll, state) {
   if (roll.mantle.attribute === "luck") return null;
 
   const party = partyFor(state.actorId);
   if (!party) return null;
 
-  const spent = state.heroicFeat ?? 0;
-  const available = heroicFeatSuccesses(party.system.valor.value, MANTLE.heroicFeatMaxSuccesses - spent);
+  const spent = state.momentousFeat ?? 0;
+  const available = momentousFeatSuccesses(party.system.momentum.value, MANTLE.momentousFeatMaxSuccesses - spent);
 
   // Nothing left to buy, and nothing already bought worth reporting.
   if (available <= 0 && spent <= 0) return null;
 
-  return { valor: party.system.valor.value, spent, max: available };
+  return { momentum: party.system.momentum.value, spent, max: available };
+}
+
+/**
+ * Whether this card can still buy a luck reroll with the party's Momentum.
+ *
+ * The mirror image of the Feat offer, and deliberately so: a Momentous Feat
+ * may never touch a luck roll, and Momentous Fortune may never touch anything
+ * else. Between them they cover every roll exactly once.
+ *
+ * @param {MantleRoll} roll
+ * @param {object} state
+ * @returns {{momentum: number, cost: number, spent: boolean}|null}
+ */
+function momentousFortuneOffer(roll, state) {
+  if (roll.mantle.attribute !== "luck") return null;
+
+  const party = partyFor(state.actorId);
+  if (!party) return null;
+
+  const spent = Boolean(state.momentousFortune);
+  const offer = momentousFortune({
+    momentum: party.system.momentum.value,
+    alreadyRerolled: spent
+  });
+
+  // Nothing left to buy and nothing already bought worth reporting.
+  if (!offer.available && !spent) return null;
+
+  return { momentum: party.system.momentum.value, cost: offer.cost, spent };
+}
+
+/**
+ * Reroll a luck test with Momentous Fortune, keeping the better result.
+ *
+ * The reroll cannot make things worse — "the character can choose the better
+ * result between the old and the new roll" — so the card keeps whichever
+ * scored more and records that the spend is used up.
+ *
+ * @param {ChatMessage} message
+ */
+async function spendMomentousFortune(message) {
+  const roll = message.rolls[0];
+  const state = message.getFlag("mantle", "card") ?? {};
+  const party = partyFor(state.actorId);
+  if (!party || !(roll instanceof MantleRoll)) return;
+
+  const offer = momentousFortune({
+    momentum: party.system.momentum.value,
+    alreadyRerolled: Boolean(state.momentousFortune)
+  });
+
+  if (!offer.available) {
+    ui.notifications.warn(game.i18n.localize("MANTLE.Momentum.noMomentousFortune"));
+    return;
+  }
+
+  const before = roll.resolve(state).successes;
+  const reroll = await new Roll(roll.formula).evaluate();
+  const after = reroll.dice.flatMap((die) => die.results).filter((r) => r.result >= 5).length;
+  const kept = betterLuck(before, after);
+
+  await party.update({ "system.momentum.value": party.system.momentum.value - offer.cost });
+
+  // The stepper already adjusts successes, so the reroll is recorded as an
+  // adjustment rather than by rewriting the dice — which keeps the original
+  // roll visible on the card, as a table would keep both sets on the felt.
+  await updateCard(message, {
+    adjustment: (state.adjustment ?? 0) + (kept - before),
+    momentousFortune: true
+  });
+
+  await ChatMessage.create({
+    content: `<div class="mantle mantle-harm-card">
+        <p><strong>${party.name}</strong> — ${game.i18n.format("MANTLE.Momentum.momentousFortuneSpent", {
+          cost: offer.cost,
+          before,
+          after,
+          kept
+        })}</p>
+      </div>`,
+    speaker: ChatMessage.getSpeaker({ actor: party })
+  });
 }
 
 /**
@@ -146,44 +229,44 @@ function partyFor(actorId) {
 }
 
 /**
- * Buy successes on this roll with the party's Valor.
+ * Buy successes on this roll with the party's Momentum.
  *
- * One Valor per success, at most three on any single roll — counted across
- * repeated presses, so three separate +1s cost three Valor and exhaust the
+ * One Momentum per success, at most three on any single roll — counted across
+ * repeated presses, so three separate +1s cost three Momentum and exhaust the
  * allowance exactly as one +3 would.
  *
  * @param {ChatMessage} message
  */
-async function spendHeroicFeat(message) {
+async function spendMomentousFeat(message) {
   const state = message.getFlag("mantle", "card") ?? {};
   const party = partyFor(state.actorId);
   if (!party) return;
 
-  const spent = state.heroicFeat ?? 0;
-  const buying = heroicFeatSuccesses(
-    party.system.valor.value,
-    MANTLE.heroicFeatMaxSuccesses - spent
+  const spent = state.momentousFeat ?? 0;
+  const buying = momentousFeatSuccesses(
+    party.system.momentum.value,
+    MANTLE.momentousFeatMaxSuccesses - spent
   );
 
   if (buying <= 0) {
-    ui.notifications.warn(game.i18n.localize("MANTLE.Valor.noHeroicFeat"));
+    ui.notifications.warn(game.i18n.localize("MANTLE.Momentum.noMomentousFeat"));
     return;
   }
 
-  const wanted = await promptHeroicFeat(buying, party.system.valor.value);
+  const wanted = await promptMomentousFeat(buying, party.system.momentum.value);
   if (!wanted) return;
 
-  const cost = wanted * MANTLE.valorCosts.heroicFeatPerSuccess;
-  await party.update({ "system.valor.value": party.system.valor.value - cost });
+  const cost = wanted * MANTLE.momentumCosts.momentousFeatPerSuccess;
+  await party.update({ "system.momentum.value": party.system.momentum.value - cost });
 
   await updateCard(message, {
     adjustment: (state.adjustment ?? 0) + wanted,
-    heroicFeat: spent + wanted
+    momentousFeat: spent + wanted
   });
 
   await ChatMessage.create({
     content: `<div class="mantle mantle-harm-card">
-        <p><strong>${party.name}</strong> — ${game.i18n.format("MANTLE.Valor.heroicFeatSpent", {
+        <p><strong>${party.name}</strong> — ${game.i18n.format("MANTLE.Momentum.momentousFeatSpent", {
           successes: wanted,
           cost
         })}</p>
@@ -196,29 +279,29 @@ async function spendHeroicFeat(message) {
  * Ask how many successes to buy.
  *
  * @param {number} max - The most this pool can afford right now
- * @param {number} valor - Valor remaining, for the prompt
+ * @param {number} momentum - Momentum remaining, for the prompt
  * @returns {Promise<number>}
  */
-async function promptHeroicFeat(max, valor) {
+async function promptMomentousFeat(max, momentum) {
   const options = Array.from({ length: max }, (_, index) => index + 1)
     .map(
       (n) =>
-        `<option value="${n}">${game.i18n.format("MANTLE.Valor.heroicFeatOption", {
+        `<option value="${n}">${game.i18n.format("MANTLE.Momentum.momentousFeatOption", {
           successes: n,
-          cost: n * MANTLE.valorCosts.heroicFeatPerSuccess
+          cost: n * MANTLE.momentumCosts.momentousFeatPerSuccess
         })}</option>`
     )
     .join("");
 
   const chosen = await foundry.applications.api.DialogV2.prompt({
-    window: { title: game.i18n.localize("MANTLE.Valor.heroicFeat") },
+    window: { title: game.i18n.localize("MANTLE.Momentum.momentousFeat") },
     classes: ["mantle"],
     content: `<form>
-        <p class="hint">${game.i18n.format("MANTLE.Valor.poolRemaining", { valor })}</p>
+        <p class="hint">${game.i18n.format("MANTLE.Momentum.poolRemaining", { momentum })}</p>
         <label class="row"><select name="successes">${options}</select></label>
       </form>`,
     ok: {
-      label: game.i18n.localize("MANTLE.Valor.spend"),
+      label: game.i18n.localize("MANTLE.Momentum.spend"),
       callback: (_event, button) => new FormData(button.form).get("successes")
     },
     rejectClose: false
@@ -266,8 +349,11 @@ export function activateCardListeners(message, html) {
     });
   }
 
-  const feat = card.querySelector("[data-heroic-feat]");
-  if (feat) feat.addEventListener("click", () => spendHeroicFeat(message));
+  const feat = card.querySelector("[data-momentous-feat]");
+  if (feat) feat.addEventListener("click", () => spendMomentousFeat(message));
+
+  const fortune = card.querySelector("[data-momentous-fortune]");
+  if (fortune) fortune.addEventListener("click", () => spendMomentousFortune(message));
 
   const apply = card.querySelector("[data-apply]");
   if (apply) apply.addEventListener("click", () => applyToTargets(message));

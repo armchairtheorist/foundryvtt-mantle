@@ -65,12 +65,12 @@ export function countSuccesses(faces) {
  * Reduce raw successes to effective successes, which is what result bands are
  * always read from.
  *
- * An opposition roll subtracts its successes; a Heroic Feat adds up to three,
- * bought with Valor. The floor is zero — an attack reduced to nothing is a
+ * An opposition roll subtracts its successes; a Momentous Feat adds up to three,
+ * bought with Momentum. The floor is zero — an attack reduced to nothing is a
  * graze, not a miss.
  *
  * @param {number} successes
- * @param {number} [adjustment] - Negative for opposition, positive for Valor
+ * @param {number} [adjustment] - Negative for opposition, positive for Momentum
  * @returns {number}
  */
 export function effectiveSuccesses(successes, adjustment = 0) {

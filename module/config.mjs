@@ -702,17 +702,20 @@ MANTLE.afflictions = {
 };
 
 /* -------------------------------------------- */
-/*  Valor                                        */
+/*  Momentum                                        */
 /* -------------------------------------------- */
 
-MANTLE.valorCosts = {
+MANTLE.momentumCosts = {
   limitBreak: 3,
-  heroicFortune: 2,
-  heroicFeatPerSuccess: 1
+  momentousFortune: 2,
+  momentousFeatPerSuccess: 1,
+
+  /** Declare a fact into the fiction that one of your Threads makes plausible. */
+  momentousDevelopment: 1
 };
 
-/** Heroic Feat adds at most this many successes to any single roll. */
-MANTLE.heroicFeatMaxSuccesses = 3;
+/** Momentous Feat adds at most this many successes to any single roll. */
+MANTLE.momentousFeatMaxSuccesses = 3;
 
 /* -------------------------------------------- */
 /*  Rest                                         */
@@ -727,8 +730,8 @@ MANTLE.interludeConsumableRestock = 1;
 /** Resolve to heal one Wound or Burden at an interlude. Flat since v0.31. */
 MANTLE.healResolveCost = 1;
 
-/** A Heroic Feat can add at most this many successes to a single roll. */
-MANTLE.heroicFeatMaxSuccesses = 3;
+/** A Momentous Feat can add at most this many successes to a single roll. */
+MANTLE.momentousFeatMaxSuccesses = 3;
 
 /* -------------------------------------------- */
 /*  Adversaries                                  */
@@ -739,11 +742,11 @@ MANTLE.heroicFeatMaxSuccesses = 3;
  * templates applied over that baseline.
  */
 MANTLE.challengeClasses = {
-  grunt: { label: "MANTLE.Class.grunt", turns: 1, valor: 0 },
-  regular: { label: "MANTLE.Class.regular", turns: 1, valor: 0 },
-  elite: { label: "MANTLE.Class.elite", turns: 1, valor: 1 },
-  champion: { label: "MANTLE.Class.champion", turns: 2, valor: 2 },
-  nemesis: { label: "MANTLE.Class.nemesis", turns: 3, valor: 3 }
+  grunt: { label: "MANTLE.Class.grunt", turns: 1, momentum: 0 },
+  regular: { label: "MANTLE.Class.regular", turns: 1, momentum: 0 },
+  elite: { label: "MANTLE.Class.elite", turns: 1, momentum: 1 },
+  champion: { label: "MANTLE.Class.champion", turns: 2, momentum: 2 },
+  nemesis: { label: "MANTLE.Class.nemesis", turns: 3, momentum: 3 }
 };
 
 /** Enemy type tags, which some player abilities key off. */

@@ -165,7 +165,7 @@ describe("successes and bands", () => {
     assert.equal(effectiveSuccesses(1, -3), 0, "an overwhelmed attack grazes, it does not miss");
   });
 
-  test("a Heroic Feat adds successes", () => {
+  test("a Momentous Feat adds successes", () => {
     assert.equal(effectiveSuccesses(1, 3), 4);
   });
 
