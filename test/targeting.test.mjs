@@ -17,6 +17,7 @@ import {
   meleeReach,
   reachFromTags,
   rangedReach,
+  targetableLocations,
   visibilityReach
 } from "../module/rules/targeting.mjs";
 import { MANTLE } from "../module/config.mjs";
@@ -235,5 +236,54 @@ describe("reach and range read off a tag list", () => {
 
   test("case is not the stat block's problem", () => {
     assert.deepEqual(reachFromTags(["Melee 3"]), { melee: 3, range: null });
+  });
+});
+
+describe("what cover leaves to aim at", () => {
+  const generic = [{ key: "mass" }, { key: "edge" }, { key: "mark" }];
+
+  test("melee ignores cover entirely", () => {
+    assert.deepEqual(targetableLocations({ locations: generic, cover: true }), generic);
+  });
+
+  test("no cover leaves everything on the table", () => {
+    assert.deepEqual(targetableLocations({ locations: generic, ranged: true }), generic);
+  });
+
+  test("a ranged attack against cover loses Mass", () => {
+    assert.deepEqual(targetableLocations({ locations: generic, cover: true, ranged: true }), [
+      { key: "edge" },
+      { key: "mark" }
+    ]);
+  });
+
+  test("Seeking ignores cover", () => {
+    assert.deepEqual(
+      targetableLocations({ locations: generic, cover: true, ranged: true, seeking: true }),
+      generic
+    );
+  });
+
+  test("a target that is all Mass cannot be shot from behind cover", () => {
+    // The rule's last clause: "If the target offers no valid Edge or Mark, it
+    // simply cannot be hit by a ranged attack from that angle." An empty list
+    // is what the caller turns into a refusal.
+    assert.deepEqual(
+      targetableLocations({ locations: [{ key: "mass" }], cover: true, ranged: true }),
+      []
+    );
+  });
+
+  test("an Imprecise weapon is in that position the moment cover appears", () => {
+    // Imprecise can only ever aim at Mass, so its list is one entry long and
+    // cover empties it — which is the Equipment catalog's own reading: an
+    // Imprecise ranged weapon cannot attack a target behind cover.
+    const imprecise = [{ key: "mass" }];
+
+    assert.deepEqual(targetableLocations({ locations: imprecise, ranged: true }), imprecise);
+    assert.deepEqual(
+      targetableLocations({ locations: imprecise, cover: true, ranged: true }),
+      []
+    );
   });
 });

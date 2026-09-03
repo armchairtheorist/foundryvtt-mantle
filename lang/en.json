@@ -71,6 +71,7 @@
   "MANTLE.Attack.impreciseHint": "Imprecise: this attack can only target Mass.",
   "MANTLE.Attack.melee": "Melee",
   "MANTLE.Attack.mode": "Attacking as",
+  "MANTLE.Attack.noLocation": "cover leaves nothing this attack can aim at",
   "MANTLE.Attack.ranged": "Ranged",
   "MANTLE.Attack.roll": "Attack",
   "MANTLE.Attack.seekingHint": "Seeking: cover does not affect this attack.",

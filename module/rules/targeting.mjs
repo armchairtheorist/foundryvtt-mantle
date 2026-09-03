@@ -180,6 +180,31 @@ export function attackModifiers({
 /* -------------------------------------------- */
 
 /**
+ * The hit locations an attack may actually aim at.
+ *
+ * Cover takes Mass off the table for a ranged attack — the target is behind
+ * something that shields the bulk of them — and Seeking ignores cover. Melee
+ * ignores cover entirely.
+ *
+ * Returning a list rather than a boolean is what lets the caller answer the
+ * rule's last clause: a target that offers no valid Edge or Mark simply cannot
+ * be hit by a ranged attack from that angle, and an Imprecise weapon, which
+ * may only ever aim at Mass, is refused by cover for the same reason.
+ *
+ * @template {{key: string}} Location
+ * @param {object} input
+ * @param {Location[]} input.locations - The locations this target offers
+ * @param {boolean} [input.cover]
+ * @param {boolean} [input.ranged]
+ * @param {boolean} [input.seeking]
+ * @returns {Location[]}
+ */
+export function targetableLocations({ locations, cover = false, ranged = false, seeking = false }) {
+  if (seeking || massAvailable({ cover, ranged })) return locations;
+  return locations.filter((location) => location.key !== "mass");
+}
+
+/**
  * The reach and range a tag list declares.
  *
  * Adversary stat blocks carry these inside the tag list — "Melee 1", "Range 6"

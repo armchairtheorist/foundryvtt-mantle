@@ -20,7 +20,7 @@
 import { MANTLE } from "../config.mjs";
 import { buildPool } from "../dice/pool.mjs";
 import { conditionModifiers } from "../rules/conditions.mjs";
-import { attackModifiers, massAvailable } from "../rules/targeting.mjs";
+import { attackModifiers, targetableLocations } from "../rules/targeting.mjs";
 
 const { DialogV2 } = foundry.applications.api;
 const TEMPLATE = "systems/mantle/templates/apps/attack-dialog.hbs";
@@ -197,6 +197,17 @@ function readAttack(data, context) {
     (/** @type {{key: string}} */ entry) => entry.key === hitLocation
   );
 
+  // Cover with nothing left to aim at is a refusal, not a penalty: a target
+  // offering no valid Edge or Mark cannot be hit by a ranged attack from that
+  // angle, and an Imprecise weapon that may only aim at Mass is in exactly
+  // that position the moment the target takes cover.
+  const available = targetableLocations({
+    locations: context.locations,
+    cover: data.get("cover") === "on",
+    ranged,
+    seeking: context.seeking
+  });
+
   const positional = attackModifiers({
     distance,
     sen: context.sen,
@@ -224,7 +235,11 @@ function readAttack(data, context) {
   const situational = Number(data.get("situational")) || 0;
   if (situational) modifiers.push({ label: "MANTLE.Modifier.situational", value: situational });
 
-  return { ...positional, modifiers };
+  if (available.length === 0) {
+    return { ...positional, modifiers, canTarget: false, blockedBy: "MANTLE.Attack.noLocation" };
+  }
+
+  return { ...positional, modifiers, available };
 }
 
 /**
@@ -242,18 +257,26 @@ function attachLivePool(html, actor, context) {
   const update = () => {
     const data = new FormData(form);
     const ranged = data.get("mode") ? data.get("mode") === "ranged" : context.ranged;
-    const cover = data.get("cover") === "on";
 
     // Cover shields part of the body from a ranged attack: Mass comes off the
     // table and only Edge and Mark remain. Melee ignores cover entirely.
-    const mass = form.querySelector('[name="hitLocation"] option[value="mass"]');
-    if (mass) {
-      const allowed = context.seeking || massAvailable({ cover, ranged });
-      mass.disabled = !allowed;
-      if (!allowed && mass.selected) {
-        const fallback = form.querySelector('[name="hitLocation"] option:not([disabled])');
-        if (fallback) fallback.selected = true;
-      }
+    const allowed = new Set(
+      targetableLocations({
+        locations: context.locations,
+        cover: data.get("cover") === "on",
+        ranged,
+        seeking: context.seeking
+      }).map((/** @type {{key: string}} */ location) => location.key)
+    );
+
+    for (const option of form.querySelectorAll('[name="hitLocation"] option')) {
+      option.disabled = !allowed.has(option.value);
+    }
+
+    const selected = form.querySelector('[name="hitLocation"] option:checked');
+    if (selected?.disabled) {
+      const fallback = form.querySelector('[name="hitLocation"] option:not([disabled])');
+      if (fallback) fallback.selected = true;
     }
 
     const { modifiers, canTarget, blockedBy } = readAttack(new FormData(form), context);
