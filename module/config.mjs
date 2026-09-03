@@ -45,7 +45,7 @@ MANTLE.successThreshold = 5;
 MANTLE.patterns = {
   double: { label: "MANTLE.Pattern.double", size: 2 },
   triple: { label: "MANTLE.Pattern.triple", size: 3 },
-  sequence: { label: "MANTLE.Pattern.sequence", size: 4 }
+  quad: { label: "MANTLE.Pattern.quad", size: 4 }
 };
 
 /** Result bands, keyed by effective successes. 3+ is the top band; beyond it is overflow. */

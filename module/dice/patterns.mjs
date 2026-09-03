@@ -1,15 +1,15 @@
 /**
  * Pattern detection.
  *
- * Every roll in Mantle is read twice: once for successes, once for patterns.
+ * Every roll in Momenta is read twice: once for successes, once for patterns.
  * There are three patterns — a Double (two dice of the same value), a Triple
- * (three of the same), and a Sequence (four consecutive values).
+ * (three of the same), and a Quad (four of the same).
  *
  * The subtle part is allocation. Each die may belong to at most one pattern, so
- * a roll frequently offers a choice rather than an answer. The Quick Start's own
- * example is `2 3 4 5 5`: that is either one Double or one Sequence, never both,
- * because both want the same 5. Every pattern that *is* allocated triggers, and
- * repeats count — `1 1 4 5 5` fires the Double outcome twice.
+ * a roll frequently offers a choice rather than an answer. `5 5 5 5` is either
+ * one Quad or two Doubles, never both, because both want the same dice. Every
+ * pattern that *is* allocated triggers, and repeats count — `1 1 4 5 5` fires
+ * the Double outcome twice.
  *
  * So this module enumerates every maximal allocation rather than picking one.
  * The chat card shows them and lets the player choose, because which allocation
@@ -19,15 +19,12 @@
  * Pure logic — no Foundry dependency, so it is unit-tested directly.
  */
 
-/** A Sequence is four consecutive values. */
-const SEQUENCE_LENGTH = 4;
-
 const FACES = 6;
 
 /**
  * @typedef {object} Pattern
- * @property {"double"|"triple"|"sequence"} type
- * @property {number} value - The repeated face, or the lowest face of a sequence
+ * @property {"double"|"triple"|"quad"} type
+ * @property {number} value - The repeated face
  * @property {number[]} faces - The die faces this pattern consumes
  */
 
@@ -48,18 +45,21 @@ function allPatternShapes() {
   /** @type {Pattern[]} */
   const shapes = [];
 
-  for (let value = 1; value <= FACES; value++) {
-    shapes.push({ type: "triple", value, faces: [value, value, value] });
-  }
-  for (let value = 1; value <= FACES; value++) {
-    shapes.push({ type: "double", value, faces: [value, value] });
-  }
-  for (let value = 1; value + SEQUENCE_LENGTH - 1 <= FACES; value++) {
-    shapes.push({
-      type: "sequence",
-      value,
-      faces: Array.from({ length: SEQUENCE_LENGTH }, (_, offset) => value + offset)
-    });
+  // Rarest first. The order only has to be fixed for the search to enumerate
+  // each multiset once, but putting the big shapes first makes the recursion
+  // find whole-hand allocations early.
+  for (const [type, length] of [
+    ["quad", 4],
+    ["triple", 3],
+    ["double", 2]
+  ]) {
+    for (let value = 1; value <= FACES; value++) {
+      shapes.push({
+        type: /** @type {"double"|"triple"|"quad"} */ (type),
+        value,
+        faces: new Array(/** @type {number} */ (length)).fill(value)
+      });
+    }
   }
 
   return shapes;
@@ -159,7 +159,8 @@ export function findAllocations(faces) {
 
   search(0);
 
-  const rank = { triple: 2, sequence: 1, double: 0 };
+  /** @type {Record<string, number>} */
+  const rank = { quad: 2, triple: 1, double: 0 };
   results.sort((a, b) => {
     if (a.patterns.length !== b.patterns.length) return b.patterns.length - a.patterns.length;
     /** @param {Allocation} allocation */
@@ -188,10 +189,10 @@ function leftoverFaces(counts) {
  * actually keys off — "Triple: Bloodlust" fires once per allocated Triple.
  *
  * @param {Allocation} allocation
- * @returns {{double: number, triple: number, sequence: number}}
+ * @returns {{double: number, triple: number, quad: number}}
  */
 export function countPatterns(allocation) {
-  const counts = { double: 0, triple: 0, sequence: 0 };
+  const counts = { double: 0, triple: 0, quad: 0 };
   for (const pattern of allocation.patterns) counts[pattern.type] += 1;
   return counts;
 }

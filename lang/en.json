@@ -340,7 +340,7 @@
   "MANTLE.Party.noMembers": "No members yet. Select their tokens and press +.",
   "MANTLE.Party.selectCharacters": "Select one or more character tokens first.",
   "MANTLE.Pattern.double": "Double",
-  "MANTLE.Pattern.sequence": "Sequence",
+  "MANTLE.Pattern.quad": "Quad",
   "MANTLE.Pattern.triple": "Triple",
   "MANTLE.Prompt.deleteItem": "Delete <strong>{name}</strong>? This cannot be undone.",
   "MANTLE.Prompt.deleteItemTitle": "Delete Item",

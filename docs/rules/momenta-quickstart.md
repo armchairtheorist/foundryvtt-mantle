@@ -4,7 +4,7 @@
 
 Momenta is a tactical, cinematic fantasy TTRPG built around modular archetypes and slottable masteries. This guide covers the core rules, the character-build system, and a primer on how Momenta adventure is structured.
 
-> **About this document:** The rules are presented concisely for TTRPG-veteran readers. The filename's version suffix is the document's version marker.
+> **About this document:** The rules are presented concisely for TTRPG-veteran readers. The **Version** line under each document's title is its version marker; the files themselves are versioned in git.
 >
 > **Acknowledgements:** Momenta takes inspiration from many excellent TTRPG and JRPG games, including:
 >
